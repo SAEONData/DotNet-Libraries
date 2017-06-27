@@ -6,6 +6,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.jfm
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -17,6 +18,7 @@
 [Rr]eleases/
 x64/
 x86/
+amd64/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -301,3 +303,10 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Application Data
+App_Data/
+connections.config
+connectionstrings.config
+machinekey.config
+connectionstrings.json
