@@ -53,27 +53,42 @@ namespace SAEON.Logs
             return result;
         }
 
+        public static string MethodSignature(string typeName, string methodName, ParameterList parameters = null)
+        {
+            return $"{typeName}.{methodName}({GetParameters(parameters)})";
+        }
+
+        public static string MethodSignature(string typeName, string methodName, string entityTypeName, ParameterList parameters = null)
+        {
+            return $"{typeName}.{methodName}<{entityTypeName}>({GetParameters(parameters)})";
+        }
+
+        public static string MethodSignature(string typeName, string methodName, string entityTypeName, string relatedEntityTypeName, ParameterList parameters = null)
+        {
+            return $"{typeName}.{methodName}<{entityTypeName},{relatedEntityTypeName}>({GetParameters(parameters)})";
+        }
+
         public static IDisposable MethodCall(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var methodCall = $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})";
-            var result = LogContext.PushProperty("Method", methodCall);
-            Log.Verbose(methodCall);
+            var method = MethodSignature(GetTypeName(type), methodName, parameters);
+            var result = LogContext.PushProperty("Method", method);
+            Log.Verbose(method);
             return result;
         }
 
         public static IDisposable MethodCall<TEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var methodCall = $"{GetTypeName(type)}.{methodName}<{GetTypeName(typeof(TEntity), true)}>({GetParameters(parameters)})";
-            var result = LogContext.PushProperty("Method", methodCall);
-            Log.Verbose(methodCall);
+            var method = MethodSignature(GetTypeName(type),methodName,GetTypeName(typeof(TEntity), true),parameters);
+            var result = LogContext.PushProperty("Method", method);
+            Log.Verbose(method);
             return result;
         }
 
         public static IDisposable MethodCall<TEntity, TRelatedEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var methodCall = $"{GetTypeName(type)}.{methodName}<{GetTypeName(typeof(TEntity), true)},{GetTypeName(typeof(TRelatedEntity), true)}>({GetParameters(parameters)})";
-            var result = LogContext.PushProperty("Method", methodCall);
-            Log.Verbose(methodCall);
+            var method = MethodSignature(GetTypeName(type),methodName,GetTypeName(typeof(TEntity), true),GetTypeName(typeof(TRelatedEntity), true), parameters);
+            var result = LogContext.PushProperty("Method", method);
+            Log.Verbose(method);
             return result;
         }
 
