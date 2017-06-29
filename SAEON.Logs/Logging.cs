@@ -32,29 +32,30 @@ namespace SAEON.Logs
             return UseFullName && !onlyName ? type.FullName : type.Name;
         }
 
-        private static string GetParamNames(ParameterList parameters)
+        private static string GetParameters(ParameterList parameters)
         {
             string result = string.Empty;
-            bool first = true;
-            if (parameters != null)
-                foreach (var param in parameters)
-                {
-                    if (first)
-                    {
-                        first = false;
-                    }
-                    else
-                    {
-                        result += ", ";
-                    }
-                    result += param.Key;
-                }
+            bool isFirst = true;
+            foreach (var kvPair in parameters)
+            {
+                if (!isFirst) result += ", ";
+                isFirst = false;
+                result += kvPair.Key + "=";
+                if (kvPair.Value == null)
+                    result += "Null";
+                else if (kvPair.Value is string)
+                    result += string.Format("'{0}'", kvPair.Value ?? "");
+                //else if (kvPair.Value is Guid)
+                //    result += string.Format("{0}", kvPair.Value);
+                else
+                    result += kvPair.Value.ToString();
+            }
             return result;
         }
 
         public static IDisposable MethodCall(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var methodCall = $"{GetTypeName(type)}.{methodName}({GetParamNames(parameters)})";
+            var methodCall = $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})";
             var result = LogContext.PushProperty("Method", methodCall);
             Log.Verbose(methodCall);
             return result;
@@ -62,7 +63,7 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var methodCall = $"{GetTypeName(type)}.{methodName}<{GetTypeName(typeof(TEntity), true)}>({GetParamNames(parameters)})";
+            var methodCall = $"{GetTypeName(type)}.{methodName}<{GetTypeName(typeof(TEntity), true)}>({GetParameters(parameters)})";
             var result = LogContext.PushProperty("Method", methodCall);
             Log.Verbose(methodCall);
             return result;
@@ -70,7 +71,7 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity, TRelatedEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var methodCall = $"{GetTypeName(type)}.{methodName}<{GetTypeName(typeof(TEntity), true)},{GetTypeName(typeof(TRelatedEntity), true)}>({GetParamNames(parameters)})";
+            var methodCall = $"{GetTypeName(type)}.{methodName}<{GetTypeName(typeof(TEntity), true)},{GetTypeName(typeof(TRelatedEntity), true)}>({GetParameters(parameters)})";
             var result = LogContext.PushProperty("Method", methodCall);
             Log.Verbose(methodCall);
             return result;
