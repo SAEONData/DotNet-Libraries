@@ -53,24 +53,24 @@ namespace SAEON.Logs
             return result;
         }
 
-        public static string MethodSignature(string typeName, string methodName, ParameterList parameters = null)
+        public static string MethodSignature(Type type, string methodName, ParameterList parameters = null)
         {
-            return $"{typeName}.{methodName}({GetParameters(parameters)})";
+            return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})";
         }
 
-        public static string MethodSignature(string typeName, string methodName, string entityTypeName, ParameterList parameters = null)
+        public static string MethodSignature(Type type, string methodName, string entityTypeName, ParameterList parameters = null)
         {
-            return $"{typeName}.{methodName}<{entityTypeName}>({GetParameters(parameters)})";
+            return $"{GetTypeName(type)}.{methodName}<{entityTypeName}>({GetParameters(parameters)})";
         }
 
-        public static string MethodSignature(string typeName, string methodName, string entityTypeName, string relatedEntityTypeName, ParameterList parameters = null)
+        public static string MethodSignature(Type type, string methodName, string entityTypeName, string relatedEntityTypeName, ParameterList parameters = null)
         {
-            return $"{typeName}.{methodName}<{entityTypeName},{relatedEntityTypeName}>({GetParameters(parameters)})";
+            return $"{GetTypeName(type)}.{methodName}<{entityTypeName},{relatedEntityTypeName}>({GetParameters(parameters)})";
         }
 
         public static IDisposable MethodCall(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var method = MethodSignature(GetTypeName(type), methodName, parameters);
+            var method = MethodSignature(type, methodName, parameters);
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
@@ -78,7 +78,7 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var method = MethodSignature(GetTypeName(type),methodName,GetTypeName(typeof(TEntity), true),parameters);
+            var method = MethodSignature(type,methodName,GetTypeName(typeof(TEntity), true),parameters);
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
@@ -86,7 +86,7 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity, TRelatedEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var method = MethodSignature(GetTypeName(type),methodName,GetTypeName(typeof(TEntity), true),GetTypeName(typeof(TRelatedEntity), true), parameters);
+            var method = MethodSignature(type,methodName,GetTypeName(typeof(TEntity), true),GetTypeName(typeof(TRelatedEntity), true), parameters);
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
