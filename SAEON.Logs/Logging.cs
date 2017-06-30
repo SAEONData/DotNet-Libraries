@@ -35,20 +35,23 @@ namespace SAEON.Logs
         private static string GetParameters(ParameterList parameters)
         {
             string result = string.Empty;
-            bool isFirst = true;
-            foreach (var kvPair in parameters)
+            if (parameters != null)
             {
-                if (!isFirst) result += ", ";
-                isFirst = false;
-                result += kvPair.Key + "=";
-                if (kvPair.Value == null)
-                    result += "Null";
-                else if (kvPair.Value is string)
-                    result += string.Format("'{0}'", kvPair.Value ?? "");
-                //else if (kvPair.Value is Guid)
-                //    result += string.Format("{0}", kvPair.Value);
-                else
-                    result += kvPair.Value.ToString();
+                bool isFirst = true;
+                foreach (var kvPair in parameters)
+                {
+                    if (!isFirst) result += ", ";
+                    isFirst = false;
+                    result += kvPair.Key + "=";
+                    if (kvPair.Value == null)
+                        result += "Null";
+                    else if (kvPair.Value is string)
+                        result += string.Format("'{0}'", kvPair.Value ?? "");
+                    //else if (kvPair.Value is Guid)
+                    //    result += string.Format("{0}", kvPair.Value);
+                    else
+                        result += kvPair.Value.ToString();
+                }
             }
             return result;
         }
@@ -78,7 +81,7 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var method = MethodSignature(type,methodName,GetTypeName(typeof(TEntity), true),parameters);
+            var method = MethodSignature(type, methodName, GetTypeName(typeof(TEntity), true), parameters);
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
@@ -86,7 +89,7 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity, TRelatedEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var method = MethodSignature(type,methodName,GetTypeName(typeof(TEntity), true),GetTypeName(typeof(TRelatedEntity), true), parameters);
+            var method = MethodSignature(type, methodName, GetTypeName(typeof(TEntity), true), GetTypeName(typeof(TRelatedEntity), true), parameters);
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
