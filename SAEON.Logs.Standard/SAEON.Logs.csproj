@@ -1,13 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.4</TargetFramework>
+    <TargetFramework>netstandard1.2</TargetFramework>
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
     <Product>SAEON Libraries</Product>
     <Description>Logging for SAEON</Description>
     <Copyright>© 2017 SAEON</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DebugType>Full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
