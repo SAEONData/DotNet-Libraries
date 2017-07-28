@@ -1,17 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.2</TargetFramework>
+    <TargetFramework>netstandard1.4</TargetFramework>
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
     <Product>SAEON Libraries</Product>
-    <Description>Logging for SAEON</Description>
+    <Description>Logging for SAEON in .NetStandard</Description>
     <Copyright>© 2017 SAEON</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <DebugType>Full</DebugType>
+    <RootNamespace>SAEON.Logs</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\SAEON.Logs.Core\Logging.cs" Link="Logging.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.5.0" />

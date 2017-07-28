@@ -1,15 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.26430.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAEON.Logs", "SAEON.Logs\SAEON.Logs.csproj", "{206B3CF1-DD83-491D-A68C-A6A477517E42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.Logs.Standard", "SAEON.Logs.Standard\SAEON.Logs.Standard.csproj", "{206B3CF1-DD83-491D-A68C-A6A477517E42}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C3045C14-78B6-416B-BE90-9ED039C17482}"
 	ProjectSection(SolutionItems) = preProject
 		License.md = License.md
 		ReadMe.md = ReadMe.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.Logs.Core", "SAEON.Logs.Core\SAEON.Logs.Core.csproj", "{E0AD4313-7225-45BD-B68E-D2E1CDDB3002}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{206B3CF1-DD83-491D-A68C-A6A477517E42}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{206B3CF1-DD83-491D-A68C-A6A477517E42}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{206B3CF1-DD83-491D-A68C-A6A477517E42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0AD4313-7225-45BD-B68E-D2E1CDDB3002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0AD4313-7225-45BD-B68E-D2E1CDDB3002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0AD4313-7225-45BD-B68E-D2E1CDDB3002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0AD4313-7225-45BD-B68E-D2E1CDDB3002}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
