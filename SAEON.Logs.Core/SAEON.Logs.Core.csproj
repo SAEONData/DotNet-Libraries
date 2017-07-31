@@ -8,6 +8,7 @@
     <Product>SAEON Libraries</Product>
     <Description>Logging for SAEON in .NetCore</Description>
     <Copyright>© 2017 SAEON</Copyright>
+    <ApplicationIcon>SAEON.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
