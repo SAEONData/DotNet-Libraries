@@ -9,6 +9,10 @@
     <Description>Logging for SAEON in .NetCore</Description>
     <Copyright>© 2017 SAEON</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <PostBuildEvent>rd /s /q s:\Development\NuGet\SAEON\$(MSBuildProjectName)
+nuget init "$(MSBuildProjectDirectory)\bin\release" s:\Development\NuGet\SAEON</PostBuildEvent>
   </PropertyGroup>
 
   <ItemGroup>

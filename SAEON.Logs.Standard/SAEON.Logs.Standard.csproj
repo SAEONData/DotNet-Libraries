@@ -1,17 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.5</TargetFramework>
+    <TargetFramework>netstandard1.3</TargetFramework>
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
     <Product>SAEON .Net Libraries</Product>
     <Description>Logging for SAEON in .NetStandard</Description>
     <Copyright>© 2017 South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
+    <PostBuildEvent>
+      rd /s /q s:\Development\NuGet\SAEON\$(MSBuildProjectName)
+      nuget init "$(MSBuildProjectDirectory)\bin\release" s:\Development\NuGet\SAEON
+    </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <DebugType>Full</DebugType>
     <RootNamespace>SAEON.Logs</RootNamespace>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\SAEON.Logs.Core\Logging.cs" Link="Logging.cs" />
