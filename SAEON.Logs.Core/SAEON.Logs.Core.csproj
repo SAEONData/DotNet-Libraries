@@ -5,9 +5,9 @@
     <RootNamespace>SAEON.Logs</RootNamespace>
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
-    <Product>SAEON Libraries</Product>
+    <Product>SAEON .Net Libraries</Product>
     <Description>Logging for SAEON in .NetCore</Description>
-    <Copyright>© 2017 SAEON</Copyright>
+    <Copyright>© 2017 South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
