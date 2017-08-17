@@ -16,9 +16,8 @@ namespace SAEON.Logs
         public static LoggerConfiguration CreateConfiguration(string fileName)
         {
             return new LoggerConfiguration()
-                .Enrich.FromLogContext() 
-                .WriteTo.RollingFile(fileName) 
-                .WriteTo.Seq("http://localhost:5341/"); 
+                .Enrich.FromLogContext()
+                .WriteTo.RollingFile(fileName); 
         }
 
         public static void CreateLogger(this LoggerConfiguration config)
