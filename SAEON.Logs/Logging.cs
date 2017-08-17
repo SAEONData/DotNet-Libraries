@@ -13,6 +13,19 @@ namespace SAEON.Logs
     {
         public static bool UseFullName { get; set; } = true;
 
+        public static LoggerConfiguration CreateConfiguration(string fileName)
+        {
+            return new LoggerConfiguration()
+                .Enrich.FromLogContext() 
+                .WriteTo.RollingFile(fileName) 
+                .WriteTo.Seq("http://localhost:5341/"); 
+        }
+
+        public static void CreateLogger(this LoggerConfiguration config)
+        {
+            Log.Logger = config.CreateLogger();
+        }
+
         public static void Exception(Exception ex, string message = "", params object[] values)
         {
             Log.Error(ex, string.IsNullOrEmpty(message) ? "An exception occured" : message, values);
