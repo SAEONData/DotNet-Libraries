@@ -16,11 +16,11 @@ namespace SAEON.Logs
         public static LoggerConfiguration CreateConfiguration(string fileName)
         {
             return new LoggerConfiguration()
-                .Enrich.FromLogContext()
+                .Enrich.FromLogContext() 
                 .WriteTo.RollingFile(fileName); 
         }
 
-        public static void CreateLogger(this LoggerConfiguration config)
+        public static void Create(this LoggerConfiguration config)
         {
             Log.Logger = config.CreateLogger();
         }
