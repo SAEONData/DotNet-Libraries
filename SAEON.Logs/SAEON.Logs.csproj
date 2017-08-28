@@ -7,7 +7,7 @@
     <Company>South African Environmental Observation Network (SAEON)</Company>
     <Product>SAEON .Net Libraries</Product>
     <Description>Logging for SAEON in .Net Standard</Description>
-    <Copyright>© 2017 South African Environmental Observation Network (SAEON)</Copyright>
+    <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
     <Version>1.0.7</Version>
     <AssemblyVersion>1.0.0.7</AssemblyVersion>

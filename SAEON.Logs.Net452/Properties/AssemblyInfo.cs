@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("SAEON.Logs.Net452")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Logging for SAEON in .Net452")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SAEON.Logs.Net452")]
-[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyCompany("South African Environmental Observation Network (SAEON)")]
+[assembly: AssemblyProduct("SAEON .Net Libraries")]
+[assembly: AssemblyCopyright("Copyright ©  2017 South African Environmental Observation Network (SAEON)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
