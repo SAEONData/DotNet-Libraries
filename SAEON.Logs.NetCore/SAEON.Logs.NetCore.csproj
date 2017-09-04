@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <ApplicationIcon>SAEON.ico</ApplicationIcon>
+    <Authors>Tim Parker-Nance</Authors>
+    <Company>South African Environmental Observation Network (SAEON)</Company>
+    <Product>SAEON .Net Libraries</Product>
+    <Description>Logging for SAEON in .Net Standard</Description>
+    <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="rd /s /q s:\Development\NuGet\SAEON\$(MSBuildProjectName)&#xD;&#xA;nuget init &quot;$(MSBuildProjectDirectory)\bin\release&quot; s:\Development\NuGet\SAEON" />
+  </Target>
+
+  <ItemGroup>
+    <Compile Include="..\SAEON.Logs\Logging.cs" Link="Logging.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" Version="2.5.0" />
+    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+  </ItemGroup>
+
+</Project>
