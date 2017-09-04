@@ -9,14 +9,14 @@ namespace SAEON.Logs
 {
     public class ParameterList : Dictionary<string, object> { }
 
-    public static class Logging
-    {
+    public static class Logging 
+    { 
         public static bool UseFullName { get; set; } = true;
 
         public static LoggerConfiguration CreateConfiguration(string fileName)
         {
             return new LoggerConfiguration()
-                .Enrich.FromLogContext()  
+                .Enrich.FromLogContext()     
                 .WriteTo.RollingFile(fileName);
         }
 
