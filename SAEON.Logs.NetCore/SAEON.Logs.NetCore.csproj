@@ -9,6 +9,7 @@
     <Description>Logging for SAEON in .Net Standard</Description>
     <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <RootNamespace>SAEON.Logs</RootNamespace>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
