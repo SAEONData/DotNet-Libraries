@@ -1,4 +1,7 @@
-﻿using Serilog;
+﻿#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1
+using Microsoft.Extensions.Configuration;
+#endif
+using Serilog;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
@@ -9,15 +12,25 @@ namespace SAEON.Logs
 {
     public class ParameterList : Dictionary<string, object> { }
 
-    public static class Logging 
+    public static class Logging  
     { 
         public static bool UseFullName { get; set; } = true;
 
+#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1
+        public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config)
+#else
         public static LoggerConfiguration CreateConfiguration(string fileName)
+#endif
         {
             return new LoggerConfiguration()
-                .Enrich.FromLogContext()     
-                .WriteTo.RollingFile(fileName);
+#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1
+                .ReadFrom.Configuration(config)
+#else
+                .ReadFrom.AppSettings()
+#endif
+                .Enrich.FromLogContext()
+                .WriteTo.RollingFile(fileName)
+                .WriteTo.Seq("http://localhost:5341/");
         }
 
         public static void Create(this LoggerConfiguration config)
@@ -59,9 +72,9 @@ namespace SAEON.Logs
                     if (kvPair.Value == null)
                         result += "Null";
                     else if (kvPair.Value is string)
-                        result += string.Format("'{0}'", kvPair.Value ?? "");
-                    //else if (kvPair.Value is Guid)
-                    //    result += string.Format("{0}", kvPair.Value);
+                        result += string.Format("'{0}'", kvPair.Value);
+                    else if (kvPair.Value is Guid)
+                        result += string.Format("{0}", kvPair.Value);
                     else
                         result += kvPair.Value.ToString();
                 }
@@ -73,7 +86,7 @@ namespace SAEON.Logs
         {
             return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})";
         }
-
+         
         public static string MethodSignature(Type type, string methodName, string entityTypeName, ParameterList parameters = null)
         {
             return $"{GetTypeName(type)}.{methodName}<{entityTypeName}>({GetParameters(parameters)})";

@@ -10,6 +10,9 @@
     <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RootNamespace>SAEON.Logs</RootNamespace>
+    <Version>1.0.6</Version>
+    <AssemblyVersion>1.0.0.6</AssemblyVersion>
+    <FileVersion>1.0.0.6</FileVersion>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -22,7 +25,9 @@
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.5.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="2.4.0" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="3.3.3" />
   </ItemGroup>
 
 </Project>

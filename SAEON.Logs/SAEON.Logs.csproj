@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net452;net461</TargetFrameworks>
+        <TargetFrameworks>netstandard1.6;netstandard2.0;net452;net461</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Tim Parker-Nance</Authors>
         <Company>South African Environmental Observation Network (SAEON)</Company>
@@ -9,9 +9,9 @@
         <Description>Logging for SAEON in .Net Standard</Description>
         <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.3</Version>
-        <AssemblyVersion>1.0.0.3</AssemblyVersion>
-        <FileVersion>1.0.0.3</FileVersion>
+        <Version>1.0.6</Version>
+        <AssemblyVersion>1.0.0.6</AssemblyVersion>
+        <FileVersion>1.0.0.6</FileVersion>
         <PackageTags />
         <PackageReleaseNotes />
     </PropertyGroup>
@@ -20,6 +20,27 @@
         <PackageReference Include="NuGet.CommandLine" Version="4.3.0" />
         <PackageReference Include="Serilog" Version="2.5.0" />
         <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
+        <PackageReference Include="Serilog.Settings.Configuration" Version="2.4.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="3.3.3" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+        <PackageReference Include="Serilog.Settings.Configuration" Version="2.4.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="3.3.3" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
+        <Reference Include="System.Net.Http" />
+        <PackageReference Include="Serilog.Settings.AppSettings" Version="2.1.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="3.3.3" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+        <PackageReference Include="Serilog.Settings.AppSettings" Version="2.1.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="3.3.3" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
