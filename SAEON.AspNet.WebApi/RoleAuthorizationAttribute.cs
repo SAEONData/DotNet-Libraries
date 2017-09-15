@@ -7,24 +7,22 @@ using System.Security.Claims;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
-namespace SAEON.AspNet.WebAPI
+namespace SAEON.AspNet.WebApi
 {
-    public class ClaimsAuthorizationAttribute : AuthorizationFilterAttribute
+    class RoleAuthorizationAttribute : AuthorizationFilterAttribute
     {
-        public string ClaimType { get; set; }
-        public string ClaimValue { get; set; }
+        private string role;
 
-        public ClaimsAuthorizationAttribute() : base() { }
+        public RoleAuthorizationAttribute() : base() { }
 
-        public ClaimsAuthorizationAttribute(string claimType, string claimValue) : this()
+        public RoleAuthorizationAttribute(string Role) : this()
         {
-            ClaimType = claimType;
-            ClaimValue = claimValue;
+            role = Role;
         }
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
-            using (Logging.MethodCall(GetType(), new ParameterList { { "Claim", ClaimType }, { "Value", ClaimValue } }))
+            using (Logging.MethodCall(GetType(), new ParameterList { { "Role", role } }))
             {
                 base.OnAuthorization(actionContext);
                 var principal = actionContext.RequestContext.Principal as ClaimsPrincipal;
@@ -35,12 +33,12 @@ namespace SAEON.AspNet.WebAPI
                     actionContext.Response.ReasonPhrase = "Not Authenticated";
                     return;
                 }
-                Logging.Verbose("Claims: {claims}", principal.Claims.Select(i => i.Type + "=" + i.Value));
-                if (!(principal.HasClaim(x => x.Type.Equals(ClaimType,StringComparison.CurrentCultureIgnoreCase) && x.Value.Equals(ClaimValue,StringComparison.CurrentCultureIgnoreCase))))
+                Logging.Verbose("Role: {role} Claims: {claims}", role, principal.Claims.Select(i => i.Type + "=" + i.Value));
+                if (!(principal.HasClaim(x => x.Type.Equals("role",StringComparison.CurrentCultureIgnoreCase) && x.Value.Equals(role,StringComparison.CurrentCultureIgnoreCase))))
                 {
-                    Logging.Error("Claims Authorization Failed");
+                    Logging.Error("Role Authorization Failed");
                     actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Forbidden);
-                    actionContext.Response.ReasonPhrase = "Claims Authorization Failed";
+                    actionContext.Response.ReasonPhrase = "Role Authorization Failed";
                     return;
                 }
             }

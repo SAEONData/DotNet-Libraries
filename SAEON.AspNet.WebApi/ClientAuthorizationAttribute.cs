@@ -13,23 +13,23 @@ namespace SAEON.AspNet.WebAPI
 {
     public class ClientAuthorizationAttribute : AuthorizationFilterAttribute
     {
-        private string clientId;
+        private string client;
 
         public ClientAuthorizationAttribute() : base() { }
 
-        public ClientAuthorizationAttribute(string ClientId) : this()
+        public ClientAuthorizationAttribute(string Client) : this()
         {
-            clientId = ClientId;
+            client = Client;
         }
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
-            using (Logging.MethodCall(GetType(), new ParameterList { { "ClientId", clientId } }))
+            using (Logging.MethodCall(GetType(), new ParameterList { { "Client", client } }))
             {
                 base.OnAuthorization(actionContext);
                 var principal = actionContext.RequestContext.Principal as ClaimsPrincipal;
-                Logging.Verbose("ClientId: {clientId} Claims: {claims}", clientId, principal.Claims.Select(i => i.Type + "=" + i.Value));
-                if (!(principal.HasClaim(x => x.Type == "client_id" && x.Value == clientId)))
+                Logging.Verbose("Client: {client} Claims: {claims}", client, principal.Claims.Select(i => i.Type + "=" + i.Value));
+                if (!(principal.HasClaim(x => x.Type == "client_id" && x.Value == client)))
                 {
                     Logging.Error("Client Authorization Failed");
                     actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Forbidden);
