@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net452;net461</TargetFrameworks>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Tim Parker-Nance</Authors>
+        <Company>South African Environmental Observation Network (SAEON)</Company>
+        <Product>SAEON .Net Libraries</Product>
+        <Description>Http Filters for SAEON in .Net Standard</Description>
+        <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
+        <ApplicationIcon>SAEON.ico</ApplicationIcon>
+        <Version>1.0.1</Version>
+        <AssemblyVersion>1.0.1.0</AssemblyVersion>
+        <FileVersion>1.0.1.0</FileVersion>
+        <PackageTags />
+        <PackageReleaseNotes />
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.3" />
+        <PackageReference Include="SAEON.Logs" Version="1.0.7" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="rd /s /q s:\Development\NuGet\SAEON\$(MSBuildProjectName)&#xD;&#xA;nuget init &quot;$(MSBuildProjectDirectory)\bin\release&quot; s:\Development\NuGet\SAEON" />
+    </Target>
+
+</Project>
