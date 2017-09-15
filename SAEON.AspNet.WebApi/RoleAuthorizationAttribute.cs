@@ -2,7 +2,7 @@
 using System;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
+using System.Net.Http; 
 using System.Security.Claims;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -18,7 +18,7 @@ namespace SAEON.AspNet.WebApi
         public RoleAuthorizationAttribute(string Role) : this()
         {
             role = Role;
-        }
+        } 
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {

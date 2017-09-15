@@ -9,8 +9,8 @@ using System.Text;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
-namespace SAEON.AspNet.WebAPI
-{
+namespace SAEON.AspNet.WebApi
+{ 
     public class ClientAuthorizationAttribute : AuthorizationFilterAttribute
     {
         private string client;
