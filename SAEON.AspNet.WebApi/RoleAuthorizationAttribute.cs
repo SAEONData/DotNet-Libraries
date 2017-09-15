@@ -9,7 +9,7 @@ using System.Web.Http.Filters;
 
 namespace SAEON.AspNet.WebApi
 {
-    class RoleAuthorizationAttribute : AuthorizationFilterAttribute
+    public class RoleAuthorizationAttribute : AuthorizationFilterAttribute
     {
         private string role;
 
