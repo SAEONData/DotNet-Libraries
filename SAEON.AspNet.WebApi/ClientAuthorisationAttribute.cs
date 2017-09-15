@@ -11,13 +11,13 @@ using System.Web.Http.Filters;
 
 namespace SAEON.AspNet.WebAPI
 {
-    public class ClientIdAttribute : AuthorizationFilterAttribute
+    public class ClientAuthorizationAttribute : AuthorizationFilterAttribute
     {
         private string clientId;
 
-        public ClientIdAttribute() : base() { }
+        public ClientAuthorizationAttribute() : base() { }
 
-        public ClientIdAttribute(string ClientId) : this()
+        public ClientAuthorizationAttribute(string ClientId) : this()
         {
             clientId = ClientId;
         }
@@ -28,12 +28,12 @@ namespace SAEON.AspNet.WebAPI
             {
                 base.OnAuthorization(actionContext);
                 var principal = actionContext.RequestContext.Principal as ClaimsPrincipal;
-                Logging.Verbose("ClientId: {clientId} Claims: {claims}", clientId, string.Join("; ", principal.Claims.Select(i => i.Type + "=" + i.Value)));
+                Logging.Verbose("ClientId: {clientId} Claims: {claims}", clientId, principal.Claims.Select(i => i.Type + "=" + i.Value));
                 if (!(principal.HasClaim(x => x.Type == "client_id" && x.Value == clientId)))
                 {
-                    Logging.Error("ClientId Authorization Failed");
+                    Logging.Error("Client Authorization Failed");
                     actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Forbidden);
-                    actionContext.Response.ReasonPhrase = "ClientId Authorization Failed";
+                    actionContext.Response.ReasonPhrase = "Client Authorization Failed";
                     return;
                 }
             }
