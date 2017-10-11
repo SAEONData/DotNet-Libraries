@@ -6,12 +6,13 @@
         <Authors>Tim Parker-Nance</Authors>
         <Company>South African Environmental Observation Network (SAEON)</Company>
         <Product>SAEON .Net Libraries</Product>
+        <Title>SAEON.Logs</Title>
         <Description>Logging for SAEON in .Net Standard</Description>
         <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.7</Version>
-        <AssemblyVersion>1.0.7.0</AssemblyVersion>
-        <FileVersion>1.0.7.0</FileVersion>
+        <Version>1.0.8</Version>
+        <AssemblyVersion>1.0.8.0</AssemblyVersion>
+        <FileVersion>1.0.8.0</FileVersion>
         <PackageTags />
         <PackageReleaseNotes />
     </PropertyGroup>
@@ -19,27 +20,25 @@
     <ItemGroup>
         <PackageReference Include="Serilog" Version="2.5.0" />
         <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="3.4.0" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
         <PackageReference Include="Serilog.Settings.Configuration" Version="2.4.0" />
-        <PackageReference Include="Serilog.Sinks.Seq" Version="3.3.3" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
         <PackageReference Include="Serilog.Settings.Configuration" Version="2.4.0" />
-        <PackageReference Include="Serilog.Sinks.Seq" Version="3.3.3" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
         <Reference Include="System.Net.Http" />
-        <PackageReference Include="Serilog.Settings.AppSettings" Version="2.1.0" />
-        <PackageReference Include="Serilog.Sinks.Seq" Version="3.3.3" />
+        <PackageReference Include="Serilog.Settings.AppSettings" Version="2.1.2" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-        <PackageReference Include="Serilog.Settings.AppSettings" Version="2.1.0" />
-        <PackageReference Include="Serilog.Sinks.Seq" Version="3.3.3" />
+        <Reference Include="System.Net.Http" />
+        <PackageReference Include="Serilog.Settings.AppSettings" Version="2.1.2" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

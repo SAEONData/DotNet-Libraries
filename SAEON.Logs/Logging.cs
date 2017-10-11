@@ -25,14 +25,14 @@ namespace SAEON.Logs
             return new LoggerConfiguration()
 #if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1
                 .ReadFrom.Configuration(config)
-#else
+#else 
                 .ReadFrom.AppSettings()
 #endif
                 .Enrich.FromLogContext()
                 .WriteTo.RollingFile(fileName)
                 .WriteTo.Seq("http://localhost:5341/");
         }
-
+         
         public static void Create(this LoggerConfiguration config)
         {
             Log.Logger = config.CreateLogger();
@@ -40,12 +40,12 @@ namespace SAEON.Logs
 
         public static void Exception(Exception ex, string message = "", params object[] values)
         {
-            Log.Error(ex, string.IsNullOrEmpty(message) ? "An exception occured" : message, values);
+            Log.Error(ex, string.IsNullOrEmpty(message) ? "An exception occurred" : message, values);
         }
 
         public static void Error(string message = "", params object[] values)
         {
-            Log.Error(string.IsNullOrEmpty(message) ? "An error occured" : message, values);
+            Log.Error(string.IsNullOrEmpty(message) ? "An error occurred" : message, values);
         }
 
         public static void Information(string message, params object[] values)

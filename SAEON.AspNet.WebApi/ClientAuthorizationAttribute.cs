@@ -1,16 +1,13 @@
 ﻿using SAEON.Logs;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Claims;
-using System.Text;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
 namespace SAEON.AspNet.WebApi
-{ 
+{
     public class ClientAuthorizationAttribute : AuthorizationFilterAttribute
     {
         private string client;
@@ -20,7 +17,7 @@ namespace SAEON.AspNet.WebApi
         public ClientAuthorizationAttribute(string Client) : this()
         {
             client = Client;
-        }
+        } 
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
