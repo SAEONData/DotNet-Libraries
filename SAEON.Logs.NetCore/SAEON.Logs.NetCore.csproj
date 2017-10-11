@@ -10,9 +10,9 @@
     <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <RootNamespace>SAEON.Logs</RootNamespace>
-    <Version>1.0.6</Version>
-    <AssemblyVersion>1.0.6.0</AssemblyVersion>
-    <FileVersion>1.0.6.0</FileVersion>
+    <Version>1.0.7</Version>
+    <AssemblyVersion>1.0.7.0</AssemblyVersion>
+    <FileVersion>1.0.7.0</FileVersion> 
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

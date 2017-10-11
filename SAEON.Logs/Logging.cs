@@ -9,10 +9,10 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SAEON.Logs
-{
+{ 
     public class ParameterList : Dictionary<string, object> { }
 
-    public static class Logging  
+    public static class Logging   
     { 
         public static bool UseFullName { get; set; } = true;
 
