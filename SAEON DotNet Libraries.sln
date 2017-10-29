@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C3045C14-78B6-416B-BE90-9ED039C17482}"
 	ProjectSection(SolutionItems) = preProject
@@ -26,6 +26,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.AspNet.WebApi", "SAEO
 		{546B436D-FD82-4761-81EE-36AC90A07BB4} = {546B436D-FD82-4761-81EE-36AC90A07BB4}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAEON.ImageProcessor", "SAEON.ImageProcessor\SAEON.ImageProcessor.csproj", "{166100F5-7580-4090-AB5D-A55418DCE1CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{800CE3A7-386A-467D-B8C8-3D7E315C33EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{800CE3A7-386A-467D-B8C8-3D7E315C33EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{800CE3A7-386A-467D-B8C8-3D7E315C33EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{166100F5-7580-4090-AB5D-A55418DCE1CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{166100F5-7580-4090-AB5D-A55418DCE1CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{166100F5-7580-4090-AB5D-A55418DCE1CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{166100F5-7580-4090-AB5D-A55418DCE1CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
