@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace SAEON.ImageProcessor.Imaging
+namespace SAEON.ImageProcessing
 {
     public class OverlayLayer
     {

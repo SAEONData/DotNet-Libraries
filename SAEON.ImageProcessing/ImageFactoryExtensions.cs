@@ -1,8 +1,6 @@
 ﻿using ImageProcessor;
 using ImageProcessor.Imaging.MetaData;
-using ImageProcessor.Processors;
 using Microsoft.WindowsAPICodePack.Shell;
-using SAEON.ImageProcessor.Imaging;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,7 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace SAEON.ImageProcessor
+namespace SAEON.ImageProcessing
 {
     public static class ImageFactoryExtensions
     {

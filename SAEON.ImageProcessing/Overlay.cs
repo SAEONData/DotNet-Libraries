@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 
-namespace SAEON.ImageProcessor.Processors
+namespace SAEON.ImageProcessing
 {
     public class Overlay : IGraphicsProcessor
     {

@@ -7,8 +7,8 @@
     <ProjectGuid>{166100F5-7580-4090-AB5D-A55418DCE1CF}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SAEON.ImageProcessor</RootNamespace>
-    <AssemblyName>SAEON.ImageProcessor</AssemblyName>
+    <RootNamespace>SAEON.ImageProcessing</RootNamespace>
+    <AssemblyName>SAEON.ImageProcessing</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -45,8 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ImageFactoryExtensions.cs" />
-    <Compile Include="Imaging\OverlayLayer.cs" />
-    <Compile Include="Processors\Overlay.cs" />
+    <Compile Include="OverlayLayer.cs" />
+    <Compile Include="Overlay.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
