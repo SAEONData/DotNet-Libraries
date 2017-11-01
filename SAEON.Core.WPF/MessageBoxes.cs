@@ -8,7 +8,7 @@ namespace SAEON.Core
         public static bool ConfirmBox(string message, params object[] values)
         {
             return (MessageBox.Show(string.Format(message, values), "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes);
-        }
+        } 
 
         public static void ErrorBox(string message, params object[] values)
         {
