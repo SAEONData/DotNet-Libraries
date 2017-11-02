@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net461</TargetFramework>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>Tim Parker-Nance</Authors>
+        <Company>South African Environmental Observation Network (SAEON)</Company>
+        <Product>SAEON .Net Libraries</Product>
+        <Description>Asp.Net MVC for SAEON in .Net Standard</Description>
+        <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
+        <ApplicationIcon>SAEON.ico</ApplicationIcon>
+        <Version>1.0.0</Version>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
+        <PackageTags />
+        <PackageReleaseNotes />
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="System.Web" />
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="rd /s /q s:\Development\NuGet\SAEON\$(MSBuildProjectName)&#xD;&#xA;nuget init &quot;$(MSBuildProjectDirectory)\bin\release&quot; s:\Development\NuGet\SAEON" />
+    </Target>
+
+</Project>
