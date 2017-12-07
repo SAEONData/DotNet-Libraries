@@ -10,15 +10,15 @@
         <Description>Logging for SAEON in .Net Standard</Description>
         <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.10</Version>
-        <AssemblyVersion>1.0.10.0</AssemblyVersion>
-        <FileVersion>1.0.10.0</FileVersion> 
+        <Version>1.0.11</Version>
+        <AssemblyVersion>1.0.11.0</AssemblyVersion>
+        <FileVersion>1.0.11.0</FileVersion> 
         <PackageTags />
         <PackageReleaseNotes />
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Serilog" Version="2.5.0" />
+        <PackageReference Include="Serilog" Version="2.6.0" />
         <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
         <PackageReference Include="Serilog.Sinks.Seq" Version="3.4.0" />
     </ItemGroup>
@@ -42,7 +42,7 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="rd /s /q s:\Development\NuGet\SAEON\$(MSBuildProjectName)&#xD;&#xA;nuget init &quot;$(MSBuildProjectDirectory)\bin\release&quot; s:\Development\NuGet\SAEON" />
+        <Exec Command="rd /s /q D:\Development\NuGet\SAEON\$(MSBuildProjectName)&#xD;&#xA;nuget init &quot;$(MSBuildProjectDirectory)\bin\release&quot; D:\Development\NuGet\" />
     </Target>
 
 </Project>

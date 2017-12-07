@@ -18,11 +18,11 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.3" />
-        <PackageReference Include="SAEON.Logs" Version="1.0.10" />
+        <PackageReference Include="SAEON.Logs" Version="1.0.11" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="rd /s /q s:\Development\NuGet\SAEON\$(MSBuildProjectName)&#xD;&#xA;nuget init &quot;$(MSBuildProjectDirectory)\bin\release&quot; s:\Development\NuGet\SAEON" />
+        <Exec Command="rd /s /q D:\Development\NuGet\SAEON\$(MSBuildProjectName)&#xD;&#xA;nuget init &quot;$(MSBuildProjectDirectory)\bin\release&quot; D:\Development\NuGet\" />
     </Target>
 
 </Project>
