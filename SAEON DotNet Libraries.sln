@@ -41,6 +41,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.AspNet.Mvc", "SAEON.A
 		{546B436D-FD82-4761-81EE-36AC90A07BB4} = {546B436D-FD82-4761-81EE-36AC90A07BB4}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAEON.OpenXML", "SAEON.OpenXML\SAEON.OpenXML.csproj", "{079B3678-2418-4B5D-BB5F-0838F5840F2F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{546B436D-FD82-4761-81EE-36AC90A07BB4} = {546B436D-FD82-4761-81EE-36AC90A07BB4}
+		{6251C2BE-EC34-4798-B635-003E9461A0BA} = {6251C2BE-EC34-4798-B635-003E9461A0BA}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +81,10 @@ Global
 		{B22F20FC-C07C-41C6-8B31-E6D4DA7E9ECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B22F20FC-C07C-41C6-8B31-E6D4DA7E9ECD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B22F20FC-C07C-41C6-8B31-E6D4DA7E9ECD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{079B3678-2418-4B5D-BB5F-0838F5840F2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{079B3678-2418-4B5D-BB5F-0838F5840F2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{079B3678-2418-4B5D-BB5F-0838F5840F2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{079B3678-2418-4B5D-BB5F-0838F5840F2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
