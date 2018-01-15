@@ -6,8 +6,8 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-
-namespace SAEON.AspNet.WebApi
+ 
+namespace SAEON.AspNet.WebApi 
 {
     public class ClaimsAuthorizationAttribute : AuthorizationFilterAttribute
     {

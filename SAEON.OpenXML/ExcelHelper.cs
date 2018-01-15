@@ -66,7 +66,7 @@ namespace SAEON.OpenXML
         {
             using (Logging.MethodCall(typeof(WorksheetPart)))
             {
-                try
+                try 
                 {
                     // Add a blank WorksheetPart.
                     WorksheetPart worksheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>();
@@ -100,7 +100,7 @@ namespace SAEON.OpenXML
                 }
                 catch (Exception ex)
                 {
-                    Logging.Exception(ex);
+                    Logging.Exception(ex); 
                     throw;
                 }
             }
