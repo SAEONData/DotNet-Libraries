@@ -10,17 +10,15 @@
         <Description>Logging for SAEON in .Net Standard</Description>
         <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.11</Version>
-        <AssemblyVersion>1.0.11.0</AssemblyVersion>
-        <FileVersion>1.0.11.0</FileVersion> 
+        <Version>1.0.12</Version>
         <PackageTags />
         <PackageReleaseNotes />
-    </PropertyGroup>
+    </PropertyGroup> 
 
     <ItemGroup>
         <PackageReference Include="Serilog" Version="2.6.0" />
         <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-        <PackageReference Include="Serilog.Sinks.Seq" Version="3.4.0" />
+        <PackageReference Include="Serilog.Sinks.Seq" Version="4.0.0" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">

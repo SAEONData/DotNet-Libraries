@@ -77,7 +77,7 @@ namespace SAEON.OpenXML
                     {
                         sheets = document.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
                     }
-                    string relationshipId = document.WorkbookPart.GetIdOfPart(worksheetPart);
+                    string relationshipId = document.WorkbookPart.GetIdOfPart(worksheetPart); 
                     Logging.Verbose("relationshipId: {relationshipId}", relationshipId);
 
                     // Get a unique ID for the new worksheet.
