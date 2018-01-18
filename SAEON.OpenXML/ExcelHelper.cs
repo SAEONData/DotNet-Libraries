@@ -448,8 +448,8 @@ namespace SAEON.OpenXML
 
             NumberingFormat nf;
             nf = new NumberingFormat();
-            nf.NumberFormatId = iExcelIndex++;
-            nf.FormatCode = "dd mmm yyyy";
+            nf.NumberFormatId = iExcelIndex++; 
+            nf.FormatCode = "yyyy-mm-dd hh:mm:ss";
             nfs.Append(nf);
             cf = new CellFormat();
             cf.NumberFormatId = nf.NumberFormatId;
