@@ -2,12 +2,12 @@
 using Microsoft.Extensions.Configuration;
 #endif
 using Serilog;
-using Serilog.Context;
+using Serilog.Context; 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices; 
 
-namespace SAEON.Logs
+namespace SAEON.Logs  
 {
     public class ParameterList : Dictionary<string, object> { }
 

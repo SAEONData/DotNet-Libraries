@@ -17,7 +17,7 @@
     </Target>
 
     <ItemGroup>
-      <PackageReference Include="ImageProcessor" Version="2.5.6" />
+      <PackageReference Include="ImageProcessor" Version="2.6.0" />
       <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="1.0.8" />
       <PackageReference Include="Microsoft.CSharp" Version="4.4.1" />
       <PackageReference Include="Microsoft.WindowsAPICodePack-Shell" Version="1.1.0" />

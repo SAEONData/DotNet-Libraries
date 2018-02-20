@@ -85,7 +85,7 @@ namespace SAEON.OpenXML
                     if (sheets.Elements<Sheet>().Count() > 0)
                     {
                         sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).Max() + 1;
-                    }
+                    } 
                     Logging.Verbose("sheetId: {sheetId}", sheetId);
 
                     // Give the new worksheet a name. 
@@ -117,10 +117,12 @@ namespace SAEON.OpenXML
                 columns = new Columns();
                 worksheetPart.Worksheet.Append(columns);
             }
-            Column column = new Column();
-            column.Min = index;
-            column.Max = index;
-            column.Width = width;
+            Column column = new Column
+            {
+                Min = index,
+                Max = index,
+                Width = width
+            };
             columns.Append(column);
             worksheetPart.Worksheet.Save();
             return column;
@@ -134,9 +136,11 @@ namespace SAEON.OpenXML
                 columns = new Columns();
                 for (int i = 1; i <= index; i++)
                 {
-                    Column column = new Column();
-                    column.Min = UInt32Value.FromUInt32(index);
-                    column.Max = UInt32Value.FromUInt32(index);
+                    Column column = new Column
+                    {
+                        Min = UInt32Value.FromUInt32(index),
+                        Max = UInt32Value.FromUInt32(index)
+                    };
                     columns.Append(column);
                 }
                 worksheetPart.Worksheet.Append(columns);
@@ -391,10 +395,14 @@ namespace SAEON.OpenXML
 
             Fonts fts = new Fonts();
             Font ft = new Font();
-            FontName ftn = new FontName();
-            ftn.Val = "Calibri";
-            FontSize ftsz = new FontSize();
-            ftsz.Val = 11;
+            FontName ftn = new FontName
+            {
+                Val = "Calibri"
+            };
+            FontSize ftsz = new FontSize
+            {
+                Val = 11
+            };
             ft.FontName = ftn;
             ft.FontSize = ftsz;
             fts.Append(ft);
@@ -404,33 +412,41 @@ namespace SAEON.OpenXML
             Fill fill;
             PatternFill patternFill;
             fill = new Fill();
-            patternFill = new PatternFill();
-            patternFill.PatternType = PatternValues.None;
+            patternFill = new PatternFill
+            {
+                PatternType = PatternValues.None
+            };
             fill.PatternFill = patternFill;
             fills.Append(fill);
             fill = new Fill();
-            patternFill = new PatternFill();
-            patternFill.PatternType = PatternValues.Gray125;
+            patternFill = new PatternFill
+            {
+                PatternType = PatternValues.Gray125
+            };
             fill.PatternFill = patternFill;
             fills.Append(fill);
             fills.Count = (uint)fills.ChildElements.Count;
 
             Borders borders = new Borders();
-            Border border = new Border();
-            border.LeftBorder = new LeftBorder();
-            border.RightBorder = new RightBorder();
-            border.TopBorder = new TopBorder();
-            border.BottomBorder = new BottomBorder();
-            border.DiagonalBorder = new DiagonalBorder();
+            Border border = new Border
+            {
+                LeftBorder = new LeftBorder(),
+                RightBorder = new RightBorder(),
+                TopBorder = new TopBorder(),
+                BottomBorder = new BottomBorder(),
+                DiagonalBorder = new DiagonalBorder()
+            };
             borders.Append(border);
             borders.Count = (uint)borders.ChildElements.Count;
 
             CellStyleFormats csfs = new CellStyleFormats();
-            CellFormat cf = new CellFormat();
-            cf.NumberFormatId = 0;
-            cf.FontId = 0;
-            cf.FillId = 0;
-            cf.BorderId = 0;
+            CellFormat cf = new CellFormat
+            {
+                NumberFormatId = 0,
+                FontId = 0,
+                FillId = 0,
+                BorderId = 0
+            };
             csfs.Append(cf);
             csfs.Count = (uint)csfs.ChildElements.Count;
 
@@ -438,26 +454,32 @@ namespace SAEON.OpenXML
             NumberingFormats nfs = new NumberingFormats();
             CellFormats cfs = new CellFormats();
 
-            cf = new CellFormat();
-            cf.NumberFormatId = 0;
-            cf.FontId = 0;
-            cf.FillId = 0;
-            cf.BorderId = 0;
-            cf.FormatId = 0;
+            cf = new CellFormat
+            {
+                NumberFormatId = 0,
+                FontId = 0,
+                FillId = 0,
+                BorderId = 0,
+                FormatId = 0
+            };
             cfs.Append(cf);
 
             NumberingFormat nf;
-            nf = new NumberingFormat();
-            nf.NumberFormatId = iExcelIndex++; 
-            nf.FormatCode = "yyyy-mm-dd hh:mm:ss";
+            nf = new NumberingFormat
+            {
+                NumberFormatId = iExcelIndex++,
+                FormatCode = "yyyy-mm-dd hh:mm:ss"
+            };
             nfs.Append(nf);
-            cf = new CellFormat();
-            cf.NumberFormatId = nf.NumberFormatId;
-            cf.FontId = 0;
-            cf.FillId = 0;
-            cf.BorderId = 0;
-            cf.FormatId = 0;
-            cf.ApplyNumberFormat = true;
+            cf = new CellFormat
+            {
+                NumberFormatId = nf.NumberFormatId,
+                FontId = 0,
+                FillId = 0,
+                BorderId = 0,
+                FormatId = 0,
+                ApplyNumberFormat = true
+            };
             cfs.Append(cf);
 
             nfs.Count = (uint)nfs.ChildElements.Count;
@@ -471,10 +493,12 @@ namespace SAEON.OpenXML
             ss.Append(cfs);
 
             CellStyles css = new CellStyles();
-            CellStyle cs = new CellStyle();
-            cs.Name = "Normal";
-            cs.FormatId = 0;
-            cs.BuiltinId = 0;
+            CellStyle cs = new CellStyle
+            {
+                Name = "Normal",
+                FormatId = 0,
+                BuiltinId = 0
+            };
             css.Append(cs);
             css.Count = (uint)css.ChildElements.Count;
             ss.Append(css);

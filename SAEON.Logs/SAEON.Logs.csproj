@@ -10,7 +10,7 @@
         <Description>Logging for SAEON in .Net Standard</Description>
         <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.12</Version>
+        <Version>1.0.13</Version>
         <PackageTags />
         <PackageReleaseNotes />
     </PropertyGroup> 
@@ -22,11 +22,11 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
-        <PackageReference Include="Serilog.Settings.Configuration" Version="2.4.0" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="2.5.0" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-        <PackageReference Include="Serilog.Settings.Configuration" Version="2.4.0" />
+        <PackageReference Include="Serilog.Settings.Configuration" Version="2.5.0" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
