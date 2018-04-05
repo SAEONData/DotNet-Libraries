@@ -1,11 +1,11 @@
 ﻿#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1 || NETCOREAPP2_0
 using Microsoft.Extensions.Configuration;
 #endif
-using Serilog;
+using Serilog; 
 using Serilog.Context;
-using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System; 
+using System.Collections.Generic; 
+using System.Runtime.CompilerServices; 
 
 namespace SAEON.Logs
 {

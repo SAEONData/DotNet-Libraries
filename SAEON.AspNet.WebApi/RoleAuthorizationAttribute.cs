@@ -8,7 +8,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
 namespace SAEON.AspNet.WebApi
-{
+{ 
     public class RoleAuthorizationAttribute : AuthorizationFilterAttribute
     {
         private string role;
@@ -16,7 +16,7 @@ namespace SAEON.AspNet.WebApi
         public RoleAuthorizationAttribute() : base() { }
 
         public RoleAuthorizationAttribute(string Role) : this()
-        {
+        { 
             role = Role;
         } 
 
