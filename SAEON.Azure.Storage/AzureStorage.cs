@@ -106,7 +106,7 @@ namespace SAEON.Azure.Storage
             CloudQueue queue = queueClient.GetQueueReference(name.ToLower());
             return queue;
         }
-        #endregion
+        #endregion 
 
         #region Tables
         public async Task DeleteTableAsync(string name)

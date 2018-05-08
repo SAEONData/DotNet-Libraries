@@ -9,7 +9,7 @@
     <Description>OpenXML utilities for SAEON .Net Standard</Description>
     <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.5</Version>
+    <Version>1.0.6</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

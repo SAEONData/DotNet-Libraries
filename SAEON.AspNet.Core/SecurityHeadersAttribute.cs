@@ -9,7 +9,7 @@ using System.Linq;
 using System.Web.Mvc;
 #endif
 using SAEON.Logs;
-
+ 
 namespace SAEON.AspNet.Core  
 {
     public class SecurityHeadersAttribute : ActionFilterAttribute

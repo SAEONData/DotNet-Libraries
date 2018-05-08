@@ -8,7 +8,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
  
 namespace SAEON.AspNet.WebApi 
-{
+{ 
     public class ClaimsAuthorizationAttribute : AuthorizationFilterAttribute
     {
         public string ClaimType { get; set; }
