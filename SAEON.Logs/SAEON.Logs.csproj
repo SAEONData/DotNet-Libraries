@@ -10,7 +10,7 @@
     <Description>Logging for SAEON in .Net Standard</Description>
     <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.15</Version>
+    <Version>1.0.16</Version>
     <PackageTags />
     <PackageReleaseNotes />
   </PropertyGroup>

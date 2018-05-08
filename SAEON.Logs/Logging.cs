@@ -27,7 +27,7 @@ namespace SAEON.Logs
 #else 
                 .ReadFrom.AppSettings()
 #endif
-                .Enrich.FromLogContext()
+                .Enrich.FromLogContext() 
 #if NETCOREAPP2_0
                 .WriteTo.File(fileName, fileSizeLimitBytes: 1_000_000, rollOnFileSizeLimit: true, shared: true, flushToDiskInterval: TimeSpan.FromSeconds(1))
 #else
@@ -122,6 +122,11 @@ namespace SAEON.Logs
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
+        }
+
+        public static void Warning(string message, params object[] values)
+        {
+            Log.Warning(message, values);
         }
 
         public static void Verbose(string message, params object[] values)
