@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Tim Parker-Nance</Authors>
+    <Company>South African Environmental Observation Network (SAEON)</Company>
+    <Product>SAEON .Net Libraries</Product>
+    <Copyright>© 2018 South African Environmental Observation Network (SAEON)</Copyright>
+    <Description>SAEON Azure Storage library</Description>
+    <ApplicationIcon>SAEON.ico</ApplicationIcon>
+    <Version>1.0.3</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
+    <PackageReference Include="WindowsAzure.Storage" Version="9.1.1" />
+  </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="echo rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet" />
+  </Target>
+
+</Project>

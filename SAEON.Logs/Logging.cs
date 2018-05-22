@@ -1,9 +1,11 @@
-﻿using Serilog;
+﻿#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1 || NETCOREAPP2_0
+using Microsoft.Extensions.Configuration;
+#endif
+using Serilog;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace SAEON.Logs
 {
@@ -13,12 +15,25 @@ namespace SAEON.Logs
     {
         public static bool UseFullName { get; set; } = true;
 
-        public static LoggerConfiguration CreateConfiguration(string fileName)
+#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1 || NETCOREAPP2_0
+        public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config)
         {
             return new LoggerConfiguration()
-                .Enrich.FromLogContext() 
-                .WriteTo.RollingFile(fileName); 
+                .ReadFrom.Configuration(config)
+                .Enrich.FromLogContext()
+                .WriteTo.File(fileName, fileSizeLimitBytes: 1_000_000, rollOnFileSizeLimit: true, shared: true, flushToDiskInterval: TimeSpan.FromSeconds(1))
+                .WriteTo.Seq("http://localhost:5341/");
         }
+#else
+        public static LoggerConfiguration CreateConfiguration(string fileName)
+            {
+                return new LoggerConfiguration()
+                .ReadFrom.AppSettings()
+                .Enrich.FromLogContext()
+                .WriteTo.RollingFile(fileName)
+                .WriteTo.Seq("http://localhost:5341/");
+            }
+#endif
 
         public static void Create(this LoggerConfiguration config)
         {
@@ -27,12 +42,12 @@ namespace SAEON.Logs
 
         public static void Exception(Exception ex, string message = "", params object[] values)
         {
-            Log.Error(ex, string.IsNullOrEmpty(message) ? "An exception occured" : message, values);
+            Log.Error(ex, string.IsNullOrEmpty(message) ? "An exception occurred" : message, values);
         }
 
         public static void Error(string message = "", params object[] values)
         {
-            Log.Error(string.IsNullOrEmpty(message) ? "An error occured" : message, values);
+            Log.Error(string.IsNullOrEmpty(message) ? "An error occurred" : message, values);
         }
 
         public static void Information(string message, params object[] values)
@@ -51,7 +66,7 @@ namespace SAEON.Logs
             if (parameters != null)
             {
                 bool isFirst = true;
-                foreach (var kvPair in parameters)
+                foreach (var kvPair in parameters) 
                 {
                     if (!isFirst) result += ", ";
                     isFirst = false;
@@ -59,9 +74,9 @@ namespace SAEON.Logs
                     if (kvPair.Value == null)
                         result += "Null";
                     else if (kvPair.Value is string)
-                        result += string.Format("'{0}'", kvPair.Value ?? "");
-                    //else if (kvPair.Value is Guid)
-                    //    result += string.Format("{0}", kvPair.Value);
+                        result += string.Format("'{0}'", kvPair.Value);
+                    else if (kvPair.Value is Guid)
+                        result += string.Format("{0}", kvPair.Value);
                     else
                         result += kvPair.Value.ToString();
                 }
@@ -106,6 +121,11 @@ namespace SAEON.Logs
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
+        }
+
+        public static void Warning(string message, params object[] values)
+        {
+            Log.Warning(message, values);
         }
 
         public static void Verbose(string message, params object[] values)
