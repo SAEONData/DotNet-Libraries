@@ -1,11 +1,11 @@
 ﻿#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1 || NETCOREAPP2_0
 using Microsoft.Extensions.Configuration;
 #endif
-using Serilog; 
+using Serilog;
 using Serilog.Context;
-using System; 
-using System.Collections.Generic; 
-using System.Runtime.CompilerServices; 
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace SAEON.Logs
 {
@@ -17,24 +17,23 @@ namespace SAEON.Logs
 
 #if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1 || NETCOREAPP2_0
         public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config)
-#else
-        public static LoggerConfiguration CreateConfiguration(string fileName)
-#endif
         {
             return new LoggerConfiguration()
-#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1 || NETCOREAPP2_0
                 .ReadFrom.Configuration(config)
-#else 
-                .ReadFrom.AppSettings()
-#endif
-                .Enrich.FromLogContext() 
-#if NETCOREAPP2_0
+                .Enrich.FromLogContext()
                 .WriteTo.File(fileName, fileSizeLimitBytes: 1_000_000, rollOnFileSizeLimit: true, shared: true, flushToDiskInterval: TimeSpan.FromSeconds(1))
-#else
-                .WriteTo.RollingFile(fileName)
-#endif 
                 .WriteTo.Seq("http://localhost:5341/");
         }
+#else
+        public static LoggerConfiguration CreateConfiguration(string fileName)
+            {
+                return new LoggerConfiguration()
+                .ReadFrom.AppSettings()
+                .Enrich.FromLogContext()
+                .WriteTo.RollingFile(fileName)
+                .WriteTo.Seq("http://localhost:5341/");
+            }
+#endif
 
         public static void Create(this LoggerConfiguration config)
         {
@@ -67,7 +66,7 @@ namespace SAEON.Logs
             if (parameters != null)
             {
                 bool isFirst = true;
-                foreach (var kvPair in parameters)
+                foreach (var kvPair in parameters) 
                 {
                     if (!isFirst) result += ", ";
                     isFirst = false;

@@ -15,8 +15,8 @@ namespace SAEON.AspNet.Core
     public class SecurityHeadersAttribute : ActionFilterAttribute
     {
         public override void OnResultExecuting(ResultExecutingContext context) 
-        {
-            using (Logging.MethodCall(this.GetType()))
+        { 
+            using (Logging.MethodCall(this.GetType()))  
             {
                 string policy = null;
 #if NETCOREAPP2_0

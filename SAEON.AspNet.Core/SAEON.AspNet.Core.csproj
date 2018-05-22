@@ -10,7 +10,7 @@
     <Description>Asp.Net Core utilities for SAEON</Description>
     <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.9</Version>
+    <Version>1.0.10</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -18,15 +18,15 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="SAEON.Logs" Version="1.0.16" />
+    <PackageReference Include="SAEON.Logs" Version="1.0.17" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.4" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <!--<Reference Include="System.Linq" />-->
     <Reference Include="System.Web" />
-    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.4" />
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.6" />
     <PackageReference Include="System.Net.Http" Version="4.3.3" />
   </ItemGroup>
 

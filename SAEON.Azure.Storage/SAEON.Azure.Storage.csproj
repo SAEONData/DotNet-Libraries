@@ -9,11 +9,10 @@
     <Copyright>© 2018 South African Environmental Observation Network (SAEON)</Copyright>
     <Description>SAEON Azure Storage library</Description>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SAEON.Logs" Version="1.0.15" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.1.1" />
   </ItemGroup>

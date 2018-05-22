@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFrameworks>net452;net461</TargetFrameworks>
@@ -9,14 +9,14 @@
         <Description>Asp.Net WebApi for SAEON in .Net Standard</Description>
         <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.10</Version>
+        <Version>1.0.11</Version>
         <PackageTags />
         <PackageReleaseNotes />
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.4" />
-        <PackageReference Include="SAEON.Logs" Version="1.0.15" />
+        <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.6" />
+        <PackageReference Include="SAEON.Logs" Version="1.0.17" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

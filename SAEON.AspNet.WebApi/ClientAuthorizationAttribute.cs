@@ -15,7 +15,7 @@ namespace SAEON.AspNet.WebApi
 
         public ClientAuthorizationAttribute() : base() { }
          
-        public ClientAuthorizationAttribute(string client) : this() 
+        public ClientAuthorizationAttribute(string client) : this()  
         {
             if (!Clients.Any(i => i == client)) Clients.Add(client);
         }

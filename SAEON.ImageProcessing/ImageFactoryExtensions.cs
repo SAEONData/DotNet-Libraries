@@ -18,8 +18,8 @@ namespace SAEON.ImageProcessing
             if (factory.ShouldProcess)
             {
                 OverlayLayer overlayLayer = new OverlayLayer(fileName, position, size);
-                return factory.Overlay(overlayLayer);
-            }
+                return factory.Overlay(overlayLayer); 
+            } 
             return factory;
         }
 

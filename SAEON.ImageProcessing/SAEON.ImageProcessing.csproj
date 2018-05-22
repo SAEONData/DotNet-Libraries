@@ -9,7 +9,7 @@
         <Description>Image processing utilities for SAEON .Net Standard</Description>
         <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.1</Version>
+        <Version>1.0.2</Version>
     </PropertyGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -17,7 +17,7 @@
     </Target>
 
     <ItemGroup>
-      <PackageReference Include="ImageProcessor" Version="2.6.0" />
+      <PackageReference Include="ImageProcessor" Version="2.6.1.19" />
       <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="1.0.8" />
       <PackageReference Include="Microsoft.CSharp" Version="4.4.1" />
       <PackageReference Include="Microsoft.WindowsAPICodePack-Shell" Version="1.1.0" />

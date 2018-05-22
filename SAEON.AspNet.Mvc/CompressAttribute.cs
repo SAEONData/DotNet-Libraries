@@ -14,7 +14,7 @@ namespace SAEON.AspNet.Mvc
              
             if (string.IsNullOrEmpty(acceptEncoding)) return;
 
-            acceptEncoding = acceptEncoding.ToUpperInvariant();
+            acceptEncoding = acceptEncoding.ToUpperInvariant(); 
 
             HttpResponseBase response = filterContext.HttpContext.Response;
 
