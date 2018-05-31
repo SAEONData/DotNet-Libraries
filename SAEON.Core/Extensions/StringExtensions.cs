@@ -16,7 +16,7 @@ namespace SAEON.Core
             return
                 quote + source.Replace(Convert.ToString(quote), Convert.ToString(quote) + Convert.ToString(quote)) + quote;
         }
-
+         
         public static string Replace(this string source, Dictionary<string, string> dictionary)
         {
             string result = source;

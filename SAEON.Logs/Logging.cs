@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1 || NETCOREAPP2_0
+﻿#if NETSTANDARD2_0 || NETCOREAPP2_0
 using Microsoft.Extensions.Configuration;
 #endif
 using Serilog;
@@ -15,8 +15,8 @@ namespace SAEON.Logs
     {
         public static bool UseFullName { get; set; } = true;
 
-#if NETSTANDARD1_6 || NETSTANDARD2_0 || NETCOREAPP1_1 || NETCOREAPP2_0
-        public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config)
+#if NETSTANDARD2_0 || NETCOREAPP2_0
+        public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config) 
         {
             return new LoggerConfiguration()
                 .ReadFrom.Configuration(config)

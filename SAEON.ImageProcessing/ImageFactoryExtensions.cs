@@ -16,7 +16,7 @@ namespace SAEON.ImageProcessing
         public static ImageFactory Overlay(this ImageFactory factory, string fileName, Point position, Size size)
         {
             if (factory.ShouldProcess)
-            {
+            { 
                 OverlayLayer overlayLayer = new OverlayLayer(fileName, position, size);
                 return factory.Overlay(overlayLayer); 
             } 
@@ -46,8 +46,7 @@ namespace SAEON.ImageProcessing
         public static ImageFactory GetExifString(this ImageFactory imageFactory, ExifPropertyTag propertyTag, out string value)
         {
             value = null;
-            PropertyItem propertyItem = null;
-            if (imageFactory.ExifPropertyItems.TryGetValue((int)propertyTag, out propertyItem) &&
+            if (imageFactory.ExifPropertyItems.TryGetValue((int)propertyTag, out PropertyItem propertyItem) &&
                 (propertyItem != null) &&
                 (propertyItem.Type == (int)ExifPropertyTagType.ASCII))
                 value = Encoding.UTF8.GetString(propertyItem.Value).Replace("\0", "");
@@ -57,10 +56,8 @@ namespace SAEON.ImageProcessing
         public static ImageFactory GetExifLatLong(this ImageFactory imageFactory, ExifPropertyTag propertyTagRef, ExifPropertyTag propertyTag, out decimal? value)
         {
             value = null;
-            string latLongRef = null;
-            imageFactory.GetExifString(propertyTagRef, out latLongRef);
-            PropertyItem propertyItem = null;
-            if (imageFactory.ExifPropertyItems.TryGetValue((int)propertyTag, out propertyItem) &&
+            imageFactory.GetExifString(propertyTagRef, out string latLongRef);
+            if (imageFactory.ExifPropertyItems.TryGetValue((int)propertyTag, out PropertyItem propertyItem) &&
                 (propertyItem != null) &&
                 (propertyItem.Type == (int)ExifPropertyTagType.Rational))
             {
@@ -102,9 +99,8 @@ namespace SAEON.ImageProcessing
 
         public static ImageFactory SetExifString(this ImageFactory imageFactory, ExifPropertyTag tag, string value)
         {
-            PropertyItem propertyItem = null;
             value += "\0";
-            if (imageFactory.ExifPropertyItems.TryGetValue((int)tag, out propertyItem) && (propertyItem != null))
+            if (imageFactory.ExifPropertyItems.TryGetValue((int)tag, out PropertyItem propertyItem) && (propertyItem != null))
             {
                 if (propertyItem.Type != (int)ExifPropertyTagType.ASCII) propertyItem.Type = (int)ExifPropertyTagType.ASCII;
                 propertyItem.Value = Encoding.UTF8.GetBytes(value);
@@ -126,8 +122,7 @@ namespace SAEON.ImageProcessing
 
         public static ImageFactory AddTags(this ImageFactory imageFactory, string fileName, List<string> newTags)
         {
-            List<string> tags;
-            imageFactory.GetTags(fileName, out tags);
+            imageFactory.GetTags(fileName, out List<string> tags);
             if (tags == null)
                 imageFactory.SetTags(fileName, newTags);
             else
