@@ -14,7 +14,7 @@ namespace SAEON.Core
         {
             MessageBox.Show(string.Format(message, values), "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-
+         
         public static void ExceptionBox(Exception ex, string message = "", params object[] values)
         {
             MessageBox.Show("Exception:" + Environment.NewLine + String.Format(message, values) + Environment.NewLine + ex.Message.Trim(),

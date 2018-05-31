@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;netstandard2.0;net452;net461;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net452;net461;netcoreapp2.0;netstandard2.0;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
@@ -10,7 +10,7 @@
     <Description>Logging for SAEON in .Net Standard</Description>
     <Copyright>Copyright © 2017 South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.17</Version>
+    <Version>1.0.18</Version>
     <PackageTags />
     <PackageReleaseNotes />
   </PropertyGroup>
@@ -18,21 +18,6 @@
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.7.1" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="4.0.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
-    <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="2.6.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.6'">
-    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="2.6.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="2.6.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
@@ -45,6 +30,16 @@
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
     <PackageReference Include="System.Net.Http" Version="4.3.3" />
     <PackageReference Include="Serilog.Settings.AppSettings" Version="2.1.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
+    <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="2.6.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="2.6.1" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

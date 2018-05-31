@@ -14,7 +14,7 @@ namespace SAEON.Azure.Storage
     public class AzureStorage
     {
         CloudStorageAccount storageAccount = null; 
-        CloudBlobClient blobClient = null;
+        CloudBlobClient blobClient = null; 
         CloudQueueClient queueClient = null;
         CloudTableClient tableClient = null;
 
