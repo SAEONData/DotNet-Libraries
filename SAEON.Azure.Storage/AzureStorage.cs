@@ -129,40 +129,45 @@ namespace SAEON.Azure.Storage
         #endregion
 
         #region TableEntities
-        public async Task<T> DeleteEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
-        {
-            return await table.DeleteEntityAsync(entity);
-        }
+        //public async Task<T> DeleteEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
+        //{
+        //    return await table.DeleteEntityAsync(entity); 
+        //}
 
-        public async Task<T> GetEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
-        {
-            return await table.GetEntityAsync(entity);
-        }
+        //public async Task<T> GetEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
+        //{
+        //    return await table.GetEntityAsync(entity);
+        //}
 
-        public async Task<T> InsertEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
-        {
-            return await table.InsertEntityAsync(entity);
-        }
+        //public async Task<T> GetEntityAsync<T>(CloudTable table, string partitionKey, string rowKey) where T : TableEntity
+        //{
+        //    return await table.GetEntityAsync<T>(partitionKey, rowKey);
+        //}
 
-        public async Task<T> InsertOrMergeEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
-        {
-            return await table.InsertOrMergeEntityAsync(entity);
-        }
+        //public async Task<T> InsertEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
+        //{
+        //    return await table.InsertEntityAsync(entity);
+        //}
 
-        public async Task<T> InsertOrReplaceEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
-        {
-            return await table.InsertOrReplaceEntityAsync(entity);
-        }
+        //public async Task<T> InsertOrMergeEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
+        //{
+        //    return await table.InsertOrMergeEntityAsync(entity);
+        //}
 
-        public async Task<T> MergeEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
-        {
-            return await table.MergeEntityAsync(entity);
-        }
+        //public async Task<T> InsertOrReplaceEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
+        //{
+        //    return await table.InsertOrReplaceEntityAsync(entity);
+        //}
 
-        public async Task<T> ReplaceEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
-        {
-            return await table.ReplaceEntityAsync(entity);
-        }
+        //public async Task<T> MergeEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
+        //{
+        //    return await table.MergeEntityAsync(entity);
+        //}
+
+        //public async Task<T> ReplaceEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
+        //{
+        //    return await table.ReplaceEntityAsync(entity);
+        //}
         #endregion
     }
 
@@ -247,6 +252,11 @@ namespace SAEON.Azure.Storage
             return (T)(await table.ExecuteAsync(TableOperation.Retrieve<T>(entity.PartitionKey, entity.RowKey))).Result;
         }
 
+        public static async Task<T> GetEntityAsync<T>(this CloudTable table, string partitionKey, string rowKey) where T : TableEntity
+        {
+            return (T)(await table.ExecuteAsync(TableOperation.Retrieve<T>(partitionKey, rowKey))).Result;
+        }
+
         public static async Task<T> InsertEntityAsync<T>(this CloudTable table, T entity) where T : TableEntity
         {
             if (entity == null) throw new NullReferenceException("InsertEntity: Null entity");
@@ -257,13 +267,13 @@ namespace SAEON.Azure.Storage
         {
             if (entity == null) throw new NullReferenceException("InsertOrMergeEntity: Null entity");
             return (T)(await table.ExecuteAsync(TableOperation.InsertOrMerge(entity))).Result;
-        }
+        } 
 
         public static async Task<T> InsertOrReplaceEntityAsync<T>(this CloudTable table, T entity) where T : TableEntity
         {
             if (entity == null) throw new NullReferenceException("InsertOrReplaceEntity: Null entity");
             return (T)(await table.ExecuteAsync(TableOperation.InsertOrReplace(entity))).Result;
-        }
+        } 
 
         public static async Task<T> MergeEntityAsync<T>(this CloudTable table, T entity) where T : TableEntity
         {
