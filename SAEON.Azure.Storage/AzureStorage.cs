@@ -33,7 +33,7 @@ namespace SAEON.Azure.Storage
                 tableClient = storageAccount.CreateCloudTableClient();
             }
         }
-
+         
         #region Containers
         public async Task<bool> DeleteContainerAsync(string name)
         {
@@ -97,10 +97,10 @@ namespace SAEON.Azure.Storage
         {
             CloudQueue queue = GetQueue(name);
             await queue.CreateIfNotExistsAsync();
-            return queue;
-        }
+            return queue; 
+        } 
 
-        public CloudQueue GetQueue(string name)
+        public CloudQueue GetQueue(string name) 
         {
             CloudQueue queue = queueClient.GetQueueReference(name.ToLower());
             return queue;
@@ -111,7 +111,7 @@ namespace SAEON.Azure.Storage
         public async Task DeleteTableAsync(string name)
         {
             CloudTable table = GetTable(name);
-            await table.DeleteIfExistsAsync();
+            await table.DeleteIfExistsAsync(); 
         }
 
         public async Task<CloudTable> EnsureTableAsync(string name)
