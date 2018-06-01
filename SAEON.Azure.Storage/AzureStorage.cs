@@ -118,11 +118,11 @@ namespace SAEON.Azure.Storage
         {
             CloudTable table = GetTable(name);
             await table.CreateIfNotExistsAsync();
-            return table;
+            return table;  
         }
 
         public CloudTable GetTable(string name)
-        {
+        { 
             CloudTable table = tableClient.GetTableReference(name);
             return table;
         }
