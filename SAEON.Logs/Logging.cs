@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD2_0 || NETCOREAPP2_0
+﻿#if NETSTANDARD2_0 || NETCOREAPP2_0 || NETCOREAPP2_1
 using Microsoft.Extensions.Configuration;
 #endif
 using Serilog;
@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace SAEON.Logs
+namespace SAEON.Logs 
 {
     public class ParameterList : Dictionary<string, object> { }
 
@@ -15,13 +15,13 @@ namespace SAEON.Logs
     {
         public static bool UseFullName { get; set; } = true;
 
-#if NETSTANDARD2_0 || NETCOREAPP2_0
+#if NETSTANDARD2_0 || NETCOREAPP2_0 || NETCOREAPP2_1
         public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config) 
         {
             return new LoggerConfiguration()
                 .ReadFrom.Configuration(config)
                 .Enrich.FromLogContext()
-                .WriteTo.File(fileName, fileSizeLimitBytes: 1_000_000, rollOnFileSizeLimit: true, shared: true, flushToDiskInterval: TimeSpan.FromSeconds(1))
+                .WriteTo.File(fileName, rollOnFileSizeLimit: true, shared: true, flushToDiskInterval: TimeSpan.FromSeconds(1), rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
                 .WriteTo.Seq("http://localhost:5341/");
         }
 #else
@@ -123,7 +123,7 @@ namespace SAEON.Logs
             return result;
         }
 
-        public static void Warning(string message, params object[] values)
+        public static void Warning(string message, params object[] values) 
         {
             Log.Warning(message, values);
         }

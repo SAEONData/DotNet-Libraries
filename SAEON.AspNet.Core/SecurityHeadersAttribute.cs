@@ -4,18 +4,18 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 #else
-using System.Configuration;
-using System.Linq;  
+using System.Configuration; 
+using System.Linq;    
 using System.Web.Mvc;
 #endif
 using SAEON.Logs;
  
 namespace SAEON.AspNet.Core  
 {
-    public class SecurityHeadersAttribute : ActionFilterAttribute
+    public class SecurityHeadersAttribute : ActionFilterAttribute  
     {
-        public override void OnResultExecuting(ResultExecutingContext context) 
-        { 
+        public override void OnResultExecuting(ResultExecutingContext context)   
+        {  
             using (Logging.MethodCall(this.GetType()))  
             {
                 string policy = null;
