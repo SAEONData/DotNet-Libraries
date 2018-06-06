@@ -6,10 +6,10 @@
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
     <Product>SAEON .Net Libraries</Product>
-    <Copyright>© 2018 South African Environmental Observation Network (SAEON)</Copyright>
+    <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
     <Description>SAEON Azure Storage library</Description>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.9</Version>
+    <Version>1.0.10</Version>
   </PropertyGroup>
 
   <ItemGroup>
