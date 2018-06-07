@@ -6,7 +6,7 @@
         <Authors>Tim Parker-Nance</Authors>
         <Company>South African Environmental Observation Network (SAEON)</Company>
         <Product>SAEON .Net Libraries</Product>
-        <Description>Image processing utilities for SAEON .Net Standard</Description>
+        <Description>Image processing utilities for SAEON in .Net</Description>
         <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Version>1.0.3</Version>
