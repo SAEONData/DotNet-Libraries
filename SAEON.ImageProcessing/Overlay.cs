@@ -16,7 +16,7 @@ namespace SAEON.ImageProcessing
         /// </summary>
         public dynamic DynamicParameter { get; set; }
 
-        /// <summary>
+        /// <summary> 
         /// Gets or sets any additional settings required by the processor.
         /// </summary>
         public Dictionary<string, string> Settings { get; set; }
