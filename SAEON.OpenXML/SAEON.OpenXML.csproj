@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.8.1" />
-    <PackageReference Include="SAEON.Logs" Version="1.0.18" />
+    <PackageReference Include="SAEON.Logs" Version="1.0.22" />
   </ItemGroup>
 
   <ItemGroup>

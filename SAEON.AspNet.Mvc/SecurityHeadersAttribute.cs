@@ -12,7 +12,7 @@ namespace SAEON.AspNet.Mvc
             using (Logging.MethodCall(this.GetType()))
             {
                 string policy = null;
-                policy = ConfigurationManager.AppSettings["ContentSecurityPolicy"];
+                policy = ConfigurationManager.AppSettings["ContentSecurityPolicy"]; 
                 if (!string.IsNullOrWhiteSpace(policy) && (context.Result is ViewResult result))
                 { 
                     Logging.Verbose("ContentSecurityPolicy: {policy}", policy);
