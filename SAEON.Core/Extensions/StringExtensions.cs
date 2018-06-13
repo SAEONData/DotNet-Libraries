@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SAEON.Core
 {
-    public static class StringExtensions
+    public static class StringExtensions 
     {
 
         public static string DoubleQuoted(this string source)
