@@ -10,27 +10,32 @@ namespace SAEON.SensorThings
     public class SensorThingsApiController<TEntity> : ApiController where TEntity : SensorThingEntity
     {
 
-        protected virtual List<TEntity> GetList()
+        protected virtual List<TEntity> GetEntities()
         {
             return new List<TEntity>();
         }
 
-        protected virtual JToken GetAllAsJSON() 
+        protected virtual TEntity GetEntity(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        [HttpGet]
+        [Route]
+        public virtual JToken GetAll()
         {
             using (Logging.MethodCall<TEntity>(GetType()))
             {
                 try
                 {
-                    var entityList = GetList();
-                    Logging.Information("List: {count} {@list}", entityList.Count, entityList);
-                    var resultList = new List<JToken>();
-                    resultList.AddRange(entityList.Select(i => i.AsJSON));
+                    var entityList = GetEntities();
+                    Logging.Verbose("List: {count} {@list}", entityList.Count, entityList);
                     var result = new JObject
                     {
                         new JProperty("@iot.count", entityList.Count),
-                        new JProperty("value", resultList)
+                        new JProperty("value", entityList.Select(i => i.AsJSON))
                     };
-                    return result; 
+                    return result;
                 }
                 catch (Exception ex)
                 {
@@ -40,6 +45,23 @@ namespace SAEON.SensorThings
             }
         }
 
+        [HttpGet]
+        [Route("{id:int}")]
+        public virtual JToken GetById([FromUri]int id)
+        {
+            using (Logging.MethodCall<TEntity>(GetType()))
+            {
+                try
+                {
+                    return GetEntity(id).AsJSON;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
     }
 }
 

@@ -123,7 +123,7 @@ namespace SAEON.SensorThings
         public override JObject AsJSON
         {
             get
-            {
+            { 
                 var result = base.AsJSON;
                 result.Add(new JProperty("name", Name));
                 result.Add(new JProperty("description", Description));
@@ -189,11 +189,11 @@ namespace SAEON.SensorThings
             {
                 var result = base.AsJSON;
                 result.Add(new JProperty("encodingType", ValueCodes.GeoJson));
-                var jLocation = new JObject(
-                    new JProperty("type", "Feature"), 
+                result.Add(new JProperty("location", new JObject(
+                    new JProperty("type", "Feature"),
                     new JProperty("geometry", new JObject(
                         new JProperty("type", "Point"),
-                        new JProperty("coordinates", CoordinatesAsJSON))));
+                        new JProperty("coordinates", CoordinatesAsJSON))))));
                 return result;
             }
         }
