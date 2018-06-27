@@ -39,21 +39,19 @@ namespace SAEON.SensorThings
         }
     }
 
-    /*
+    public class UnitOfMeasurement
+    {
+        public string Name { get; set; }
+        public string Symbol { get; set; }
+        public string Definition { get; set; }
+    }
+
     public class BoundingBox
     {
-        [Required]
         public decimal Left { get; set; }
-        [Required]
         public decimal Bottom { get; set; }
-        [Required]
         public decimal Right { get; set; }
-        [Required]
         public decimal Top { get; set; }
-
-        //public override string ToString()
-        //{
-        //}
     }
 
     public class TimeInterval
@@ -85,14 +83,14 @@ namespace SAEON.SensorThings
             return result;
         }
     }
-    */
 
     public abstract class SensorThingEntity
     {
-        public Uri Uri { get; set; }
+        public string BaseUrl { get; set; }
+        public string EntitySetName { get; protected set; }
 
         public int Id { get; set; }
-        public string SelfLink => $"{Uri.GetLeftPart(UriPartial.Path)}/({Id})";
+        public string SelfLink => $"{BaseUrl}/{EntitySetName}({Id})";
         public List<string> NavigationLinks { get; private set; } = new List<string>();
 
         public virtual JObject AsJSON
@@ -106,11 +104,13 @@ namespace SAEON.SensorThings
                 };
                 foreach (var link in NavigationLinks)
                 {
-                    result.Add($"{link}@iot.navigationLink", $"{Uri.AbsolutePath}({Id})/{link}");
+                    result.Add($"{link}@iot.navigationLink", $"{BaseUrl}/{EntitySetName}({Id})/{link}");
                 }
                 return result;
             }
         }
+
+        public object Call { get; private set; }
     }
 
     public abstract class NamedSensorThingEntity : SensorThingEntity
@@ -123,7 +123,7 @@ namespace SAEON.SensorThings
         public override JObject AsJSON
         {
             get
-            { 
+            {
                 var result = base.AsJSON;
                 result.Add(new JProperty("name", Name));
                 result.Add(new JProperty("description", Description));
@@ -135,9 +135,12 @@ namespace SAEON.SensorThings
     public class Thing : NamedSensorThingEntity
     {
         public Dictionary<string, object> Properties { get; private set; } = new Dictionary<string, object>();
+        public Location Location { get; set; } = null;
+        public List<HistoricalLocation> HistoricalLocations { get; } = new List<HistoricalLocation>();
 
         public Thing() : base()
         {
+            EntitySetName = "Things";
             NavigationLinks.Add("Locations");
             NavigationLinks.Add("HistoricalLocations");
             NavigationLinks.Add("Datastreams");
@@ -167,9 +170,12 @@ namespace SAEON.SensorThings
         public double Longitude { get; set; }
         public double Latitude { get; set; }
         public double? Elevation { get; set; } = null;
+        public List<Thing> Things { get; } = new List<Thing>();
+        public List<HistoricalLocation> HistoricalLocations { get; } = new List<HistoricalLocation>();
 
         public Location() : base()
         {
+            EntitySetName = "Locations";
             NavigationLinks.Add("Things");
             NavigationLinks.Add("HistoricalLocations");
         }
@@ -183,6 +189,7 @@ namespace SAEON.SensorThings
                 return result;
             }
         }
+
         public override JObject AsJSON
         {
             get
@@ -199,4 +206,92 @@ namespace SAEON.SensorThings
         }
     }
 
+    public class HistoricalLocation : SensorThingEntity
+    {
+        public DateTime Time { get; set; }
+        public List<Location> Locations { get; } = new List<Location>();
+        public Thing Thing { get; set; } = null;
+
+        public HistoricalLocation() : base()
+        {
+            EntitySetName = "HistoricalLocations"; 
+            NavigationLinks.Add("Locations");
+            NavigationLinks.Add("Thing");
+        }
+         
+        private void SetId() 
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hash = 17;
+                if (Thing != null)
+                {
+                    hash = hash * 23 + Thing.Id;
+                } 
+                if (Locations.Any()) 
+                {
+                    hash = hash * 23 + Locations[0].Id;
+                }
+                Id = hash;
+            }
+        }
+
+        public override JObject AsJSON
+        {
+            get
+            {
+                SetId();
+                var result = base.AsJSON;
+                result.Add(new JProperty("time",Time.ToString("o")));
+                return result;
+            }
+        }
+    }
+
+    public class Datastream : NamedSensorThingEntity
+    {
+        public UnitOfMeasurement UnitOfMeasurement { get; } = new UnitOfMeasurement();
+        public string ObservationType { get; } = ValueCodes.OM_Measurement;
+        public BoundingBox ObservedArea { get; } = null;
+        public TimeInterval PhenomenonTime { get; } = new TimeInterval();
+        public TimeInterval ResultTime { get; } = new TimeInterval();
+        public Thing Thing { get; set; } = null;
+        //public Sensor Sensor { get; set; } = null;
+        //public ObservedProperty ObservedProperty { get; set; } = null;
+        //public List<Observation> Observations { get; } = new List<Observation>();
+        
+        public Datastream() : base()
+        {
+            EntitySetName = "Datastreams";
+            NavigationLinks.Add("Thing");
+            NavigationLinks.Add("Sensor");
+            NavigationLinks.Add("ObservedProperty");
+            NavigationLinks.Add("Observations");
+        }
+
+        public override JObject AsJSON
+        {
+            get
+            {
+                var result = base.AsJSON;
+                if (UnitOfMeasurement != null)
+                {
+                    result.Add(new JProperty("unitOfMeasurement", new JObject(
+                        new JProperty("name",UnitOfMeasurement.Name),
+                        new JProperty("symbol",UnitOfMeasurement.Symbol),
+                        new JProperty("definition",UnitOfMeasurement.Definition))));
+                }
+                result.Add(new JProperty("observationType", ObservationType));
+                if (ObservedArea != null)
+                {
+                    result.Add(new JProperty("observedArea", new JObject(
+                        new JProperty("type", "Polygon"),
+                        new JProperty("coordinates", ObservedArea))));
+                }
+                result.Add(new JProperty("phenomenonTime", PhenomenonTime));
+                result.Add(new JProperty("resultTime", ResultTime));
+                return result;
+            }
+        }
+    }
 }

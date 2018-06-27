@@ -17,23 +17,21 @@ namespace SAEON.SensorThings
 
         protected virtual TEntity GetEntity(int id)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
-        [HttpGet]
-        [Route]
-        public virtual JToken GetAll()
+        protected JToken GetMany<TRelatedEntity>(int id, Func<int, List<TRelatedEntity>> getRelatedEntities) where TRelatedEntity : SensorThingEntity
         {
-            using (Logging.MethodCall<TEntity>(GetType()))
+            using (Logging.MethodCall<TEntity, TRelatedEntity>(GetType()))
             {
                 try
                 {
-                    var entityList = GetEntities();
-                    Logging.Verbose("List: {count} {@list}", entityList.Count, entityList);
+                    var entities = getRelatedEntities(id);
+                    Logging.Verbose("List: {count} {@list}", entities.Count, entities);
                     var result = new JObject
                     {
-                        new JProperty("@iot.count", entityList.Count),
-                        new JProperty("value", entityList.Select(i => i.AsJSON))
+                        new JProperty("@iot.count", entities.Count),
+                        new JProperty("value", entities.Select(i => i.AsJSON))
                     };
                     return result;
                 }
@@ -46,14 +44,21 @@ namespace SAEON.SensorThings
         }
 
         [HttpGet]
-        [Route("{id:int}")]
-        public virtual JToken GetById([FromUri]int id)
+        [Route]
+        public virtual JToken GetAll()
         {
             using (Logging.MethodCall<TEntity>(GetType()))
             {
                 try
                 {
-                    return GetEntity(id).AsJSON;
+                    var entities = GetEntities();
+                    Logging.Verbose("List: {count} {@list}", entities.Count, entities);
+                    var result = new JObject
+                    {
+                        new JProperty("@iot.count", entities.Count),
+                        new JProperty("value", entities.Select(i => i.AsJSON))
+                    };
+                    return result;
                 }
                 catch (Exception ex)
                 {
@@ -62,6 +67,47 @@ namespace SAEON.SensorThings
                 }
             }
         }
+
+        [HttpGet]
+        //[Route("({id:int})")]
+        public virtual JToken GetById([FromUri]int id)
+        {
+            using (Logging.MethodCall<TEntity>(GetType()))
+            {
+                try
+                {
+                    var entity = GetEntity(id);
+                    if (entity == null)
+                        return null;
+                    else
+                        return entity.AsJSON;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+         
+
+        //[HttpGet]
+        ////[Route("({id:int})/Related")]
+        //public virtual JToken GetSingle<TRelatedEntity>([FromUri]int id) where TRelatedEntity : SensorThingEntity
+        //{
+        //    using (Logging.MethodCall<TEntity>(GetType()))
+        //    {
+        //        try
+        //        {
+        //            return GetRelatedEntity<TRelatedEntity>(id)?.AsJSON;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Logging.Exception(ex);
+        //            throw;
+        //        }
+        //    }
+        //}
     }
 }
 
