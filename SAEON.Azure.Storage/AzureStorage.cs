@@ -15,7 +15,7 @@ namespace SAEON.Azure.Storage
     {
         CloudStorageAccount storageAccount = null; 
         CloudBlobClient blobClient = null; 
-        CloudQueueClient queueClient = null;
+        CloudQueueClient queueClient = null; 
         CloudTableClient tableClient = null;
 
         public AzureStorage() : this("AzureStorage") { }

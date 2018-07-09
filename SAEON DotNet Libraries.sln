@@ -49,7 +49,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.OpenXML", "SAEON.Open
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.Azure.Storage", "SAEON.Azure.Storage\SAEON.Azure.Storage.csproj", "{5BAE9A07-0C0D-4F1E-BA27-17EC77A85535}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAEON.SensorThings", "SAEON.SensorThings\SAEON.SensorThings.csproj", "{057AF8C9-D835-4291-B9FD-67DDFAF0C86B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.SensorThings", "SAEON.SensorThings\SAEON.SensorThings.csproj", "{057AF8C9-D835-4291-B9FD-67DDFAF0C86B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
