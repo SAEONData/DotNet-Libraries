@@ -79,8 +79,10 @@ namespace SAEON.SensorThings
                                 new JArray(new JValue(Right), new JValue(Bottom)),
                                 new JArray(new JValue(Left), new JValue(Bottom)),
                                 new JArray(new JValue(Left), new JValue(Top)));
-                var exterior = new JArray();
-                exterior.Add(polygon);
+                var exterior = new JArray
+                {
+                    polygon
+                };
                 return new JObject(
                     new JProperty("type", "Polygon"),
                     new JProperty("coordinates", exterior)); 
@@ -133,7 +135,7 @@ namespace SAEON.SensorThings
         public DateTime Start { get; set; }
         public DateTime? End { get; set; }
 
-        public JValue AsJSON
+        public JValue AsJSON 
         {
             get
             {
@@ -405,6 +407,9 @@ namespace SAEON.SensorThings
         public string Quality { get; set; }
         public TimeInterval ValidTime { get; set; } = null;
         public Dictionary<string, object> Parameters { get; } = new Dictionary<string, object>();
+        public Datastream Datastream { get; set; } = null;
+        public FeatureOfInterest FeatureOfInterest { get; set; } = null;
+
 
         public Observation() : base()
         {
@@ -445,7 +450,7 @@ namespace SAEON.SensorThings
     {
         public Coordinate Coordinate { get; set; } = null;
         public double Longitude { get; set; }
-        public double Latitude { get; set; }
+        public double Latitude { get; set; } 
         public double? Elevation { get; set; } = null;
         public List<Observation> Observations { get; } = new List<Observation>();
 
