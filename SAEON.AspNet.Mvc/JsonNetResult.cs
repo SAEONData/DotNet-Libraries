@@ -9,7 +9,7 @@ namespace SAEON.AspNet.Mvc
     public class JsonNetResult : ActionResult
     {
         public Encoding ContentEncoding { get; set; }
-        public string ContentType { get; set; }
+        public string ContentType { get; set; } 
         public object Data { get; set; }
          
         public JsonSerializerSettings SerializerSettings { get; set; } 
