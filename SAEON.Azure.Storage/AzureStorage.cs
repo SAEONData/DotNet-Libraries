@@ -18,13 +18,17 @@ namespace SAEON.Azure.Storage
         CloudQueueClient queueClient = null; 
         CloudTableClient tableClient = null;
 
-        public AzureStorage() : this("AzureStorage") { }
+        public AzureStorage() : this("AzureStorage") { }  
 
         public AzureStorage(string connectionStringName)
         {
             //using (Logging.MethodCall(GetType(), new ParameterList { { nameof(connectionStringName), connectionStringName } }))
             {
-                var connectionString = ConfigurationManager.AppSettings[connectionStringName];
+                var connectionString = ConfigurationManager.ConnectionStrings[connectionStringName]?.ConnectionString;
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    connectionString = ConfigurationManager.AppSettings[connectionStringName];
+                }
                 Console.WriteLine($"ConnectionString: {connectionStringName} {connectionString}");
                 //Logging.Information("ConnectionString: {connectionStringName} {ConnectionString}", connectionStringName, connectionString);
                 storageAccount = CloudStorageAccount.Parse(connectionString);
