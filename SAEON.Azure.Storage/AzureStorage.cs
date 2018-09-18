@@ -13,10 +13,10 @@ namespace SAEON.Azure.Storage
 {
     public class AzureStorage
     {
-        CloudStorageAccount storageAccount = null; 
-        CloudBlobClient blobClient = null; 
-        CloudQueueClient queueClient = null; 
-        CloudTableClient tableClient = null;
+        private CloudStorageAccount storageAccount = null;
+        private CloudBlobClient blobClient = null;
+        private CloudQueueClient queueClient = null;
+        private CloudTableClient tableClient = null;
 
         public AzureStorage() : this("AzureStorage") { }  
 
@@ -37,7 +37,15 @@ namespace SAEON.Azure.Storage
                 tableClient = storageAccount.CreateCloudTableClient();
             }
         }
-         
+
+        ~AzureStorage()
+        {
+            blobClient = null;
+            queueClient = null;
+            tableClient = null;
+            storageAccount = null;
+        }
+
         #region Containers
         public async Task<bool> DeleteContainerAsync(string name)
         {
@@ -172,7 +180,7 @@ namespace SAEON.Azure.Storage
         //{
         //    return await table.ReplaceEntityAsync(entity);
         //}
-        #endregion
+        #endregion 
     }
 
     public static class AzureStorageExtensions
@@ -243,6 +251,7 @@ namespace SAEON.Azure.Storage
                 }
             }
         }
+
         public static async Task<T> DeleteEntityAsync<T>(this CloudTable table, T entity) where T : TableEntity
         {
             if (entity == null) throw new NullReferenceException("DeleteEntity: Null entity");
