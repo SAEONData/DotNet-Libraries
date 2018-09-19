@@ -2,6 +2,7 @@
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
+using SAEON.Logs;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -22,15 +23,14 @@ namespace SAEON.Azure.Storage
 
         public AzureStorage(string connectionStringName)
         {
-            //using (Logging.MethodCall(GetType(), new ParameterList { { nameof(connectionStringName), connectionStringName } }))
+            using (Logging.MethodCall(GetType(), new ParameterList { { nameof(connectionStringName), connectionStringName } }))
             {
                 var connectionString = ConfigurationManager.ConnectionStrings[connectionStringName]?.ConnectionString;
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     connectionString = ConfigurationManager.AppSettings[connectionStringName];
                 }
-                Console.WriteLine($"ConnectionString: {connectionStringName} {connectionString}");
-                //Logging.Information("ConnectionString: {connectionStringName} {ConnectionString}", connectionStringName, connectionString);
+                Logging.Information("ConnectionString: {connectionStringName} {ConnectionString}", connectionStringName, connectionString);
                 storageAccount = CloudStorageAccount.Parse(connectionString);
                 blobClient = storageAccount.CreateCloudBlobClient();
                 queueClient = storageAccount.CreateCloudQueueClient();

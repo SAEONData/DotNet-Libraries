@@ -2,9 +2,11 @@
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Azure.Documents.Linq;
 using Newtonsoft.Json;
+using SAEON.Core.Extensions;
 using SAEON.Logs;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Linq;
 using System.Linq.Expressions;
@@ -19,14 +21,34 @@ namespace SAEON.Azure.CosmosDB
         public string Id { get; set; }
     }
 
-    public class AzureCosmosDB
+    public class EpochDate
     {
-        private DocumentClient documentClient = null;
+        public DateTime Date { get; set; } = DateTime.MinValue;
+        public int Epoch
+        {
+            get
+            {
+                return ((Date == null) || (Date == DateTime.MinValue)) ? int.MinValue : Date.ToEpoch();
+            }
+        }
+
+        public EpochDate() { }
+        public EpochDate(DateTime date)
+        {
+            Date = date;
+        }
+    }
+
+    public class AzureCosmosDB<T> where T : AzureDocument
+    {
+        private DocumentClient client = null;
+        private Database database = null;
+        private DocumentCollection collection = null;
 
         private string DatabaseId { get; set; }
         private string CollectionId { get; set; }
         private string PartitionKey { get; set; }
-        private int Throughput { get; set; } = 400; 
+        private int Throughput { get; set; } = 400;
 
         public AzureCosmosDB(string databaseId, string collectionId, string partitionKey)
         {
@@ -34,20 +56,30 @@ namespace SAEON.Azure.CosmosDB
             {
                 try
                 {
-                    var cosmosDBURL = ConfigurationManager.AppSettings["CosmosDBUrl"];
-                    var primaryKey = ConfigurationManager.AppSettings["CosmosDBPrimaryKey"];
-                    documentClient = new DocumentClient(new Uri(cosmosDBURL), primaryKey);
+                    var cosmosDBUrl = ConfigurationManager.AppSettings["AzureCosmosDBUrl"];
+                    if (string.IsNullOrWhiteSpace(cosmosDBUrl))
+                    {
+                        throw new ArgumentNullException("AppSettings.AzureCosmosDBUrl cannot be null");
+                    }
+
+                    var authKey = ConfigurationManager.AppSettings["AzureCosmosDBAuthKey"];
+                    if (string.IsNullOrWhiteSpace(authKey))
+                    {
+                        throw new ArgumentNullException("AppSettings.AzureCosmosDBAuthKey cannot be null");
+                    }
+
+                    client = new DocumentClient(new Uri(cosmosDBUrl), authKey);
                     DatabaseId = databaseId;
                     CollectionId = collectionId;
                     PartitionKey = partitionKey;
-                    Throughput = Convert.ToInt32(ConfigurationManager.AppSettings["CosmosDBThroughput"] ?? "400");
-                    Logging.Information("CosmosDbUrl: {CosmosDbURL} Database: {DatabaseId} Collection: {CollecionId} PartitionKey: {PartitionKey} Throughput: {Throughput}",
-                        cosmosDBURL, DatabaseId, CollectionId, PartitionKey, Throughput);
+                    Throughput = Convert.ToInt32(ConfigurationManager.AppSettings["AzureCosmosDBThroughput"] ?? "400");
+                    Logging.Information("CosmosDbUrl: {CosmosDbUrl} Database: {DatabaseId} Collection: {CollectionId} PartitionKey: {PartitionKey} Throughput: {Throughput}",
+                        cosmosDBUrl, DatabaseId, CollectionId, PartitionKey, Throughput);
                 }
                 catch (Exception ex)
                 {
                     Logging.Exception(ex);
-                    throw; 
+                    throw;
                 }
             }
         }
@@ -56,71 +88,76 @@ namespace SAEON.Azure.CosmosDB
         {
             using (Logging.MethodCall(GetType()))
             {
-                documentClient = null;
+                collection = null;
+                database = null;
+                client = null;
             }
         }
 
         #region Database
         public async Task EnsureDatabaseAsync()
         {
+            if (database != null)
+            {
+                return;
+            }
+
             using (Logging.MethodCall(GetType(), new ParameterList { { "DatabaseId", DatabaseId } }))
             {
                 try
                 {
-                    try
-                    {
-                        await documentClient.ReadDatabaseAsync(UriFactory.CreateDatabaseUri(DatabaseId));
-                    }
-                    catch (DocumentClientException e)
-                    {
-                        if (e.StatusCode == HttpStatusCode.NotFound)
-                        {
-                            await documentClient.CreateDatabaseAsync(new Database { Id = DatabaseId });
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
+                    database = await client.CreateDatabaseIfNotExistsAsync(new Database { Id = DatabaseId });
                 }
                 catch (Exception ex)
                 {
+                    database = null;
                     Logging.Exception(ex);
                     throw;
                 }
             }
         }
-          
+
         #endregion
 
         #region Collection
         public async Task EnsureCollectionAsync()
         {
-            using (Logging.MethodCall(GetType(), new ParameterList { { "DatabaseId", DatabaseId }, { "CollectionId", CollectionId } }))
+            if (collection != null)
+            {
+                return;
+            }
+
+            using (Logging.MethodCall(GetType(), new ParameterList { { "DatabaseId", DatabaseId }, { "CollectionId", CollectionId }, { "PartitionKey", PartitionKey } }))
             {
                 try
                 {
                     await EnsureDatabaseAsync();
-                    try
-                    {
-                        await documentClient.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId));
-                    }
-                    catch (DocumentClientException e)
-                    {  
-                        if (e.StatusCode == HttpStatusCode.NotFound)
+                    var collection = new DocumentCollection { Id = CollectionId };
+                    collection.PartitionKey.Paths.Add(PartitionKey);
+                    collection.IndexingPolicy.IndexingMode = IndexingMode.Lazy;
+                    // Defaults
+                    collection.IndexingPolicy.IncludedPaths.Add(
+                        new IncludedPath 
                         {
-                            var collection = new DocumentCollection { Id = CollectionId };
-                            collection.PartitionKey.Paths.Add(PartitionKey);
-                            await documentClient.CreateDocumentCollectionAsync(UriFactory.CreateDatabaseUri(DatabaseId), collection, new RequestOptions { OfferThroughput = Throughput });
-                        }
-                        else
-                        { 
-                            throw;
-                        }
-                    }
+                            Path = "/*",
+                            Indexes = new Collection<Index> {
+                                new HashIndex(DataType.String) { Precision = 3 },
+                                new RangeIndex(DataType.Number) { Precision = -1 }
+                            }
+                        });
+                    foreach (var prop in typeof(T).GetProperties().Where(i => i.PropertyType == typeof(EpochDate)))
+                    {
+                        collection.IndexingPolicy.IncludedPaths.Add(new IncludedPath
+                        {
+                            Path = $"/{prop.Name}/Epoch/?",
+                            Indexes = new Collection<Index> { { new RangeIndex(DataType.Number, -1) } }
+                        });
+                    };
+                    this.collection = await client.CreateDocumentCollectionIfNotExistsAsync(database.SelfLink, collection);
                 }
                 catch (Exception ex)
                 {
+                    collection = null;
                     Logging.Exception(ex);
                     throw;
                 }
@@ -129,7 +166,7 @@ namespace SAEON.Azure.CosmosDB
         #endregion
 
         #region Items
-        public async Task<T> GetItemAsync<T>(string id) where T: AzureDocument
+        public async Task<T> GetItemAsync(string id)
         {
             using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id } }))
             {
@@ -137,7 +174,8 @@ namespace SAEON.Azure.CosmosDB
                 {
                     try
                     {
-                        Document document = await documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
+                        await EnsureCollectionAsync();
+                        Document document = await client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
                         return (T)(dynamic)document;
                     }
                     catch (DocumentClientException e)
@@ -160,13 +198,14 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<IEnumerable<T>> GetItemsAsync<T>(Expression<Func<T, bool>> predicate) where T : AzureDocument
+        public async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
                 try
                 {
-                    IDocumentQuery<T> query = documentClient.CreateDocumentQuery<T>(
+                    await EnsureCollectionAsync();
+                    IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
                     UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions { MaxItemCount = -1 }).Where(predicate).AsDocumentQuery();
                     List<T> results = new List<T>();
                     while (query.HasMoreResults)
@@ -183,13 +222,14 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<Document> CreateItemAsync<T>(T item) where T : AzureDocument
+        public async Task<Document> CreateItemAsync(T item)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
                 try
                 {
-                    return await documentClient.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item);
+                    await EnsureCollectionAsync();
+                    return await client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item);
                 }
                 catch (Exception ex)
                 {
@@ -199,13 +239,14 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<Document> UpdateItemAsync<T>(string id, T item) where T : AzureDocument
+        public async Task<Document> UpdateItemAsync(string id, T item)
         {
             using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id } }))
             {
                 try
                 {
-                    return await documentClient.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id), item);
+                    await EnsureCollectionAsync();
+                    return await client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id), item);
                 }
                 catch (Exception ex)
                 {
@@ -215,13 +256,14 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task DeleteItemAsync<T>(string id) where T : AzureDocument
+        public async Task DeleteItemAsync(string id)
         {
             using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id } }))
             {
                 try
                 {
-                    await documentClient.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
+                    await EnsureCollectionAsync();
+                    await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
                 }
                 catch (Exception ex)
                 {

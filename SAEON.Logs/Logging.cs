@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP2_0 || NETCOREAPP2_1
+﻿#if NETCOREAPP2_0
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace SAEON.Logs  
+namespace SAEON.Logs
 {
     public class ParameterList : Dictionary<string, object> { }
 
@@ -21,13 +21,14 @@ namespace SAEON.Logs
     {
         public static bool UseFullName { get; set; } = true;
 
-#if NETSTANDARD2_0 || NETCOREAPP2_0 || NETCOREAPP2_1
+#if NETSTANDARD2_0 || NETCOREAPP2_0 
         public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config) 
         {
             return new LoggerConfiguration()
                 .ReadFrom.Configuration(config)
                 .Enrich.FromLogContext()
                 .WriteTo.File(fileName, rollOnFileSizeLimit: true, shared: true, flushToDiskInterval: TimeSpan.FromSeconds(1), rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
+                .WriteTo.Console()
                 .WriteTo.Seq("http://localhost:5341/");
         }
 #else
@@ -37,6 +38,7 @@ namespace SAEON.Logs
                 .ReadFrom.AppSettings()
                 .Enrich.FromLogContext()
                 .WriteTo.RollingFile(fileName)
+                .WriteTo.Console()
                 .WriteTo.Seq("http://localhost:5341/");
             }
 #endif
@@ -44,6 +46,11 @@ namespace SAEON.Logs
         public static void Create(this LoggerConfiguration config)
         {
             Log.Logger = config.CreateLogger();
+        }
+
+        public static void ShutDown()
+        {
+            Log.CloseAndFlush();
         }
 
         public static void Exception(Exception ex, string message = "", params object[] values)
@@ -112,7 +119,7 @@ namespace SAEON.Logs
             Log.Verbose(method);
             return result;
         }
-
+         
         public static IDisposable MethodCall<TEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
             var method = MethodSignature(type, methodName, GetTypeName(typeof(TEntity), true), parameters);
@@ -141,7 +148,7 @@ namespace SAEON.Logs
 
     }
 
-#if NETCOREAPP2_0 || NETCOREAPP2_1
+#if NETCOREAPP2_0 
     public static class SAEONWebHostExtensions 
     {
         public static IWebHostBuilder UseSAEONLogs(this IWebHostBuilder builder, Serilog.ILogger logger = null, bool dispose = false)
