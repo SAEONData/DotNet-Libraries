@@ -21,6 +21,8 @@ namespace SAEON.Azure.CosmosDB
         public string Id { get; set; }
     }
 
+    public class AzureSubDocument { }
+
     public class EpochDate
     {
         public DateTime Date { get; set; } = DateTime.MinValue;
@@ -45,10 +47,11 @@ namespace SAEON.Azure.CosmosDB
         private Database database = null;
         private DocumentCollection collection = null;
 
+        private const int DefaultThroughput = 1000;
         private string DatabaseId { get; set; }
         private string CollectionId { get; set; }
         private string PartitionKey { get; set; }
-        private int Throughput { get; set; } = 400;
+        private int Throughput { get; set; } = DefaultThroughput;
 
         public AzureCosmosDB(string databaseId, string collectionId, string partitionKey)
         {
@@ -72,7 +75,7 @@ namespace SAEON.Azure.CosmosDB
                     DatabaseId = databaseId;
                     CollectionId = collectionId;
                     PartitionKey = partitionKey;
-                    Throughput = Convert.ToInt32(ConfigurationManager.AppSettings["AzureCosmosDBThroughput"] ?? "400");
+                    Throughput = Convert.ToInt32(ConfigurationManager.AppSettings["AzureCosmosDBThroughput"] ?? DefaultThroughput.ToString());
                     Logging.Information("CosmosDbUrl: {CosmosDbUrl} Database: {DatabaseId} Collection: {CollectionId} PartitionKey: {PartitionKey} Throughput: {Throughput}",
                         cosmosDBUrl, DatabaseId, CollectionId, PartitionKey, Throughput);
                 }
@@ -137,13 +140,13 @@ namespace SAEON.Azure.CosmosDB
                     collection.IndexingPolicy.IndexingMode = IndexingMode.Lazy;
                     // Defaults
                     collection.IndexingPolicy.IncludedPaths.Add(
-                        new IncludedPath 
+                        new IncludedPath
                         {
                             Path = "/*",
                             Indexes = new Collection<Index> {
-                                new HashIndex(DataType.String) { Precision = 3 },
+                                new HashIndex(DataType.String) { Precision = 3 }, 
                                 new RangeIndex(DataType.Number) { Precision = -1 }
-                            }
+                            } 
                         });
                     foreach (var prop in typeof(T).GetProperties().Where(i => i.PropertyType == typeof(EpochDate)))
                     {
@@ -152,6 +155,17 @@ namespace SAEON.Azure.CosmosDB
                             Path = $"/{prop.Name}/Epoch/?",
                             Indexes = new Collection<Index> { { new RangeIndex(DataType.Number, -1) } }
                         });
+                    };
+                    foreach (var subProp in typeof(T).GetProperties().Where(i => i.PropertyType == typeof(AzureSubDocument)))
+                    {
+                        foreach (var prop in subProp.GetType().GetProperties().Where(i => i.PropertyType == typeof(EpochDate)))
+                        {
+                            collection.IndexingPolicy.IncludedPaths.Add(new IncludedPath
+                            {
+                                Path = $"/{subProp.Name}/{prop.Name}/Epoch/?",
+                                Indexes = new Collection<Index> { { new RangeIndex(DataType.Number, -1) } }
+                            });
+                        }
                     };
                     this.collection = await client.CreateDocumentCollectionIfNotExistsAsync(database.SelfLink, collection);
                 }
