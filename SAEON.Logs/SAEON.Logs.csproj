@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.0;</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp2.0;netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
@@ -10,14 +10,14 @@
     <Description>Logging for SAEON in .Net</Description>
     <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.29</Version>
+    <Version>1.0.31</Version>
     <PackageTags />
     <PackageReleaseNotes />
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Serilog" Version="2.7.1" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.0.1" />
     <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
     <PackageReference Include="Serilog.Sinks.Seq" Version="4.0.0" />
   </ItemGroup>
@@ -29,7 +29,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0'">
     <PackageReference Include="Serilog.AspNetCore" Version="2.1.1" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.0.1" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
