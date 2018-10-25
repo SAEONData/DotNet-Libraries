@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="SAEON.Core" Version="1.0.9" />
-    <PackageReference Include="SAEON.Logs" Version="1.0.31" />
+    <PackageReference Include="SAEON.Logs" Version="1.0.32" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
   </ItemGroup>
 

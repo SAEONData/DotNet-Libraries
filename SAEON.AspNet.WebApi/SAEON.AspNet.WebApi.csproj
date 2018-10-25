@@ -16,7 +16,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.6" />
-        <PackageReference Include="SAEON.Logs" Version="1.0.31" />
+        <PackageReference Include="SAEON.Logs" Version="1.0.32" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

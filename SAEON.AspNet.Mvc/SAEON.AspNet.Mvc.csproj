@@ -17,7 +17,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.6" />
         <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-        <PackageReference Include="SAEON.Logs" Version="1.0.31" />
+        <PackageReference Include="SAEON.Logs" Version="1.0.32" />
     </ItemGroup>
 
     <ItemGroup>
