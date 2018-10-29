@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net461</TargetFrameworks>
+        <TargetFrameworks>net461;</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Tim Parker-Nance</Authors>
         <Company>South African Environmental Observation Network (SAEON)</Company>
@@ -9,14 +9,14 @@
         <Description>Asp.Net WebApi for SAEON in .Net</Description>
         <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.17</Version>
+        <Version>1.0.21</Version>
         <PackageTags />
         <PackageReleaseNotes />
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.6" />
-        <PackageReference Include="SAEON.Logs" Version="1.0.24" />
+        <PackageReference Include="SAEON.Logs" Version="1.0.32" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

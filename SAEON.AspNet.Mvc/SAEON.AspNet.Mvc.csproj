@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net461</TargetFramework>
+        <TargetFrameworks>net461;</TargetFrameworks>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Authors>Tim Parker-Nance</Authors>
         <Company>South African Environmental Observation Network (SAEON)</Company>
@@ -9,7 +9,7 @@
         <Description>Asp.Net MVC for SAEON in .Net</Description>
         <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.8</Version>
+        <Version>1.0.14</Version>
         <PackageTags />
         <PackageReleaseNotes />
     </PropertyGroup>
@@ -17,7 +17,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.6" />
         <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-        <PackageReference Include="SAEON.Logs" Version="1.0.24" />
+        <PackageReference Include="SAEON.Logs" Version="1.0.32" />
     </ItemGroup>
 
     <ItemGroup>

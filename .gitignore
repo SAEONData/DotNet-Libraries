@@ -306,7 +306,15 @@ $RECYCLE.BIN/
 
 # Application Data
 App_Data/
-connections.config
-connectionstrings.config
-machinekey.config
-connectionstrings.json
+Logs/
+[cC]onnections.config
+[cC]onnection[sS]trings.config
+[cC]onnection[sS]trings.json
+[mM]achine[kK]ey.config
+[sS]mtp.config
+*.[sS]ecrets.json
+*.[sS]ecrets.config
+[sS]ecrets.json
+[sS]ecrets.config
+[sS]ecrets.*.json
+[sS]ecrets.*.config

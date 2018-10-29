@@ -18,9 +18,8 @@ namespace SAEON.ImageProcessing
 
         public override bool Equals(object obj)
         {
-            OverlayLayer overlayLayer = obj as OverlayLayer;
 
-            if (overlayLayer == null) return false;
+            if (!(obj is OverlayLayer overlayLayer)) return false;
 
             // Define the tolerance for variation in their values 
             return FileName.Equals(overlayLayer.FileName, StringComparison.CurrentCultureIgnoreCase) &&

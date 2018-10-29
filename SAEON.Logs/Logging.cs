@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP2_0 || NETCOREAPP2_1
+﻿#if NETCOREAPP2_0
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,11 +9,11 @@ using Microsoft.Extensions.Configuration;
 #endif  
 using Serilog;
 using Serilog.Context;
-using System;  
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace SAEON.Logs  
+namespace SAEON.Logs
 {
     public class ParameterList : Dictionary<string, object> { }
 
@@ -21,29 +21,37 @@ namespace SAEON.Logs
     {
         public static bool UseFullName { get; set; } = true;
 
-#if NETSTANDARD2_0 || NETCOREAPP2_0 || NETCOREAPP2_1
+#if NETSTANDARD2_0 || NETCOREAPP2_0 
         public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config) 
         {
             return new LoggerConfiguration()
                 .ReadFrom.Configuration(config)
                 .Enrich.FromLogContext()
                 .WriteTo.File(fileName, rollOnFileSizeLimit: true, shared: true, flushToDiskInterval: TimeSpan.FromSeconds(1), rollingInterval: RollingInterval.Day, retainedFileCountLimit: null)
+                .WriteTo.Console()
                 .WriteTo.Seq("http://localhost:5341/");
         }
 #else
         public static LoggerConfiguration CreateConfiguration(string fileName)
-            {
-                return new LoggerConfiguration()
-                .ReadFrom.AppSettings()
-                .Enrich.FromLogContext()
-                .WriteTo.RollingFile(fileName)
-                .WriteTo.Seq("http://localhost:5341/");
-            }
+        {
+            return new LoggerConfiguration()
+            .ReadFrom.AppSettings()
+            .Enrich.FromLogContext()
+            .WriteTo.RollingFile(fileName)
+            .WriteTo.Console()
+            .WriteTo.Seq("http://localhost:5341/");
+        }
 #endif
 
         public static void Create(this LoggerConfiguration config)
         {
             Log.Logger = config.CreateLogger();
+        }
+
+        public static void ShutDown()
+        {
+            Information("Shutting logging down");
+            Log.CloseAndFlush();
         }
 
         public static void Exception(Exception ex, string message = "", params object[] values)
@@ -63,7 +71,8 @@ namespace SAEON.Logs
 
         private static string GetTypeName(Type type, bool onlyName = false)
         {
-            return UseFullName && !onlyName ? type.FullName : type.Name;
+            //return UseFullName && !onlyName ? type.FullName : type.Name;
+            return UseFullName && !onlyName ? $"{type.Namespace}.{type.Name}" : type.Name;
         }
 
         private static string GetParameters(ParameterList parameters)
@@ -72,19 +81,31 @@ namespace SAEON.Logs
             if (parameters != null)
             {
                 bool isFirst = true;
-                foreach (var kvPair in parameters) 
+                foreach (var kvPair in parameters)
                 {
-                    if (!isFirst) result += ", ";
+                    if (!isFirst)
+                    {
+                        result += ", ";
+                    }
+
                     isFirst = false;
                     result += kvPair.Key + "=";
                     if (kvPair.Value == null)
+                    {
                         result += "Null";
+                    }
                     else if (kvPair.Value is string)
+                    {
                         result += string.Format("'{0}'", kvPair.Value);
+                    }
                     else if (kvPair.Value is Guid)
+                    {
                         result += string.Format("{0}", kvPair.Value);
+                    }
                     else
+                    {
                         result += kvPair.Value.ToString();
+                    }
                 }
             }
             return result;
@@ -95,14 +116,14 @@ namespace SAEON.Logs
             return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})";
         }
 
-        public static string MethodSignature(Type type, string methodName, string entityTypeName, ParameterList parameters = null)
+        public static string MethodSignature(Type type, string methodName, Type entityType, ParameterList parameters = null)
         {
-            return $"{GetTypeName(type)}.{methodName}<{entityTypeName}>({GetParameters(parameters)})";
+            return $"{GetTypeName(type)}.{methodName}<{GetTypeName(entityType, true)}>({GetParameters(parameters)})";
         }
 
-        public static string MethodSignature(Type type, string methodName, string entityTypeName, string relatedEntityTypeName, ParameterList parameters = null)
+        public static string MethodSignature(Type type, string methodName, Type entityType, Type relatedEntityType, ParameterList parameters = null)
         {
-            return $"{GetTypeName(type)}.{methodName}<{entityTypeName},{relatedEntityTypeName}>({GetParameters(parameters)})";
+            return $"{GetTypeName(type)}.{methodName}<{GetTypeName(entityType, true)},{GetTypeName(relatedEntityType, true)}>({GetParameters(parameters)})";
         }
 
         public static IDisposable MethodCall(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
@@ -115,7 +136,7 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var method = MethodSignature(type, methodName, GetTypeName(typeof(TEntity), true), parameters);
+            var method = MethodSignature(type, methodName, typeof(TEntity), parameters);
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
@@ -123,13 +144,13 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity, TRelatedEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var method = MethodSignature(type, methodName, GetTypeName(typeof(TEntity), true), GetTypeName(typeof(TRelatedEntity), true), parameters);
+            var method = MethodSignature(type, methodName, typeof(TEntity), typeof(TRelatedEntity), parameters);
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
         }
 
-        public static void Warning(string message, params object[] values) 
+        public static void Warning(string message, params object[] values)
         {
             Log.Warning(message, values);
         }
@@ -141,7 +162,7 @@ namespace SAEON.Logs
 
     }
 
-#if NETCOREAPP2_0 || NETCOREAPP2_1
+#if NETCOREAPP2_0 
     public static class SAEONWebHostExtensions 
     {
         public static IWebHostBuilder UseSAEONLogs(this IWebHostBuilder builder, Serilog.ILogger logger = null, bool dispose = false)

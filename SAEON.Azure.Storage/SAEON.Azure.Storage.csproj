@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net461;netcoreapp2.0;netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
@@ -9,12 +9,11 @@
     <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
     <Description>SAEON Azure Storage library</Description>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.14</Version>
+    <Version>1.0.27</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
-    <PackageReference Include="WindowsAzure.Storage" Version="9.1.1" />
+    <PackageReference Include="WindowsAzure.Storage" Version="9.3.2" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
