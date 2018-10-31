@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace SAEON.Extensions.Logging
 {
@@ -25,17 +24,29 @@ namespace SAEON.Extensions.Logging
                 bool isFirst = true;
                 foreach (var kvPair in parameters)
                 {
-                    if (!isFirst) result += ", ";
+                    if (!isFirst)
+                    {
+                        result += ", ";
+                    }
+
                     isFirst = false;
                     result += kvPair.Key + "=";
                     if (kvPair.Value == null)
+                    {
                         result += "Null";
+                    }
                     else if (kvPair.Value is string)
+                    {
                         result += string.Format("'{0}'", kvPair.Value);
+                    }
                     else if (kvPair.Value is Guid)
+                    {
                         result += string.Format("{0}", kvPair.Value);
+                    }
                     else
+                    {
                         result += kvPair.Value.ToString();
+                    }
                 }
             }
             return result;
@@ -56,29 +67,61 @@ namespace SAEON.Extensions.Logging
             return new MethodCall(log, MethodSignature(type, methodName, parameters));
         }
 
+        private static (string msg, object[] args) GetMsgAndArgs(string methodCall, string message, params object[] values)
+        {
+            var msg = "{MethodCall} " + message;
+            var args = new List<object> { methodCall };
+            if (!string.IsNullOrWhiteSpace(message) && (values != null) && (values.Length > 0))
+            {
+                args.Add(values);
+            }
+            return (msg.Trim(), args.ToArray());
+        }
+
         public static void Exception(this ILogger log, string methodCall, Exception ex, string message = "", params object[] values)
         {
-            log.LogError(ex, string.IsNullOrEmpty(message) ? "An exception occurred" : message, values);
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                var (msg, args) = GetMsgAndArgs(methodCall, "An exception occurred");
+                log.LogError(ex, msg, args);
+            }
+            else
+            {
+                var (msg, args) = GetMsgAndArgs(methodCall, message, values);
+                log.LogError(ex, msg, args);
+            }
         }
 
         public static void Error(this ILogger log, string methodCall, string message = "", params object[] values)
         {
-            log.LogError(string.IsNullOrEmpty(message) ? "An error occurred" : message, values);
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                var (msg, args) = GetMsgAndArgs(methodCall, "An error occurred");
+                log.LogError(msg, args);
+            }
+            else
+            {
+                var (msg, args) = GetMsgAndArgs(methodCall, message, values);
+                log.LogError(msg, args);
+            }
         }
 
         public static void Information(this ILogger log, string methodCall, string message, params object[] values)
         {
-            log.LogInformation(message, values);
+            var (msg, args) = GetMsgAndArgs(methodCall, message, values);
+            log.LogInformation(msg, args);
         }
 
         public static void Warning(this ILogger log, string methodCall, string message, params object[] values)
         {
-            log.LogWarning(message, values);
+            var (msg, args) = GetMsgAndArgs(methodCall, message, values);
+            log.LogWarning(msg, args);
         }
 
         public static void Verbose(this ILogger log, string methodCall, string message, params object[] values)
         {
-            log.LogDebug(message, values);
+            var (msg, args) = GetMsgAndArgs(methodCall, message, values);
+            log.LogDebug(msg, args);
         }
     }
 
@@ -91,7 +134,8 @@ namespace SAEON.Extensions.Logging
         {
             this.log = log;
             this.methodCall = methodCall;
-            log.Verbose(methodCall, "Start");
+            log?.Information(methodCall, "");
+            log?.Verbose(methodCall, "Start");
         }
 
         #region IDisposable Support
@@ -109,7 +153,7 @@ namespace SAEON.Extensions.Logging
                 // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
                 // TODO: set large fields to null.
 
-                log.Verbose(methodCall, "Done");
+                log?.Verbose(methodCall, "Done");
                 disposedValue = true;
             }
         }
@@ -132,27 +176,27 @@ namespace SAEON.Extensions.Logging
 
         public void Exception(Exception ex, string message = "", params object[] values)
         {
-            log.Exception(methodCall, ex, message, values);
+            log?.Exception(methodCall, ex, message, values);
         }
 
         public void Error(string message = "", params object[] values)
         {
-            log.Error(methodCall, message, values);
+            log?.Error(methodCall, message, values);
         }
 
         public void Information(string message, params object[] values)
         {
-            log.Information(methodCall, message, values);
+            log?.Information(methodCall, message, values);
         }
 
         public void Warning(string message, params object[] values)
         {
-            log.Warning(methodCall, message, values);
+            log?.Warning(methodCall, message, values);
         }
 
         public void Verbose(string message, params object[] values)
         {
-            log.Verbose(methodCall, message, values);
+            log?.Verbose(methodCall, message, values);
         }
 
     }
