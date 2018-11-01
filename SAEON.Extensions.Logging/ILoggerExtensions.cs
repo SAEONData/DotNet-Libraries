@@ -73,7 +73,7 @@ namespace SAEON.Extensions.Logging
             var args = new List<object> { methodCall };
             if (!string.IsNullOrWhiteSpace(message) && (values != null) && (values.Length > 0))
             {
-                args.Add(values);
+                args.AddRange(values);
             }
             return (msg.Trim(), args.ToArray());
         }
