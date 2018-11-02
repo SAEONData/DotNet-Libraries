@@ -34,6 +34,7 @@ namespace SAEON.Azure.Storage
         }
 
         #region Containers
+
         public async Task<bool> DeleteContainerAsync(string name)
         {
             CloudBlobContainer container = GetContainer(name);
@@ -51,9 +52,11 @@ namespace SAEON.Azure.Storage
         {
             return blobClient.GetContainerReference(name.ToLower());
         }
-        #endregion
+
+        #endregion Containers
 
         #region Blobs
+
         public async Task DeleteBlobAsync(CloudBlobContainer container, string name)
         {
             await container.DeleteBlobAsync(name);
@@ -62,6 +65,11 @@ namespace SAEON.Azure.Storage
         public static async Task<bool> DownloadBlobAsync(CloudBlobContainer container, string name, Stream stream)
         {
             return await container.DownloadBlobAsync(name, stream);
+        }
+
+        public static async Task<List<string>> FolderList(CloudBlobContainer container, string folder)
+        {
+            return await container.FolderList(folder);
         }
 
         public static async Task UploadBlobAsync(CloudBlobContainer container, string name, Stream stream)
@@ -74,6 +82,11 @@ namespace SAEON.Azure.Storage
             await container.UploadBlobAsync(name, byteArray);
         }
 
+        public static async Task UploadBlobAsync(CloudBlobContainer container, string name, string content)
+        {
+            await container.UploadBlobAsync(name, content);
+        }
+
         public static async Task UploadBlobIfNotExistsAsync(CloudBlobContainer container, string name, Stream stream)
         {
             await container.UploadBlobIfNotExistsAsync(name, stream);
@@ -83,9 +96,16 @@ namespace SAEON.Azure.Storage
         {
             await container.UploadBlobIfNotExistsAsync(name, byteArray);
         }
-        #endregion
+
+        public static async Task UploadBlobIfNotExistsAsync(CloudBlobContainer container, string name, string content)
+        {
+            await container.UploadBlobIfNotExistsAsync(name, content);
+        }
+
+        #endregion Blobs
 
         #region
+
         public async Task DeleteQueueAsync(string name)
         {
             CloudQueue queue = GetQueue(name);
@@ -104,9 +124,11 @@ namespace SAEON.Azure.Storage
             CloudQueue queue = queueClient.GetQueueReference(name.ToLower());
             return queue;
         }
+
         #endregion
 
         #region Tables
+
         public async Task DeleteTableAsync(string name)
         {
             CloudTable table = GetTable(name);
@@ -125,12 +147,13 @@ namespace SAEON.Azure.Storage
             CloudTable table = tableClient.GetTableReference(name);
             return table;
         }
+
         #endregion
 
         #region TableEntities
         //public async Task<T> DeleteEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
         //{
-        //    return await table.DeleteEntityAsync(entity); 
+        //    return await table.DeleteEntityAsync(entity);
         //}
 
         //public async Task<T> GetEntityAsync<T>(CloudTable table, T entity) where T : TableEntity
@@ -173,6 +196,7 @@ namespace SAEON.Azure.Storage
     public static class AzureStorageExtensions
     {
         #region Blobs
+
         public static async Task DeleteBlobAsync(this CloudBlobContainer container, string name)
         {
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
@@ -186,9 +210,26 @@ namespace SAEON.Azure.Storage
             {
                 return false;
             }
-
             await blockBlob.DownloadToStreamAsync(stream);
             return true;
+        }
+
+        public static async Task<List<string>> FolderList(this CloudBlobContainer container, string folder)
+        {
+            var result = new List<string>();
+            var dir = container.GetDirectoryReference(folder);
+            BlobContinuationToken blobContinuationToken = null;
+            do
+            {
+                var results = await dir.ListBlobsSegmentedAsync(blobContinuationToken);
+                // Get the value of the continuation token returned by the listing call.
+                blobContinuationToken = results.ContinuationToken;
+                foreach (IListBlobItem item in results.Results)
+                {
+                    result.Add(item.Uri.ToString());
+                }
+            } while (blobContinuationToken != null); // Loop while the continuation token is not null.
+            return result;
         }
 
         public static async Task UploadBlobAsync(this CloudBlobContainer container, string name, Stream stream)
@@ -203,6 +244,13 @@ namespace SAEON.Azure.Storage
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
             await blockBlob.DeleteIfExistsAsync();
             await blockBlob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
+        }
+
+        public static async Task UploadBlobAsync(this CloudBlobContainer container, string name, string content)
+        {
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
+            await blockBlob.DeleteIfExistsAsync();
+            await blockBlob.UploadTextAsync(content);
         }
 
         public static async Task UploadBlobIfNotExistsAsync(this CloudBlobContainer container, string name, Stream stream)
@@ -222,6 +270,16 @@ namespace SAEON.Azure.Storage
                 await blockBlob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
             }
         }
+
+        public static async Task UploadBlobIfNotExistsAsync(this CloudBlobContainer container, string name, string content)
+        {
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
+            if (!await blockBlob.ExistsAsync())
+            {
+                await blockBlob.UploadTextAsync(content);
+            }
+        }
+
         #endregion
 
         #region Queues
@@ -336,7 +394,7 @@ namespace SAEON.Azure.Storage
             oldEntity.CopyFrom(entity);
             return (T)(await table.ExecuteAsync(TableOperation.Replace(oldEntity))).Result;
         }
+
         #endregion
     }
-
 }
