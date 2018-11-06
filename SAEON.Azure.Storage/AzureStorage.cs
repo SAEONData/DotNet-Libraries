@@ -12,7 +12,7 @@ namespace SAEON.Azure.Storage
 {
     public abstract class AzureTable : TableEntity
     {
-        internal virtual void SetKeys()
+        public virtual void SetKeys()
         {
             throw new NotImplementedException();
         }
@@ -159,45 +159,6 @@ namespace SAEON.Azure.Storage
         #endregion
 
         #region AzureTables
-        //public async Task<T> DeleteEntityAsync<T>(CloudTable table, T entity) where T : AzureTable
-        //{
-        //    return await table.DeleteEntityAsync(entity);
-        //}
-
-        //public async Task<T> GetEntityAsync<T>(CloudTable table, T entity) where T : AzureTable
-        //{
-        //    return await table.GetEntityAsync(entity);
-        //}
-
-        //public async Task<T> GetEntityAsync<T>(CloudTable table, string partitionKey, string rowKey) where T : AzureTable
-        //{
-        //    return await table.GetEntityAsync<T>(partitionKey, rowKey);
-        //}
-
-        //public async Task<T> InsertEntityAsync<T>(CloudTable table, T entity) where T : AzureTable
-        //{
-        //    return await table.InsertEntityAsync(entity);
-        //}
-
-        //public async Task<T> InsertOrMergeEntityAsync<T>(CloudTable table, T entity) where T : AzureTable
-        //{
-        //    return await table.InsertOrMergeEntityAsync(entity);
-        //}
-
-        //public async Task<T> InsertOrReplaceEntityAsync<T>(CloudTable table, T entity) where T : AzureTable
-        //{
-        //    return await table.InsertOrReplaceEntityAsync(entity);
-        //}
-
-        //public async Task<T> MergeEntityAsync<T>(CloudTable table, T entity) where T : AzureTable
-        //{
-        //    return await table.MergeEntityAsync(entity);
-        //}
-
-        //public async Task<T> ReplaceEntityAsync<T>(CloudTable table, T entity) where T : AzureTable
-        //{
-        //    return await table.ReplaceEntityAsync(entity);
-        //}
         #endregion
     }
 
@@ -351,17 +312,29 @@ namespace SAEON.Azure.Storage
             return (T)(await table.ExecuteAsync(TableOperation.Retrieve<T>(partitionKey, rowKey))).Result;
         }
 
-        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table) where T : AzureTable, new()
+        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table, TableQuery<T> query) where T : AzureTable, new()
         {
             var result = new List<T>();
             TableContinuationToken token = null;
             do
             {
-                var queryResult = await table.ExecuteQuerySegmentedAsync(new TableQuery<T>(), token);
+                var queryResult = await table.ExecuteQuerySegmentedAsync(query, token);
                 result.AddRange(queryResult.Results);
                 token = queryResult.ContinuationToken;
             } while (token != null);
             return result;
+        }
+
+        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table) where T : AzureTable, new()
+        {
+            return await GetEntitiesAsync(table, new TableQuery<T>());
+        }
+
+        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table, string partitionKey) where T : AzureTable, new()
+        {
+            var query = new TableQuery<T>();
+            query.Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
+            return await GetEntitiesAsync(table, query);
         }
 
         public static async Task<T> InsertEntityAsync<T>(this CloudTable table, T entity) where T : AzureTable
