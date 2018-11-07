@@ -273,15 +273,15 @@ namespace SAEON.Azure.Storage
 
         public static void CopyFrom(this AzureTable destination, AzureTable source)
         {
-            var fields = destination.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var field in fields)
+            var props = destination.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance /*| BindingFlags.GetProperty | BindingFlags.SetProperty*/);
+            foreach (var prop in props)
             {
-                if (!field.Name.Equals("PartitionKey", StringComparison.CurrentCultureIgnoreCase) &&
-                    !field.Name.Equals("RowKey", StringComparison.CurrentCultureIgnoreCase) &&
-                    !field.Name.Equals("Timestamp", StringComparison.CurrentCultureIgnoreCase) &&
-                    !field.Name.Equals("ETag", StringComparison.CurrentCultureIgnoreCase))
+                if (!prop.Name.Equals("PartitionKey", StringComparison.CurrentCultureIgnoreCase) &&
+                    !prop.Name.Equals("RowKey", StringComparison.CurrentCultureIgnoreCase) &&
+                    !prop.Name.Equals("Timestamp", StringComparison.CurrentCultureIgnoreCase) &&
+                    !prop.Name.Equals("ETag", StringComparison.CurrentCultureIgnoreCase))
                 {
-                    field.SetValue(destination, field.GetValue(source));
+                    prop.SetValue(destination, prop.GetValue(source));
                 }
             }
         }
