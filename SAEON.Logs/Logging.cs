@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP2_0
+﻿#if NETCOREAPP2_0 || NETCOREAPP2_1
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +6,8 @@ using Microsoft.Extensions.Logging;
 using Serilog.AspNetCore;
 #elif NETSTANDARD2_0
 using Microsoft.Extensions.Configuration;
-#endif  
+#endif
+
 using Serilog;
 using Serilog.Context;
 using System;
@@ -21,8 +22,8 @@ namespace SAEON.Logs
     {
         public static bool UseFullName { get; set; } = true;
 
-#if NETSTANDARD2_0 || NETCOREAPP2_0 
-        public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config) 
+#if NETSTANDARD2_0 || NETCOREAPP2_0 || NETCOREAPP2_1
+        public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config)
         {
             return new LoggerConfiguration()
                 .ReadFrom.Configuration(config)
@@ -32,6 +33,7 @@ namespace SAEON.Logs
                 .WriteTo.Seq("http://localhost:5341/");
         }
 #else
+
         public static LoggerConfiguration CreateConfiguration(string fileName)
         {
             return new LoggerConfiguration()
@@ -41,6 +43,7 @@ namespace SAEON.Logs
             .WriteTo.Console()
             .WriteTo.Seq("http://localhost:5341/");
         }
+
 #endif
 
         public static void Create(this LoggerConfiguration config)
@@ -159,11 +162,10 @@ namespace SAEON.Logs
         {
             Log.Verbose(message, values);
         }
-
     }
 
-#if NETCOREAPP2_0 
-    public static class SAEONWebHostExtensions 
+#if NETCOREAPP2_0 || NETCOREAPP2_1
+    public static class SAEONWebHostExtensions
     {
         public static IWebHostBuilder UseSAEONLogs(this IWebHostBuilder builder, Serilog.ILogger logger = null, bool dispose = false)
         {
@@ -198,5 +200,4 @@ namespace SAEON.Logs
         }
     }
 #endif
-
 }

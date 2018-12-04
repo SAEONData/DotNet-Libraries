@@ -29,6 +29,7 @@ namespace SAEON.SensorThings
             Elevation = elevation;
         }
 
+        [JsonIgnore]
         public JObject AsJSON
         {
             get
@@ -50,6 +51,7 @@ namespace SAEON.SensorThings
         public string Symbol { get; set; }
         public string Definition { get; set; }
 
+        [JsonIgnore]
         public JObject AsJSON
         {
             get
@@ -69,6 +71,7 @@ namespace SAEON.SensorThings
         public double Right { get; set; }
         public double Top { get; set; }
 
+        [JsonIgnore]
         public JObject AsJSON
         {
             get
@@ -94,6 +97,7 @@ namespace SAEON.SensorThings
     {
         public DateTime Value { get; set; }
 
+        [JsonIgnore]
         public JValue AsJSON
         {
             get
@@ -120,6 +124,7 @@ namespace SAEON.SensorThings
             End = end;
         }
 
+        [JsonIgnore]
         public JValue AsJSON
         {
             get
@@ -135,6 +140,7 @@ namespace SAEON.SensorThings
         public DateTime Start { get; set; }
         public DateTime? End { get; set; }
 
+        [JsonIgnore]
         public JValue AsJSON 
         {
             get
@@ -153,15 +159,16 @@ namespace SAEON.SensorThings
     {
         public static string BaseUrl { get; set; }
     }
-
+     
     public abstract class SensorThingEntity
     {
         public string EntitySetName { get; protected set; }
 
         public int Id { get; set; }
-        public string SelfLink => $"{SensorThingsConfig.BaseUrl}/{EntitySetName}({Id})";
+        public string SelfLink { get { return $"{SensorThingsConfig.BaseUrl}/{EntitySetName}({Id})"; } set {; } }
         public List<string> NavigationLinks { get; } = new List<string>();
 
+        [JsonIgnore]
         public virtual JObject AsJSON
         {
             get
