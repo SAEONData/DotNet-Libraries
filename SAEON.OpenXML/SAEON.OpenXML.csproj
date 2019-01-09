@@ -7,9 +7,9 @@
     <Company>South African Environmental Observation Network (SAEON)</Company>
     <Product>SAEON .Net Libraries</Product>
     <Description>OpenXML utilities for SAEON .Net</Description>
-    <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
+    <Copyright>Copyright © 2017-2019 South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.17</Version>
+    <Version>1.0.18</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.8.1" />
-    <PackageReference Include="SAEON.Logs" Version="1.0.34" />
+    <PackageReference Include="SAEON.Logs" Version="1.0.35" />
   </ItemGroup>
 
 </Project>

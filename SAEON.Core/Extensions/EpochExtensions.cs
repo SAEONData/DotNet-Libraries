@@ -4,7 +4,7 @@ namespace SAEON.Core.Extensions
 {
     public static class EpochExtensions
     {
-        public static DateTime FromEpoch(this int unixTime)
+        public static DateTime FromEpoch(this int unixTime) 
         {
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return epoch.AddSeconds(unixTime);

@@ -8,9 +8,9 @@
     <Product>SAEON .Net Libraries</Product>
     <Title>SAEON.Logs</Title>
     <Description>Logging for SAEON in .Net</Description>
-    <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
+    <Copyright>Copyright © 2017-2019 South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.34</Version>
+    <Version>1.0.35</Version>
     <PackageTags />
     <PackageReleaseNotes />
   </PropertyGroup>

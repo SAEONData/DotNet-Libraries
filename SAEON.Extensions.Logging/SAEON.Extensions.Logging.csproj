@@ -8,9 +8,9 @@
     <Product>SAEON .Net Libraries</Product>
     <Title>SAEON.Extensions.Logging</Title>
     <Description>Microsoft.Extensions.Logging extensions for SAEON in .Net Standard 2.0</Description>
-    <Copyright>Copyright © 2018 South African Environmental Observation Network (SAEON)</Copyright>
+    <Copyright>Copyright © 2018-2019 South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.10</Version>
+    <Version>1.0.11</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -18,7 +18,7 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
   </ItemGroup>
 
 </Project>
