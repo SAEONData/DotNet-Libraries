@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.0;netcoreapp2.2;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net461;net472;netcoreapp2.2;netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
@@ -9,7 +9,7 @@
     <Copyright>Copyright © 2017-2019 South African Environmental Observation Network (SAEON)</Copyright>
     <Description>SAEON Azure Storage library</Description>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.45</Version>
+    <Version>1.0.46</Version>
   </PropertyGroup>
 
   <ItemGroup>
