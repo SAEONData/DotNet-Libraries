@@ -3,7 +3,7 @@ using System.IO;
 
 namespace SAEON.Core
 {
-    public static class ApplicationHelper  
+    public static class ApplicationHelper
     {
         public static string ApplicationName { get; set; } = Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.FriendlyName);
         public static string ApplicationVendor { get; } = "SAEON";

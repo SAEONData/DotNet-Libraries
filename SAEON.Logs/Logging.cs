@@ -1,4 +1,4 @@
-﻿#if NETCOREAPP2_0 || NETCOREAPP2_1
+﻿#if NETCOREAPP2_1 || NETCOREAPP2_2
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +12,7 @@ using Serilog;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices; 
 
 namespace SAEON.Logs
 {
@@ -22,7 +22,7 @@ namespace SAEON.Logs
     {
         public static bool UseFullName { get; set; } = true;
 
-#if NETSTANDARD2_0 || NETCOREAPP2_0 || NETCOREAPP2_1
+#if NETSTANDARD2_0 || NETCOREAPP2_1 || NETCOREAPP2_2
         public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config)
         {
             return new LoggerConfiguration()
@@ -164,7 +164,7 @@ namespace SAEON.Logs
         }
     }
 
-#if NETCOREAPP2_0 || NETCOREAPP2_1
+#if NETCOREAPP2_1|| NETCOREAPP2_2
     public static class SAEONWebHostExtensions
     {
         public static IWebHostBuilder UseSAEONLogs(this IWebHostBuilder builder, Serilog.ILogger logger = null, bool dispose = false)

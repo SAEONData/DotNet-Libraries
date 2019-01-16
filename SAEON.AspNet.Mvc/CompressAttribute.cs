@@ -4,9 +4,9 @@ using System.Web.Mvc;
 
 namespace SAEON.AspNet.Mvc
 { 
-    public class CompressAttribute : ActionFilterAttribute  
+    public class CompressAttribute : ActionFilterAttribute
     { 
-        public override void OnActionExecuting(ActionExecutingContext filterContext) 
+        public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             HttpRequestBase request = filterContext.HttpContext.Request;
 
