@@ -9,7 +9,7 @@
     <Copyright>Copyright © 2017-2019 South African Environmental Observation Network (SAEON)</Copyright>
     <Description>SAEON Azure CosmosDB library</Description>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.26</Version>
+    <Version>1.0.32</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,15 +21,15 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.1.3" />
   </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.1.3" />
   </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.1.3" />
   </ItemGroup>
-  
+
+
+
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="echo rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet" />
   </Target>
