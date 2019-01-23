@@ -74,8 +74,8 @@ namespace SAEON.Logs
 
         private static string GetTypeName(Type type, bool onlyName = false)
         {
-            //return UseFullName && !onlyName ? type.FullName : type.Name;
-            return UseFullName && !onlyName ? $"{type.Namespace}.{type.Name}" : type.Name;
+            return UseFullName && !onlyName ? type.FullName : type.Name;
+            //return UseFullName && !onlyName ? $"{type.Namespace}.{type.Name}" : type.Name;
         }
 
         private static string GetParameters(ParameterList parameters)
