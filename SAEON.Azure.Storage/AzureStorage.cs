@@ -304,12 +304,23 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> GetEntityAsync<T>(this CloudTable table, T entity) where T : AzureTable
         {
+            entity.SetKeys();
             return (T)(await table.ExecuteAsync(TableOperation.Retrieve<T>(entity.PartitionKey, entity.RowKey))).Result;
         }
 
         public static async Task<T> GetEntityAsync<T>(this CloudTable table, string partitionKey, string rowKey) where T : AzureTable
         {
             return (T)(await table.ExecuteAsync(TableOperation.Retrieve<T>(partitionKey, rowKey))).Result;
+        }
+
+        public static async Task<bool> EntityExistsAsync<T>(this CloudTable table, T entity) where T : AzureTable
+        {
+            return await GetEntityAsync(table, entity) != null;
+        }
+
+        public static async Task<bool> EntityExistsAsync<T>(this CloudTable table, string partitionKey, string rowKey) where T : AzureTable
+        {
+            return await GetEntityAsync<T>(table, partitionKey, rowKey) != null;
         }
 
         public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table, TableQuery<T> query) where T : AzureTable, new()
