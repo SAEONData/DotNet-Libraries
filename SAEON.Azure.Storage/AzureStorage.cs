@@ -271,9 +271,9 @@ namespace SAEON.Azure.Storage
 
         #region AzureTables
 
-        public static void CopyFrom(this AzureTable destination, AzureTable source)
+        public static void CopyFrom<T>(this T destination, T source) where T : AzureTable
         {
-            var props = destination.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance /*| BindingFlags.GetProperty | BindingFlags.SetProperty*/);
+            var props = destination.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.SetProperty);
             foreach (var prop in props)
             {
                 if (!prop.Name.Equals("PartitionKey", StringComparison.CurrentCultureIgnoreCase) &&
