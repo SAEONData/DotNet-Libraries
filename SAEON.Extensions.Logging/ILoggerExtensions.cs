@@ -82,12 +82,20 @@ namespace SAEON.Extensions.Logging
         {
             if (string.IsNullOrWhiteSpace(message))
             {
-                var (msg, args) = GetMsgAndArgs(methodCall, "An exception occurred");
+                var (msg, args) = GetMsgAndArgs(methodCall, "An exception occurred!");
+                if (!string.IsNullOrEmpty(ex?.Message))
+                {
+                    msg += $" Exception: {ex.Message}";
+                }
                 log.LogError(ex, msg, args);
             }
             else
             {
                 var (msg, args) = GetMsgAndArgs(methodCall, message, values);
+                if (!string.IsNullOrEmpty(ex?.Message))
+                {
+                    msg += $" Exception: {ex.Message}";
+                }
                 log.LogError(ex, msg, args);
             }
         }
