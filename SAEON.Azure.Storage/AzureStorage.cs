@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SAEON.Azure.Storage
 {
-    public abstract class AzureTable : TableEntity
+    public abstract class AzureTableEntity : TableEntity
     {
         public virtual void SetKeys()
         {
@@ -329,7 +329,7 @@ namespace SAEON.Azure.Storage
         #endregion
 
         #region AzureTables
-        public static void CopyFrom<T>(this T destination, T source) where T : AzureTable
+        public static void CopyFrom<T>(this T destination, T source) where T : AzureTableEntity
         {
             var props = destination.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.GetProperty | BindingFlags.SetProperty);
             foreach (var prop in props)
@@ -344,7 +344,7 @@ namespace SAEON.Azure.Storage
             }
         }
 
-        public static async Task<T> DeleteEntityAsync<T>(this CloudTable table, T entity) where T : AzureTable
+        public static async Task<T> DeleteEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
             if (entity == null)
             {
@@ -360,28 +360,28 @@ namespace SAEON.Azure.Storage
             return (T)(await table.ExecuteAsync(TableOperation.Delete(oldEntity))).Result;
         }
 
-        public static async Task<T> GetEntityAsync<T>(this CloudTable table, T entity) where T : AzureTable
+        public static async Task<T> GetEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
             entity.SetKeys();
             return (T)(await table.ExecuteAsync(TableOperation.Retrieve<T>(entity.PartitionKey, entity.RowKey))).Result;
         }
 
-        public static async Task<T> GetEntityAsync<T>(this CloudTable table, string partitionKey, string rowKey) where T : AzureTable
+        public static async Task<T> GetEntityAsync<T>(this CloudTable table, string partitionKey, string rowKey) where T : AzureTableEntity
         {
             return (T)(await table.ExecuteAsync(TableOperation.Retrieve<T>(partitionKey, rowKey))).Result;
         }
 
-        public static async Task<bool> EntityExistsAsync<T>(this CloudTable table, T entity) where T : AzureTable
+        public static async Task<bool> EntityExistsAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
             return await GetEntityAsync(table, entity) != null;
         }
 
-        public static async Task<bool> EntityExistsAsync<T>(this CloudTable table, string partitionKey, string rowKey) where T : AzureTable
+        public static async Task<bool> EntityExistsAsync<T>(this CloudTable table, string partitionKey, string rowKey) where T : AzureTableEntity
         {
             return await GetEntityAsync<T>(table, partitionKey, rowKey) != null;
         }
 
-        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table, TableQuery<T> query) where T : AzureTable, new()
+        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table, TableQuery<T> query) where T : AzureTableEntity, new()
         {
             var result = new List<T>();
             TableContinuationToken token = null;
@@ -394,19 +394,19 @@ namespace SAEON.Azure.Storage
             return result;
         }
 
-        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table) where T : AzureTable, new()
+        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table) where T : AzureTableEntity, new()
         {
             return await GetEntitiesAsync(table, new TableQuery<T>());
         }
 
-        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table, string partitionKey) where T : AzureTable, new()
+        public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table, string partitionKey) where T : AzureTableEntity, new()
         {
             var query = new TableQuery<T>();
             query.Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
             return await GetEntitiesAsync(table, query);
         }
 
-        public static async Task<T> InsertEntityAsync<T>(this CloudTable table, T entity) where T : AzureTable
+        public static async Task<T> InsertEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
             if (entity == null)
             {
@@ -416,7 +416,7 @@ namespace SAEON.Azure.Storage
             return (T)(await table.ExecuteAsync(TableOperation.Insert(entity))).Result;
         }
 
-        public static async Task<T> InsertOrMergeEntityAsync<T>(this CloudTable table, T entity) where T : AzureTable
+        public static async Task<T> InsertOrMergeEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
             if (entity == null)
             {
@@ -426,7 +426,7 @@ namespace SAEON.Azure.Storage
             return (T)(await table.ExecuteAsync(TableOperation.InsertOrMerge(entity))).Result;
         }
 
-        public static async Task<T> InsertOrReplaceEntityAsync<T>(this CloudTable table, T entity) where T : AzureTable
+        public static async Task<T> InsertOrReplaceEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
             if (entity == null)
             {
@@ -436,7 +436,7 @@ namespace SAEON.Azure.Storage
             return (T)(await table.ExecuteAsync(TableOperation.InsertOrReplace(entity))).Result;
         }
 
-        public static async Task<T> MergeEntityAsync<T>(this CloudTable table, T entity) where T : AzureTable
+        public static async Task<T> MergeEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
             if (entity == null)
             {
@@ -454,7 +454,7 @@ namespace SAEON.Azure.Storage
             return (T)(await table.ExecuteAsync(TableOperation.Merge(oldEntity))).Result;
         }
 
-        public static async Task<T> ReplaceEntityAsync<T>(this CloudTable table, T entity) where T : AzureTable
+        public static async Task<T> ReplaceEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
             if (entity == null)
             {
