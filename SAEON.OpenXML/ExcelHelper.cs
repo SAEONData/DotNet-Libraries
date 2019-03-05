@@ -114,10 +114,11 @@ namespace SAEON.OpenXML
         #region Rows
         public static Row InsertRowInWorksheet(SheetData sheetData, int rowIndex)
         {
+            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
             Row row = sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).FirstOrDefault();
             if (row == null)
             {
-                row = new Row() { RowIndex = Convert.ToUInt32(rowIndex) };
+                row = new Row() { RowIndex = (uint)rowIndex };
                 sheetData.Append(row);
             }
             return row;
@@ -132,7 +133,7 @@ namespace SAEON.OpenXML
         #endregion
 
         #region Columns
-        public static Column AddColumn(WorksheetPart worksheetPart, int index, double width)
+        public static Column AddColumn(WorksheetPart worksheetPart, int index, double width, bool save = false)
         {
             Columns columns = worksheetPart.Worksheet.GetFirstChild<Columns>();
             if (columns == null)
@@ -147,11 +148,11 @@ namespace SAEON.OpenXML
                 Width = width
             };
             columns.Append(column);
-            worksheetPart.Worksheet.Save();
+            if (save) worksheetPart.Worksheet.Save();
             return column;
         }
 
-        public static Column GetColumn(WorksheetPart worksheetPart, int index)
+        public static Column GetColumn(WorksheetPart worksheetPart, int index, bool save = false)
         {
             Columns columns = worksheetPart.Worksheet.GetFirstChild<Columns>();
             if (columns == null)
@@ -167,7 +168,7 @@ namespace SAEON.OpenXML
                     columns.Append(column);
                 }
                 worksheetPart.Worksheet.Append(columns);
-                worksheetPart.Worksheet.Save();
+                if (save) worksheetPart.Worksheet.Save();
             }
             return worksheetPart.Worksheet.Descendants<Column>().ElementAt(index - 1);
         }
@@ -225,6 +226,9 @@ namespace SAEON.OpenXML
         // If the cell already exists, returns it. 
         private static Cell InsertCellInWorksheet(SheetData sheetData, string columnName, Row row)
         {
+            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
+            if (row == null) throw new ArgumentNullException(nameof(row));
+
             string cellReference = columnName + row.RowIndex;
 
             // If there is not a cell with the specified column name, insert one.  
@@ -250,7 +254,6 @@ namespace SAEON.OpenXML
                 cell = new Cell() { CellReference = cellReference };
                 row.InsertBefore(cell, refCell);
 
-                //worksheet.Save();
                 return cell;
             }
         }
@@ -259,16 +262,7 @@ namespace SAEON.OpenXML
         // If the cell already exists, returns it. 
         private static Cell InsertCellInWorksheet(SheetData sheetData, string columnName, int rowIndex)
         {
-            string cellReference = columnName + rowIndex;
-
-            // If the worksheet does not contain a row with the specified row index, insert one.
-            Row row = sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).FirstOrDefault();
-            if (row == null)
-            {
-                row = new Row() { RowIndex = (uint)rowIndex };
-                sheetData.Append(row);
-            }
-
+            var row = InsertRowInWorksheet(sheetData, rowIndex);
             return InsertCellInWorksheet(sheetData, columnName, row);
         }
 
@@ -290,7 +284,7 @@ namespace SAEON.OpenXML
 
         // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text 
         // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
-        private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart)
+        private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart, bool save = false)
         {
             // If the part does not contain a SharedStringTable, create one.
             if (shareStringPart.SharedStringTable == null)
@@ -313,13 +307,15 @@ namespace SAEON.OpenXML
 
             // The text does not exist in the part. Create the SharedStringItem and return its index.
             shareStringPart.SharedStringTable.AppendChild(new SharedStringItem(new Text(text)));
-            shareStringPart.SharedStringTable.Save();
-
+            if (save) shareStringPart.SharedStringTable.Save();
             return i;
         }
 
         public static void SetCellValue(SpreadsheetDocument document, SheetData sheetData, string columnName, Row row, object value)
         {
+            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
+            if (row == null) throw new ArgumentNullException(nameof(row));
+
             if (value == null)
             {
                 return;
@@ -395,7 +391,7 @@ namespace SAEON.OpenXML
 
         public static void SetCellValue(SpreadsheetDocument document, SheetData sheetData, int colIndex, Row row, object value)
         {
-            SetCellValue(document, sheetData, colIndex, row, value);
+            SetCellValue(document, sheetData, GetColumnName(colIndex), row, value);
         }
 
         public static void SetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, int colIndex, Row row, object value)
@@ -423,7 +419,6 @@ namespace SAEON.OpenXML
             {
                 result = GetCellValue(document, cell);
             }
-
             return result;
         }
 
@@ -684,12 +679,13 @@ namespace SAEON.OpenXML
 
         public static void Save(SpreadsheetDocument document)
         {
-            document.WorkbookPart.Workbook.Save();
+            //document.WorkbookPart.Workbook.Save();
+            document.Save();
         }
 
         public static void Close(SpreadsheetDocument document)
         {
-            document.Close(); ;
+            document.Close();
         }
 
         public static void SaveAndClose(SpreadsheetDocument document)
