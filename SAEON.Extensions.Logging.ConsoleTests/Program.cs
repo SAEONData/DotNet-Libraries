@@ -8,11 +8,10 @@ namespace SAEON.Extensions.Logging.ConsoleTests
     {
         private static void ConfigureServices(IServiceCollection services)
         {
-            ILoggerFactory loggerFactory = new LoggerFactory()
-                .AddConsole(LogLevel.Information);
-
-            services.AddSingleton(loggerFactory); // Add first my already configured instance
-            services.AddLogging(); // Allow ILogger<T>
+            services.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddConsole();
+            });
 
             services.AddTransient<Program>();
         }

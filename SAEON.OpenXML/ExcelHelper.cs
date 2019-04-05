@@ -9,12 +9,12 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text; 
+using System.Text;
 
 namespace SAEON.OpenXML
 {
     public static class ExcelHelper
-    { 
+    {
 
         #region Sheets 
         public static Sheet GetSheet(SpreadsheetDocument document, int sheetId)
@@ -66,7 +66,7 @@ namespace SAEON.OpenXML
         {
             using (Logging.MethodCall(typeof(WorksheetPart)))
             {
-                try 
+                try
                 {
                     // Add a blank WorksheetPart.
                     WorksheetPart worksheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>();
@@ -77,20 +77,23 @@ namespace SAEON.OpenXML
                     {
                         sheets = document.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
                     }
-                    string relationshipId = document.WorkbookPart.GetIdOfPart(worksheetPart); 
+                    string relationshipId = document.WorkbookPart.GetIdOfPart(worksheetPart);
                     Logging.Verbose("relationshipId: {relationshipId}", relationshipId);
 
                     // Get a unique ID for the new worksheet.
-                    uint sheetId = 1; 
+                    uint sheetId = 1;
                     if (sheets.Elements<Sheet>().Count() > 0)
                     {
                         sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).Max() + 1;
-                    } 
+                    }
                     Logging.Verbose("sheetId: {sheetId}", sheetId);
 
                     // Give the new worksheet a name. 
                     if (string.IsNullOrEmpty(sheetName))
+                    {
                         sheetName = "Sheet" + sheetId;
+                    }
+
                     Logging.Verbose("sheetName: {sheetName}", sheetName);
 
                     // Append the new worksheet and associate it with the workbook.
@@ -100,16 +103,37 @@ namespace SAEON.OpenXML
                 }
                 catch (Exception ex)
                 {
-                    Logging.Exception(ex); 
+                    Logging.Exception(ex);
                     throw;
                 }
             }
         }
-         
-        #endregion 
+
+        #endregion
+
+        #region Rows
+        public static Row InsertRowInWorksheet(SheetData sheetData, int rowIndex)
+        {
+            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
+            Row row = sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).FirstOrDefault();
+            if (row == null)
+            {
+                row = new Row() { RowIndex = (uint)rowIndex };
+                sheetData.Append(row);
+            }
+            return row;
+        }
+
+        public static Row InsertRowInWorksheet(WorksheetPart worksheetPart, int rowIndex)
+        {
+            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+            return InsertRowInWorksheet(sheetData, rowIndex);
+        }
+
+        #endregion
 
         #region Columns
-        public static Column AddColumn(WorksheetPart worksheetPart, UInt32 index, double width)
+        public static Column AddColumn(WorksheetPart worksheetPart, int index, double width, bool save = false)
         {
             Columns columns = worksheetPart.Worksheet.GetFirstChild<Columns>();
             if (columns == null)
@@ -119,16 +143,16 @@ namespace SAEON.OpenXML
             }
             Column column = new Column
             {
-                Min = index,
-                Max = index,
+                Min = (uint)index,
+                Max = (uint)index,
                 Width = width
             };
             columns.Append(column);
-            worksheetPart.Worksheet.Save();
+            if (save) worksheetPart.Worksheet.Save();
             return column;
         }
 
-        public static Column GetColumn(WorksheetPart worksheetPart, UInt32 index)
+        public static Column GetColumn(WorksheetPart worksheetPart, int index, bool save = false)
         {
             Columns columns = worksheetPart.Worksheet.GetFirstChild<Columns>();
             if (columns == null)
@@ -138,23 +162,23 @@ namespace SAEON.OpenXML
                 {
                     Column column = new Column
                     {
-                        Min = UInt32Value.FromUInt32(index),
-                        Max = UInt32Value.FromUInt32(index)
+                        Min = (uint)index,
+                        Max = (uint)index
                     };
                     columns.Append(column);
                 }
                 worksheetPart.Worksheet.Append(columns);
-                worksheetPart.Worksheet.Save();
+                if (save) worksheetPart.Worksheet.Save();
             }
-            return worksheetPart.Worksheet.Descendants<Column>().ElementAt(Convert.ToInt32(index) - 1);
+            return worksheetPart.Worksheet.Descendants<Column>().ElementAt(index - 1);
         }
 
-        public static string GetColumnName(uint column)
+        public static string GetColumnName(int column)
         {
             uint value = 0;
             uint remainder = 0;
             string result = string.Empty;
-            value = column;
+            value = (uint)column;
             while (value > 0)
             {
                 remainder = (value - 1) % 26;
@@ -164,16 +188,20 @@ namespace SAEON.OpenXML
             return result;
         }
 
-        public static string GetColumnName(int column)
-        {
-            return GetColumnName(Convert.ToUInt32(column));
-        }
+        //public static string GetColumnName(int column)
+        //{
+        //    return GetColumnName(column);
+        //}
 
         public static int GetColumnIndex(string columnName)
         {
             // Remove row numbers
             int r = columnName.IndexOfAny("0123456789".ToCharArray());
-            if (r > 0) columnName = columnName.Substring(0, r);
+            if (r > 0)
+            {
+                columnName = columnName.Substring(0, r);
+            }
+
             int result = 0;
             int[] digits = new int[columnName.Length];
             for (int i = 0; i < columnName.Length; ++i)
@@ -194,56 +222,69 @@ namespace SAEON.OpenXML
 
         #region Cells
 
-        // Given a column name, a row index, and a WorksheetPart, inserts a cell into the worksheet. 
+        // Given a column name, a Row, and a SheetData, inserts a cell into the worksheet. 
         // If the cell already exists, returns it. 
-        private static Cell InsertCellInWorksheet(WorksheetPart worksheetPart, string columnName, uint rowIndex)
+        private static Cell InsertCellInWorksheet(SheetData sheetData, string columnName, Row row)
         {
-            Worksheet worksheet = worksheetPart.Worksheet;
-            SheetData sheetData = worksheet.GetFirstChild<SheetData>();
-            string cellReference = columnName + rowIndex;
+            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
+            if (row == null) throw new ArgumentNullException(nameof(row));
 
-            // If the worksheet does not contain a row with the specified row index, insert one.
-            Row row;
-            if (sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).Count() != 0)
-            {
-                row = sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).First();
-            }
-            else
-            {
-                row = new Row() { RowIndex = rowIndex };
-                sheetData.Append(row);
-            }
+            string cellReference = columnName + row.RowIndex;
 
             // If there is not a cell with the specified column name, insert one.  
-            if (row.Elements<Cell>().Where(c => c.CellReference.Value == columnName + rowIndex).Count() > 0)
+            Cell cell = row.Elements<Cell>().Where(c => c.CellReference.Value == cellReference).FirstOrDefault();
+            if (cell != null)
             {
-                return row.Elements<Cell>().Where(c => c.CellReference.Value == cellReference).First();
+                return cell;
             }
             else
             {
                 // Cells must be in sequential order according to CellReference. Determine where to insert the new cell.
                 Cell refCell = null;
-                foreach (Cell cell in row.Elements<Cell>())
+                foreach (Cell searchCell in row.Elements<Cell>())
                 {
                     //if (string.Compare(cell.CellReference.Value, cellReference, true) > 0)
-                    if (GetColumnIndex(cell.CellReference.Value) > GetColumnIndex(cellReference))
+                    if (GetColumnIndex(searchCell.CellReference.Value) > GetColumnIndex(cellReference))
                     {
-                        refCell = cell;
+                        refCell = searchCell;
                         break;
                     }
                 }
 
-                Cell newCell = new Cell() { CellReference = cellReference };
-                row.InsertBefore(newCell, refCell);
+                cell = new Cell() { CellReference = cellReference };
+                row.InsertBefore(cell, refCell);
 
-                //worksheet.Save();
-                return newCell;
+                return cell;
             }
+        }
+
+        // Given a column name, a Row, and a SheetDatam inserts a cell into the worksheet. 
+        // If the cell already exists, returns it. 
+        private static Cell InsertCellInWorksheet(SheetData sheetData, string columnName, int rowIndex)
+        {
+            var row = InsertRowInWorksheet(sheetData, rowIndex);
+            return InsertCellInWorksheet(sheetData, columnName, row);
+        }
+
+        // Given a column name, a Row, and a WorksheetPart, inserts a cell into the worksheet. 
+        // If the cell already exists, returns it. 
+        private static Cell InsertCellInWorksheet(WorksheetPart worksheetPart, string columnName, Row row)
+        {
+            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+            return InsertCellInWorksheet(sheetData, columnName, row);
+        }
+
+        // Given a column name, a row index, and a WorksheetPart, inserts a cell into the worksheet. 
+        // If the cell already exists, returns it. 
+        private static Cell InsertCellInWorksheet(WorksheetPart worksheetPart, string columnName, int rowIndex)
+        {
+            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+            return InsertCellInWorksheet(sheetData, columnName, rowIndex);
         }
 
         // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text 
         // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
-        private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart)
+        private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart, bool save = false)
         {
             // If the part does not contain a SharedStringTable, create one.
             if (shareStringPart.SharedStringTable == null)
@@ -266,20 +307,29 @@ namespace SAEON.OpenXML
 
             // The text does not exist in the part. Create the SharedStringItem and return its index.
             shareStringPart.SharedStringTable.AppendChild(new SharedStringItem(new Text(text)));
-            shareStringPart.SharedStringTable.Save();
-
+            if (save) shareStringPart.SharedStringTable.Save();
             return i;
         }
 
-        public static void SetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, string columnName, uint rowIndex, object value)
+        public static void SetCellValue(SpreadsheetDocument document, SheetData sheetData, string columnName, Row row, object value)
         {
-            if (value == null) return;
-            Cell cell = InsertCellInWorksheet(worksheetPart, columnName, rowIndex);
+            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
+            if (row == null) throw new ArgumentNullException(nameof(row));
+
+            if (value == null)
+            {
+                return;
+            }
+
+            Cell cell = InsertCellInWorksheet(sheetData, columnName, row);
             if (value is string)
             {
                 // Get the SharedStringTablePart. If it does not exist, create a new one.
                 SharedStringTablePart shareStringPart = document.WorkbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
-                if (shareStringPart == null) shareStringPart = document.WorkbookPart.AddNewPart<SharedStringTablePart>();
+                if (shareStringPart == null)
+                {
+                    shareStringPart = document.WorkbookPart.AddNewPart<SharedStringTablePart>();
+                }
 
                 // Insert the text into the SharedStringTablePart.
                 int index = InsertSharedStringItem((string)value, shareStringPart);
@@ -321,14 +371,43 @@ namespace SAEON.OpenXML
             }
         }
 
+        public static void SetCellValue(SpreadsheetDocument document, SheetData sheetData, string columnName, int rowIndex, object value)
+        {
+            var row = InsertRowInWorksheet(sheetData, rowIndex);
+            SetCellValue(document, sheetData, columnName, row, value);
+        }
+
+        public static void SetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, string columnName, Row row, object value)
+        {
+            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+            SetCellValue(document, sheetData, columnName, row, value);
+        }
+
         public static void SetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, string columnName, int rowIndex, object value)
         {
-            SetCellValue(document, worksheetPart, columnName, Convert.ToUInt32(rowIndex), value);
+            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+            SetCellValue(document, sheetData, columnName, rowIndex, value);
+        }
+
+        public static void SetCellValue(SpreadsheetDocument document, SheetData sheetData, int colIndex, Row row, object value)
+        {
+            SetCellValue(document, sheetData, GetColumnName(colIndex), row, value);
+        }
+
+        public static void SetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, int colIndex, Row row, object value)
+        {
+            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+            SetCellValue(document, sheetData, colIndex, row, value);
+        }
+
+        public static void SetCellValue(SpreadsheetDocument document, SheetData sheetData, int colIndex, int rowIndex, object value)
+        {
+            SetCellValue(document, sheetData, GetColumnName(colIndex), rowIndex, value);
         }
 
         public static void SetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, int colIndex, int rowIndex, object value)
         {
-            SetCellValue(document, worksheetPart, GetColumnName(colIndex), Convert.ToUInt32(rowIndex), value);
+            SetCellValue(document, worksheetPart, GetColumnName(colIndex), rowIndex, value);
         }
 
         public static object GetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, string columnName, int rowIndex)
@@ -336,7 +415,10 @@ namespace SAEON.OpenXML
             object result = null;
             Cell cell = worksheetPart.Worksheet.Descendants<Cell>().
               Where(c => c.CellReference == columnName + rowIndex).FirstOrDefault();
-            if (cell != null) result = GetCellValue(document, cell);
+            if (cell != null)
+            {
+                result = GetCellValue(document, cell);
+            }
             return result;
         }
 
@@ -349,6 +431,7 @@ namespace SAEON.OpenXML
         {
             object result = cell.InnerText;
             if (cell.DataType != null)
+            {
                 switch (cell.DataType.Value)
                 {
                     case CellValues.Boolean:
@@ -361,11 +444,18 @@ namespace SAEON.OpenXML
                         int i;
                         double d;
                         if (int.TryParse(cell.InnerText, out i))
+                        {
                             result = i;
+                        }
                         else if (double.TryParse(cell.InnerText, out d))
+                        {
                             result = d;
+                        }
                         else
+                        {
                             result = cell.InnerText;
+                        }
+
                         break;
                     case CellValues.SharedString:
                         // For shared strings, look up the value in the
@@ -382,6 +472,8 @@ namespace SAEON.OpenXML
                         }
                         break;
                 }
+            }
+
             return result;
         }
 
@@ -587,12 +679,13 @@ namespace SAEON.OpenXML
 
         public static void Save(SpreadsheetDocument document)
         {
-            document.WorkbookPart.Workbook.Save();
+            //document.WorkbookPart.Workbook.Save();
+            document.Save();
         }
 
         public static void Close(SpreadsheetDocument document)
         {
-            document.Close(); ;
+            document.Close();
         }
 
         public static void SaveAndClose(SpreadsheetDocument document)
@@ -647,7 +740,7 @@ namespace SAEON.OpenXML
                     c++;
                 }
             }
-            uint r = 2;
+            int r = 2;
             foreach (T d in data)
             {
                 c = 1;
@@ -663,7 +756,6 @@ namespace SAEON.OpenXML
                 r++;
             }
         }
-
         #endregion
     }
 }
