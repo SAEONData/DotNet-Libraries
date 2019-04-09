@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28729.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C3045C14-78B6-416B-BE90-9ED039C17482}"
 	ProjectSection(SolutionItems) = preProject
@@ -65,6 +65,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.Extensions.Logging", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.Extensions.Logging.ConsoleTests", "SAEON.Extensions.Logging.ConsoleTests\SAEON.Extensions.Logging.ConsoleTests.csproj", "{F5162B78-EC97-492D-BA7B-F13D247E6420}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.OpenXML.ConsoleTests", "SAEON.OpenXML.ConsoleTests\SAEON.OpenXML.ConsoleTests.csproj", "{4CD15722-9A31-4956-A119-358E9A67A862}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -119,6 +121,10 @@ Global
 		{F5162B78-EC97-492D-BA7B-F13D247E6420}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5162B78-EC97-492D-BA7B-F13D247E6420}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5162B78-EC97-492D-BA7B-F13D247E6420}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CD15722-9A31-4956-A119-358E9A67A862}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CD15722-9A31-4956-A119-358E9A67A862}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CD15722-9A31-4956-A119-358E9A67A862}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CD15722-9A31-4956-A119-358E9A67A862}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

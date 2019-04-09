@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SAEON.OpenXML
 {
@@ -429,33 +430,30 @@ namespace SAEON.OpenXML
 
         private static object GetCellValue(SpreadsheetDocument document, Cell cell)
         {
-            object result = cell.InnerText;
+            var text = cell.CellFormula == null ? cell.InnerText : cell.CellValue.InnerText;
+            if (text == "#N/A") text = null;
+            object result = text;
             if (cell.DataType != null)
             {
                 switch (cell.DataType.Value)
                 {
                     case CellValues.Boolean:
-                        result = cell.InnerText != "0";
+                        result = text != "0";
                         break;
                     case CellValues.Date:
-                        result = DateTime.FromOADate(double.Parse(cell.InnerText));
+                        result = DateTime.FromOADate(double.Parse(text));
                         break;
                     case CellValues.Number:
                         int i;
                         double d;
-                        if (int.TryParse(cell.InnerText, out i))
+                        if (int.TryParse(text, out i))
                         {
                             result = i;
                         }
-                        else if (double.TryParse(cell.InnerText, out d))
+                        else if (double.TryParse(text, out d))
                         {
                             result = d;
                         }
-                        else
-                        {
-                            result = cell.InnerText;
-                        }
-
                         break;
                     case CellValues.SharedString:
                         // For shared strings, look up the value in the
@@ -468,12 +466,11 @@ namespace SAEON.OpenXML
                         // the table.
                         if (stringTable != null)
                         {
-                            result = stringTable.SharedStringTable.ElementAt(int.Parse(cell.InnerText)).InnerText;
+                            result = stringTable.SharedStringTable.ElementAt(int.Parse(text)).InnerText;
                         }
                         break;
                 }
             }
-
             return result;
         }
 
@@ -694,9 +691,58 @@ namespace SAEON.OpenXML
             Close(document);
         }
 
+        public static Dictionary<string, string> GetDefinedNames(SpreadsheetDocument document)
+        {
+            var result = new Dictionary<String, String>();
+            var wbPart = document.WorkbookPart;
+            DefinedNames definedNames = wbPart.Workbook.DefinedNames;
+            if (definedNames != null)
+            {
+                foreach (DefinedName dn in definedNames)
+                    result.Add(dn.Name.Value, dn.Text);
+            }
+            return result;
+        }
         #endregion
 
         #region Utilities
+
+        public static (string sheetName, string colLeft, int rowTop, string colRight, int rowBottom) SplitRange(string range)
+        {
+            var splitSheet = range.Split('!');
+            var sheet = splitSheet[0];
+            var splitRange = splitSheet[1].Split(':');
+            var topLeft = SplitCellReference(splitRange[0]);
+            var bottomRight = SplitCellReference(splitRange[1]);
+            return (sheet, topLeft.col, topLeft.row, bottomRight.col, bottomRight.row);
+        }
+
+        public static (string col, int row) SplitCellReference(string cellReference)
+        {
+            var cellRef = cellReference.Replace("$", string.Empty);
+            var p = cellRef.IndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+            var col = cellRef.Substring(0, p);
+            var row = int.Parse(cellRef.Substring(p));
+            return (col, row);
+        }
+
+        public static object[,] GetRangeValues(SpreadsheetDocument doc, string range)
+        {
+            var (sheetName, colLeft, rowTop, colRight, rowBottom) = SplitRange(range);
+            var sheetPart = GetWorksheetPart(doc, sheetName);
+            var nCols = GetColumnIndex(colRight) - GetColumnIndex(colLeft) + 1;
+            var nRows = rowBottom - rowTop + 1;
+            var result = new object[nRows, nCols];
+            int colLeftIndex = GetColumnIndex(colLeft);
+            for (int row = rowTop; row < rowBottom+1; row++)
+            {
+                for (int col = colLeftIndex; col < GetColumnIndex(colRight)+1; col++)
+                {
+                    result[row-rowTop, col-colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
+                }
+            }
+            return result;
+        }
 
         public static object[,] LoadSpreadsheet(string fileName, string sheetName = "")
         {
@@ -715,11 +761,8 @@ namespace SAEON.OpenXML
                 {
                     foreach (Cell c in r.Elements<Cell>())
                     {
-                        string cRef = c.CellReference.Value;
-                        int p = cRef.IndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
-                        int col = GetColumnIndex(cRef.Substring(0, p));
-                        int row = int.Parse(cRef.Substring(p));
-                        result[row - 1, col - 1] = GetCellValue(document, c);
+                        var (col, row) = SplitCellReference(c.CellReference.Value);
+                        result[row - 1, GetColumnIndex(col) - 1] = GetCellValue(document, c);
                     }
                 }
                 return result;
