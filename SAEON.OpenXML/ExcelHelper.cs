@@ -433,7 +433,7 @@ namespace SAEON.OpenXML
             var text = cell.CellFormula == null ? cell.InnerText : cell.CellValue.InnerText;
             if (text == "#N/A") text = null;
             object result = text;
-            if (cell.DataType != null)
+            if ((result != null) && (cell.DataType != null))
             {
                 switch (cell.DataType.Value)
                 {
