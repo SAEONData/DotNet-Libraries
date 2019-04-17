@@ -67,6 +67,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.Extensions.Logging.Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.OpenXML.ConsoleTests", "SAEON.OpenXML.ConsoleTests\SAEON.OpenXML.ConsoleTests.csproj", "{4CD15722-9A31-4956-A119-358E9A67A862}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAEON.Logs.ConsoleTests", "SAEON.Logs.ConsoleTests\SAEON.Logs.ConsoleTests.csproj", "{D2787D8B-EE50-4C38-B192-F56F446C9603}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -125,6 +127,10 @@ Global
 		{4CD15722-9A31-4956-A119-358E9A67A862}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CD15722-9A31-4956-A119-358E9A67A862}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CD15722-9A31-4956-A119-358E9A67A862}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2787D8B-EE50-4C38-B192-F56F446C9603}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2787D8B-EE50-4C38-B192-F56F446C9603}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2787D8B-EE50-4C38-B192-F56F446C9603}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2787D8B-EE50-4C38-B192-F56F446C9603}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

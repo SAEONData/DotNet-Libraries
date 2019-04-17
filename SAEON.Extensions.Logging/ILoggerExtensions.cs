@@ -13,7 +13,9 @@ namespace SAEON.Extensions.Logging
 
         private static string GetTypeName(Type type, bool onlyName = false)
         {
-            return UseFullName && !onlyName ? type.FullName : type.Name;
+            //return UseFullName && !onlyName ? type.FullName : type.Name;
+            var typeName = type.IsGenericType ? type.Name.Split('`')[0] : type.Name;
+            return UseFullName && !onlyName ? $"{type.Namespace}.{typeName}" : typeName;
         }
 
         private static string GetParameters(LoggerParameters parameters)
@@ -57,14 +59,30 @@ namespace SAEON.Extensions.Logging
             return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})";
         }
 
-        private static string MethodSignature(Type type, string methodName, string entityTypeName, LoggerParameters parameters = null)
+        private static string MethodSignature(Type type, Type entityType, string methodName, LoggerParameters parameters = null)
         {
-            return $"{GetTypeName(type)}.{methodName}<{entityTypeName}>({GetParameters(parameters)})";
+            return $"{GetTypeName(type)}<{GetTypeName(entityType)}>.{methodName}({GetParameters(parameters)})";
         }
+
+        private static string MethodSignature(Type type, Type entityType, Type relatedEntityType, string methodName, LoggerParameters parameters = null)
+        {
+            return $"{GetTypeName(type)}<{GetTypeName(entityType)},{GetTypeName(relatedEntityType)}>.{methodName}({GetParameters(parameters)})";
+        }
+
 
         public static MethodCall MethodCall(this ILogger log, Type type, LoggerParameters parameters = null, [CallerMemberName] string methodName = "")
         {
             return new MethodCall(log, MethodSignature(type, methodName, parameters));
+        }
+
+        public static MethodCall MethodCall<TEntity>(this ILogger log, Type type, LoggerParameters parameters = null, [CallerMemberName] string methodName = "")
+        {
+            return new MethodCall(log, MethodSignature(type, typeof(TEntity), methodName, parameters));
+        }
+
+        public static MethodCall MethodCall<TEntity, TRelatedEntity>(this ILogger log, Type type, LoggerParameters parameters = null, [CallerMemberName] string methodName = "")
+        {
+            return new MethodCall(log, MethodSignature(type, typeof(TEntity), typeof(TRelatedEntity), methodName, parameters));
         }
 
         private static (string msg, object[] args) GetMsgAndArgs(string methodCall, string message, params object[] values)

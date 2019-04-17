@@ -12,7 +12,7 @@ using Serilog;
 using Serilog.Context;
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices; 
+using System.Runtime.CompilerServices;
 
 namespace SAEON.Logs
 {
@@ -74,8 +74,9 @@ namespace SAEON.Logs
 
         private static string GetTypeName(Type type, bool onlyName = false)
         {
-            return UseFullName && !onlyName ? type.FullName : type.Name;
-            //return UseFullName && !onlyName ? $"{type.Namespace}.{type.Name}" : type.Name;
+            //return UseFullName && !onlyName ? type.FullName : type.Name;
+            var typeName = type.IsGenericType ? type.Name.Split('`')[0] : type.Name;
+            return UseFullName && !onlyName ? $"{type.Namespace}.{typeName}" : typeName;
         }
 
         private static string GetParameters(ParameterList parameters)
@@ -116,17 +117,17 @@ namespace SAEON.Logs
 
         public static string MethodSignature(Type type, string methodName, ParameterList parameters = null)
         {
-            return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})";
+            return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})".Replace("..",".");
         }
 
-        public static string MethodSignature(Type type, string methodName, Type entityType, ParameterList parameters = null)
+        public static string MethodSignature(Type type, Type entityType, string methodName, ParameterList parameters = null)
         {
-            return $"{GetTypeName(type)}.{methodName}<{GetTypeName(entityType, true)}>({GetParameters(parameters)})";
+            return $"{GetTypeName(type)}<{GetTypeName(entityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".");
         }
 
-        public static string MethodSignature(Type type, string methodName, Type entityType, Type relatedEntityType, ParameterList parameters = null)
+        public static string MethodSignature(Type type, Type entityType, Type relatedEntityType, string methodName, ParameterList parameters = null)
         {
-            return $"{GetTypeName(type)}.{methodName}<{GetTypeName(entityType, true)},{GetTypeName(relatedEntityType, true)}>({GetParameters(parameters)})";
+            return $"{GetTypeName(type)}<{GetTypeName(entityType)},{GetTypeName(relatedEntityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".");
         }
 
         public static IDisposable MethodCall(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
@@ -139,7 +140,7 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var method = MethodSignature(type, methodName, typeof(TEntity), parameters);
+            var method = MethodSignature(type, typeof(TEntity), methodName, parameters);
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
@@ -147,7 +148,7 @@ namespace SAEON.Logs
 
         public static IDisposable MethodCall<TEntity, TRelatedEntity>(Type type, ParameterList parameters = null, [CallerMemberName] string methodName = "")
         {
-            var method = MethodSignature(type, methodName, typeof(TEntity), typeof(TRelatedEntity), parameters);
+            var method = MethodSignature(type, typeof(TEntity), typeof(TRelatedEntity), methodName, parameters);
             var result = LogContext.PushProperty("Method", method);
             Log.Verbose(method);
             return result;
