@@ -11,6 +11,7 @@ using System.Configuration;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace SAEON.Azure.CosmosDB
@@ -25,7 +26,9 @@ namespace SAEON.Azure.CosmosDB
 
     public class EpochDate
     {
+        [JsonProperty("dateTime")]
         public DateTime DateTime { get; set; } = DateTime.MinValue;
+        [JsonProperty("epoch")]
         public int Epoch
         {
             get
@@ -152,19 +155,22 @@ namespace SAEON.Azure.CosmosDB
                         });
                     foreach (var prop in typeof(T).GetProperties().Where(i => i.PropertyType == typeof(EpochDate)))
                     {
+                        var propName = prop.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? prop.Name;
                         collection.IndexingPolicy.IncludedPaths.Add(new IncludedPath
                         {
-                            Path = $"/{prop.Name}/Epoch/?",
+                            Path = $"/{propName}/epoch/?",
                             Indexes = new Collection<Index> { { new RangeIndex(DataType.Number, -1) } }
                         });
                     };
                     foreach (var subProp in typeof(T).GetProperties().Where(i => i.PropertyType == typeof(AzureSubDocument)))
                     {
+                        var subPropName = subProp.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? subProp.Name;
                         foreach (var prop in subProp.GetType().GetProperties().Where(i => i.PropertyType == typeof(EpochDate)))
                         {
+                            var propName = prop.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? prop.Name;
                             collection.IndexingPolicy.IncludedPaths.Add(new IncludedPath
                             {
-                                Path = $"/{subProp.Name}/{prop.Name}/Epoch/?",
+                                Path = $"/{subPropName}/{propName}/epoch/?",
                                 Indexes = new Collection<Index> { { new RangeIndex(DataType.Number, -1) } }
                             });
                         }
@@ -198,6 +204,7 @@ namespace SAEON.Azure.CosmosDB
                     {
                         if (e.StatusCode == HttpStatusCode.NotFound)
                         {
+                            Logging.Verbose("Item iwth ID {ID} not found", id);
                             return default;
                         }
                         else
@@ -214,6 +221,49 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
+        public async Task<T> GetItemAsync(string id, object partitionKey)
+        {
+            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id }, { "PartitionKey", partitionKey } }))
+            {
+                try
+                {
+                    try
+                    {
+                        if (AutoEnsureCollection) await EnsureCollectionAsync();
+                        Document document = await client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id), new RequestOptions { PartitionKey = new PartitionKey(partitionKey) });
+                        return (T)(dynamic)document;
+                    }
+                    catch (DocumentClientException e)
+                    {
+                        if (e.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            Logging.Verbose("Item iwth ID {ID}, PartitionKey {PartitionKey} not found", id, partitionKey);
+                            return default;
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<T> GetItemAsync(string id, Expression<Func<T, object>> partitionKeyExpression, T item)
+        {
+            return await GetItemAsync(id, partitionKeyExpression.Compile()(item));
+        }
+
+        public async Task<T> GetItemAsync(Expression<Func<T, string>> idExpression, Expression<Func<T, object>> partitionKeyExpression, T item)
+        {
+            return await GetItemAsync(idExpression.Compile()(item), partitionKeyExpression.Compile()(item));
+        }
+
         public async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
         {
             using (Logging.MethodCall<T>(GetType()))
@@ -221,8 +271,7 @@ namespace SAEON.Azure.CosmosDB
                 try
                 {
                     if (AutoEnsureCollection) await EnsureCollectionAsync();
-                    IDocumentQuery<T> query = client.CreateDocumentQuery<T>(
-                    UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions { MaxItemCount = -1 }).Where(predicate).AsDocumentQuery();
+                    IDocumentQuery<T> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions { MaxItemCount = -1 }).Where(predicate).AsDocumentQuery();
                     List<T> results = new List<T>();
                     while (query.HasMoreResults)
                     {
@@ -272,6 +321,12 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
+        public async Task<Document> UpdateItemAsync(Expression<Func<T, string>> idExpression, T item)
+        {
+            return await UpdateItemAsync(idExpression.Compile()(item), item);
+        }
+
+
         public async Task<Document> UpsertItemAsync(string id, T item)
         {
             using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id } }))
@@ -279,15 +334,7 @@ namespace SAEON.Azure.CosmosDB
                 try
                 {
                     if (AutoEnsureCollection) await EnsureCollectionAsync();
-                    var result = await GetItemAsync(id);
-                    if (result == null)
-                    {
-                        return await CreateItemAsync(item);
-                    }
-                    else
-                    {
-                        return await UpdateItemAsync(id, item);
-                    }
+                    return await client.UpsertDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item);
                 }
                 catch (Exception ex)
                 {
@@ -295,6 +342,38 @@ namespace SAEON.Azure.CosmosDB
                     throw;
                 }
             }
+        }
+
+        public async Task<Document> UpsertItemAsync(Expression<Func<T, string>> idExpression, T item)
+        {
+            return await UpsertItemAsync(idExpression.Compile()(item), item);
+        }
+
+        public async Task<Document> UpsertItemAsync(string id, object partitionKey, T item)
+        {
+            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id }, { "PartitionKey", partitionKey } }))
+            {
+                try
+                {
+                    if (AutoEnsureCollection) await EnsureCollectionAsync();
+                    return await client.UpsertDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item, new RequestOptions { PartitionKey = new PartitionKey(partitionKey) });
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<Document> UpsertItemAsync(string id, Expression<Func<T, object>> partitionKeyExpression, T item)
+        {
+            return await UpsertItemAsync(id, partitionKeyExpression.Compile()(item), item);
+        }
+
+        public async Task<Document> UpsertItemAsync(Expression<Func<T, string>> idExpression, Expression<Func<T, object>> partitionKeyExpression, T item)
+        {
+            return await UpsertItemAsync(idExpression.Compile()(item), partitionKeyExpression.Compile()(item), item);
         }
 
         public async Task<Document> DeleteItemAsync(string id)
@@ -313,6 +392,78 @@ namespace SAEON.Azure.CosmosDB
                 }
             }
         }
+
+        public async Task<Document> DeleteItemAsync(string id, object partitionKey)
+        {
+            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id }, { "PartitionKey", partitionKey } }))
+            {
+                try
+                {
+                    if (AutoEnsureCollection) await EnsureCollectionAsync();
+                    return await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id), new RequestOptions { PartitionKey = new PartitionKey(partitionKey) });
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<Document> DeleteItemAsync(string id, Expression<Func<T, object>> partitionKeyExpression, T item)
+        {
+            return await DeleteItemAsync(id, partitionKeyExpression.Compile()(item));
+        }
+
+        public async Task<Document> DeleteItemAsync(Expression<Func<T, string>> idExpression, Expression<Func<T, object>> partitionKeyExpression, T item)
+        {
+            return await DeleteItemAsync(idExpression.Compile()(item), partitionKeyExpression.Compile()(item));
+        }
+
+        public async Task DeleteItemsAsync(Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
+        {
+            using (Logging.MethodCall<T>(GetType()))
+            {
+                try
+                {
+                    if (AutoEnsureCollection) await EnsureCollectionAsync();
+                    IQueryable<string> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId),
+                        new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = enableCrossPartition }).Where(predicate).Select(idExpression);
+                    foreach (var id in query)
+                    {
+                        await DeleteItemAsync(id);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task DeleteItemsAsync(Expression<Func<T, string>> idExpression, object partitionKey, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
+        {
+            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey } }))
+            {
+                try
+                {
+                    if (AutoEnsureCollection) await EnsureCollectionAsync();
+                    IQueryable<string> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId),
+                        new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = enableCrossPartition }).Where(predicate).Select(idExpression);
+                    foreach (var id in query)
+                    {
+                        await DeleteItemAsync(id, partitionKey);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
         #endregion
     }
 

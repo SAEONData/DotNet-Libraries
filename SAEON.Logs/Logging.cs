@@ -76,7 +76,7 @@ namespace SAEON.Logs
         {
             //return UseFullName && !onlyName ? type.FullName : type.Name;
             var typeName = type.IsGenericType ? type.Name.Split('`')[0] : type.Name;
-            return UseFullName && !onlyName ? $"{type.Namespace}.{typeName}" : typeName;
+            return UseFullName && !onlyName ? $"{type.Namespace}.{typeName}".TrimStart('.') : typeName;
         }
 
         private static string GetParameters(ParameterList parameters)
