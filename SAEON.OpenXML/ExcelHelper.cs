@@ -10,12 +10,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace SAEON.OpenXML
 {
     public static class ExcelHelper
     {
+        public static bool UseSharedStrings { get; set; } = true;
 
         #region Sheets 
         public static Sheet GetSheet(SpreadsheetDocument document, int sheetId)
@@ -115,7 +115,11 @@ namespace SAEON.OpenXML
         #region Rows
         public static Row InsertRowInWorksheet(SheetData sheetData, int rowIndex)
         {
-            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
+            if (sheetData == null)
+            {
+                throw new ArgumentNullException(nameof(sheetData));
+            }
+
             Row row = sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).FirstOrDefault();
             if (row == null)
             {
@@ -149,7 +153,11 @@ namespace SAEON.OpenXML
                 Width = width
             };
             columns.Append(column);
-            if (save) worksheetPart.Worksheet.Save();
+            if (save)
+            {
+                worksheetPart.Worksheet.Save();
+            }
+
             return column;
         }
 
@@ -169,7 +177,10 @@ namespace SAEON.OpenXML
                     columns.Append(column);
                 }
                 worksheetPart.Worksheet.Append(columns);
-                if (save) worksheetPart.Worksheet.Save();
+                if (save)
+                {
+                    worksheetPart.Worksheet.Save();
+                }
             }
             return worksheetPart.Worksheet.Descendants<Column>().ElementAt(index - 1);
         }
@@ -227,8 +238,15 @@ namespace SAEON.OpenXML
         // If the cell already exists, returns it. 
         private static Cell InsertCellInWorksheet(SheetData sheetData, string columnName, Row row)
         {
-            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (sheetData == null)
+            {
+                throw new ArgumentNullException(nameof(sheetData));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
 
             string cellReference = columnName + row.RowIndex;
 
@@ -308,14 +326,25 @@ namespace SAEON.OpenXML
 
             // The text does not exist in the part. Create the SharedStringItem and return its index.
             shareStringPart.SharedStringTable.AppendChild(new SharedStringItem(new Text(text)));
-            if (save) shareStringPart.SharedStringTable.Save();
+            if (save)
+            {
+                shareStringPart.SharedStringTable.Save();
+            }
+
             return i;
         }
 
         public static void SetCellValue(SpreadsheetDocument document, SheetData sheetData, string columnName, Row row, object value)
         {
-            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
-            if (row == null) throw new ArgumentNullException(nameof(row));
+            if (sheetData == null)
+            {
+                throw new ArgumentNullException(nameof(sheetData));
+            }
+
+            if (row == null)
+            {
+                throw new ArgumentNullException(nameof(row));
+            }
 
             if (value == null)
             {
@@ -323,20 +352,28 @@ namespace SAEON.OpenXML
             }
 
             Cell cell = InsertCellInWorksheet(sheetData, columnName, row);
-            if (value is string)
+            if (value is string text)
             {
-                // Get the SharedStringTablePart. If it does not exist, create a new one.
-                SharedStringTablePart shareStringPart = document.WorkbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
-                if (shareStringPart == null)
+                if (!UseSharedStrings)
                 {
-                    shareStringPart = document.WorkbookPart.AddNewPart<SharedStringTablePart>();
+                    cell.InlineString = new InlineString(new Text(text));
+                    cell.DataType = new EnumValue<CellValues>(CellValues.InlineString);
                 }
+                else
+                {
+                    // Get the SharedStringTablePart. If it does not exist, create a new one.
+                    SharedStringTablePart shareStringPart = document.WorkbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
+                    if (shareStringPart == null)
+                    {
+                        shareStringPart = document.WorkbookPart.AddNewPart<SharedStringTablePart>();
+                    }
 
-                // Insert the text into the SharedStringTablePart.
-                int index = InsertSharedStringItem((string)value, shareStringPart);
-                // Set the value of cell
-                cell.CellValue = new CellValue(index.ToString());
-                cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+                    // Insert the text into the SharedStringTablePart.
+                    int index = InsertSharedStringItem((string)value, shareStringPart);
+                    // Set the value of cell
+                    cell.CellValue = new CellValue(index.ToString());
+                    cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
+                }
             }
             else if ((value is int) || (value is double) || (value is float) || (value is decimal))
             {
@@ -431,7 +468,11 @@ namespace SAEON.OpenXML
         private static object GetCellValue(SpreadsheetDocument document, Cell cell)
         {
             var text = cell.CellFormula == null ? cell.InnerText : cell.CellValue.InnerText;
-            if (text == "#N/A") text = null;
+            if (text == "#N/A")
+            {
+                text = null;
+            }
+
             object result = text;
             if ((result != null) && (cell.DataType != null))
             {
@@ -454,6 +495,9 @@ namespace SAEON.OpenXML
                         {
                             result = d;
                         }
+                        break;
+                    case CellValues.InlineString:
+                        result = text;
                         break;
                     case CellValues.SharedString:
                         // For shared strings, look up the value in the
@@ -699,7 +743,9 @@ namespace SAEON.OpenXML
             if (definedNames != null)
             {
                 foreach (DefinedName dn in definedNames)
+                {
                     result.Add(dn.Name.Value, dn.Text);
+                }
             }
             return result;
         }
@@ -734,11 +780,11 @@ namespace SAEON.OpenXML
             var nRows = rowBottom - rowTop + 1;
             var result = new object[nRows, nCols];
             int colLeftIndex = GetColumnIndex(colLeft);
-            for (int row = rowTop; row < rowBottom+1; row++)
+            for (int row = rowTop; row < rowBottom + 1; row++)
             {
-                for (int col = colLeftIndex; col < GetColumnIndex(colRight)+1; col++)
+                for (int col = colLeftIndex; col < GetColumnIndex(colRight) + 1; col++)
                 {
-                    result[row-rowTop, col-colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
+                    result[row - rowTop, col - colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
                 }
             }
             return result;
