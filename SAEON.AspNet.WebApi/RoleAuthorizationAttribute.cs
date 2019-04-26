@@ -11,7 +11,7 @@ namespace SAEON.AspNet.WebApi
 { 
     public class RoleAuthorizationAttribute : AuthorizationFilterAttribute
     {
-        private string role;
+        private readonly string role;
 
         public RoleAuthorizationAttribute() : base() { }
 

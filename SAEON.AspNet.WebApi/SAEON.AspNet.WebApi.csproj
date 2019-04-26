@@ -9,7 +9,7 @@
         <Description>Asp.Net WebApi for SAEON in .Net</Description>
         <Copyright>Copyright © 2017-2019 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.27</Version>
+        <Version>1.0.28</Version>
         <PackageTags />
         <PackageReleaseNotes />
     </PropertyGroup>
