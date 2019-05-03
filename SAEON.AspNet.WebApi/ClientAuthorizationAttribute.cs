@@ -1,4 +1,5 @@
 ﻿using SAEON.Logs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -9,23 +10,30 @@ using System.Web.Http.Filters;
 
 namespace SAEON.AspNet.WebApi
 {
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class ClientAuthorizationAttribute : AuthorizationFilterAttribute
     {
-        private List<string> Clients { get;  } = new List<string>();
+        private List<string> Clients { get; } = new List<string>();
 
         public ClientAuthorizationAttribute() : base() { }
-         
-        public ClientAuthorizationAttribute(string client) : this()  
+
+        public ClientAuthorizationAttribute(string client) : this()
         {
-            if (!Clients.Any(i => i == client)) Clients.Add(client);
+            if (!Clients.Any(i => i == client))
+            {
+                Clients.Add(client);
+            }
         }
 
         public ClientAuthorizationAttribute(params string[] clients) : this()
         {
             foreach (var client in clients)
             {
-                if (!Clients.Any(i => i == client)) Clients.Add(client);
-            }  
+                if (!Clients.Any(i => i == client))
+                {
+                    Clients.Add(client);
+                }
+            }
         }
 
         public override void OnAuthorization(HttpActionContext actionContext)
@@ -47,8 +55,7 @@ namespace SAEON.AspNet.WebApi
                 if (!found)
                 {
                     Logging.Error("Client Authorization Failed");
-                    actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Forbidden);
-                    actionContext.Response.ReasonPhrase = "Client Authorization Failed";
+                    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Client Authorization Failed");
                     return;
                 }
             }
