@@ -16,7 +16,7 @@
   <ItemGroup>
     <PackageReference Include="AutoQueryable.AspNet.Filter" Version="1.7.0" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="SAEON.Logs" Version="1.0.42" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
   </ItemGroup>
