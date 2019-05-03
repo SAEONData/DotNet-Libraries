@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net461;net472;</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Tim Parker-Nance</Authors>
+    <Company>South African Environmental Observation Network (SAEON)</Company>
+    <Product>SAEON .Net Libraries</Product>
+    <Description>Asp.Net Common for SAEON in .Net</Description>
+    <Copyright>Copyright © 2019 South African Environmental Observation Network (SAEON)</Copyright>
+    <ApplicationIcon>SAEON.ico</ApplicationIcon>
+    <Version>1.0.2</Version>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="echo rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet" />
+  </Target>
+
+</Project>
