@@ -1,4 +1,5 @@
-﻿using SAEON.Logs;
+﻿using SAEON.AspNet.Common;
+using SAEON.Logs;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -16,7 +17,6 @@ namespace SAEON.AspNet.WebApi
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class TenantAuthorizationAttribute : AuthorizationFilterAttribute
     {
-        private static readonly string tenantHeaderId = "x-data-tenant";
         public List<string> Tenants { get; private set; } = new List<string>();
         public string DefaultTenant { get; private set; } = string.Empty;
 
@@ -24,9 +24,9 @@ namespace SAEON.AspNet.WebApi
         {
             //using (Logging.MethodCall(GetType()))
             {
-                var tenants = (ConfigurationManager.AppSettings["Tenants"] ?? string.Empty).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                var tenants = (ConfigurationManager.AppSettings[Constants.Tenants] ?? string.Empty).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 Tenants.AddRange(tenants);
-                DefaultTenant = (ConfigurationManager.AppSettings["DefaultTenant"] ?? string.Empty);
+                DefaultTenant = (ConfigurationManager.AppSettings[Constants.DefaultTenant] ?? string.Empty);
                 //Logging.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant}", Tenants.ToArray(), DefaultTenant);
             }
         }
@@ -44,13 +44,13 @@ namespace SAEON.AspNet.WebApi
 
         private void DoTenantAuthorization(HttpActionContext actionContext)
         {
-            if (!actionContext.Request.Headers.Contains(tenantHeaderId))
+            if (!actionContext.Request.Headers.Contains(Constants.TenantHeaderId))
             {
                 Logging.Error("Tenant Authorization Failed (No tenant header)");
                 actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenant header)");
                 return;
             }
-            var tenant = actionContext.Request.Headers.GetValues(tenantHeaderId).FirstOrDefault();
+            var tenant = actionContext.Request.Headers.GetValues(Constants.TenantHeaderId).FirstOrDefault();
             Logging.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant} Tenant: {Tenant}", Tenants.ToArray(), DefaultTenant, tenant);
             if (string.IsNullOrWhiteSpace(tenant))
             {
@@ -101,7 +101,7 @@ namespace SAEON.AspNet.WebApi
                 throw new ArgumentNullException(nameof(request));
             }
 
-            var tenant = request.Headers.Contains(tenantHeaderId) ? request.Headers.GetValues(TenantAuthorizationAttribute.tenantHeaderId).FirstOrDefault() : null;
+            var tenant = request.Headers.Contains(Constants.TenantHeaderId) ? request.Headers.GetValues(Constants.TenantHeaderId).FirstOrDefault() : null;
             if (string.IsNullOrWhiteSpace(tenant))
             {
                 throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.NotFound, "Tenant header not found"));

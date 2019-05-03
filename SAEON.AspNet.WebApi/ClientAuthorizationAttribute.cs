@@ -1,4 +1,5 @@
-﻿using SAEON.Logs;
+﻿using SAEON.AspNet.Common;
+using SAEON.Logs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,7 +47,7 @@ namespace SAEON.AspNet.WebApi
                 foreach (var client in Clients)
                 {
                     Logging.Verbose("Client: {client} Claims: {claims}", client, principal.Claims.Select(i => i.Type + "=" + i.Value));
-                    if (principal.HasClaim(x => x.Type == "client_id" && x.Value == client))
+                    if (principal.HasClaim(x => x.Type == Constants.ClaimClientId && x.Value == client))
                     {
                         found = true;
                         break;

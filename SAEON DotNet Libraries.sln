@@ -69,6 +69,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.OpenXML.ConsoleTests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAEON.Logs.ConsoleTests", "SAEON.Logs.ConsoleTests\SAEON.Logs.ConsoleTests.csproj", "{D2787D8B-EE50-4C38-B192-F56F446C9603}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAEON.AspNet.Common", "SAEON.AspNet.Common\SAEON.AspNet.Common.csproj", "{08028905-2B1F-46B3-9FC9-E6DD2D84A54E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -131,6 +133,10 @@ Global
 		{D2787D8B-EE50-4C38-B192-F56F446C9603}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2787D8B-EE50-4C38-B192-F56F446C9603}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2787D8B-EE50-4C38-B192-F56F446C9603}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08028905-2B1F-46B3-9FC9-E6DD2D84A54E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08028905-2B1F-46B3-9FC9-E6DD2D84A54E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08028905-2B1F-46B3-9FC9-E6DD2D84A54E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08028905-2B1F-46B3-9FC9-E6DD2D84A54E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

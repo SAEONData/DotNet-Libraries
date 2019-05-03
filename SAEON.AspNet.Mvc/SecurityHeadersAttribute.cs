@@ -1,4 +1,5 @@
-﻿using SAEON.Logs;
+﻿using SAEON.AspNet.Common;
+using SAEON.Logs;
 using System.Configuration;
 using System.Linq;
 using System.Web.Mvc;
@@ -12,7 +13,7 @@ namespace SAEON.AspNet.Mvc
             using (Logging.MethodCall(this.GetType()))
             {
                 string policy = null;
-                policy = ConfigurationManager.AppSettings["ContentSecurityPolicy"]; 
+                policy = ConfigurationManager.AppSettings[Constants.ContentSecurityPolicy]; 
                 if (!string.IsNullOrWhiteSpace(policy) && (context.Result is ViewResult result))
                 { 
                     Logging.Verbose("ContentSecurityPolicy: {policy}", policy);
