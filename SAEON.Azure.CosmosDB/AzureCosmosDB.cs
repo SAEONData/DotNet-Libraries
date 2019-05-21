@@ -315,9 +315,9 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<T> GetItemAsync(string id, object partitionKey)
+        public async Task<T> GetItemAsync(object partitionKey, string id)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id }, { "PartitionKey", partitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey }, { "Id", id } }))
             {
                 try
                 {
@@ -352,14 +352,14 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<T> GetItemAsync(string id, Expression<Func<T, object>> partitionKeyExpression, T item)
+        public async Task<T> GetItemAsync(Expression<Func<T, object>> partitionKeyExpression, string id, T item)
         {
-            return await GetItemAsync(id, partitionKeyExpression.Compile()(item));
+            return await GetItemAsync(partitionKeyExpression.Compile()(item), id);
         }
 
-        public async Task<T> GetItemAsync(Expression<Func<T, string>> idExpression, Expression<Func<T, object>> partitionKeyExpression, T item)
+        public async Task<T> GetItemAsync(Expression<Func<T, object>> partitionKeyExpression, Expression<Func<T, string>> idExpression, T item)
         {
-            return await GetItemAsync(idExpression.Compile()(item), partitionKeyExpression.Compile()(item));
+            return await GetItemAsync(partitionKeyExpression.Compile()(item), idExpression.Compile()(item));
         }
 
         public async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
@@ -373,8 +373,8 @@ namespace SAEON.Azure.CosmosDB
                         await EnsureCollectionAsync();
                     }
 
-                    IDocumentQuery<T> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions { MaxItemCount = -1 }).Where(predicate).AsDocumentQuery();
-                    List<T> results = new List<T>();
+                    var query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions { MaxItemCount = -1 }).Where(predicate).AsDocumentQuery();
+                    var results = new List<T>();
                     while (query.HasMoreResults)
                     {
                         results.AddRange(await query.ExecuteNextAsync<T>());
@@ -671,6 +671,38 @@ namespace SAEON.Azure.CosmosDB
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
                     var cost = new AzureCost();
+                    foreach (var item in items)
+                    {
+                        var response = await UpsertItemAsync(item);
+                        cost.NumberOfDocuments++;
+                        cost += response.cost;
+                    }
+                    stopWatch.Stop();
+                    cost.Duration = stopWatch.Elapsed;
+                    return cost;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<AzureCost> BulkUpsertItemsAsync(List<T> items)
+        {
+            using (Logging.MethodCall<T>(GetType()))
+            {
+                try
+                {
+                    if (AutoEnsureCollection)
+                    {
+                        await EnsureCollectionAsync();
+                    }
+
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    var cost = new AzureCost();
                     //foreach (var item in items)
                     //{
                     //    var response = await UpsertItemAsync(item);
@@ -898,9 +930,9 @@ namespace SAEON.Azure.CosmosDB
         }
 
 
-        public async Task<(T item, AzureCost cost)> DeleteItemAsync(string id, object partitionKey)
+        public async Task<(T item, AzureCost cost)> DeleteItemAsync(object partitionKey, string id)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id }, { "PartitionKey", partitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey }, { "Id", id }}))
             {
                 try
                 {
@@ -925,7 +957,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, AzureCost cost)> DeleteItemAsync(T item, object partitionKey)
         {
-            return await DeleteItemAsync(item.Id, partitionKey);
+            return await DeleteItemAsync(partitionKey, item.Id);
         }
 
         public async Task<(T item, AzureCost cost)> DeleteItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
@@ -965,7 +997,7 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<AzureCost> DeleteItemsAsync(Expression<Func<T, string>> idExpression, object partitionKey, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
+        public async Task<AzureCost> DeleteItemsAsync(object partitionKey, Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
         {
             using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey } }))
             {
@@ -983,7 +1015,7 @@ namespace SAEON.Azure.CosmosDB
                     var cost = new AzureCost();
                     foreach (var id in query)
                     {
-                        var response = await DeleteItemAsync(id, partitionKey);
+                        var response = await DeleteItemAsync(partitionKey, id);
                         cost.NumberOfDocuments++;
                         cost += response.cost;
                     }
@@ -999,7 +1031,7 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<AzureCost> DeleteItemsAsync(string partitionKeyColumn, string whereColumn, object whereValue, bool enableCrossPartition = false)
+        public async Task<AzureCost> BulkDeleteItemsAsync(object partitionKey, Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
@@ -1018,12 +1050,10 @@ namespace SAEON.Azure.CosmosDB
                     try
                     {
                         await LoadCollectionAsync();
-                        Logging.Verbose("Client: {Client} Database: {Database} Collection: {Collection}", client != null, database != null, collection != null);
-
-                        var sql = $"Select o.{partitionKeyColumn} partitionKey, o.id from Observations o where o.{whereColumn} = \"{whereValue}\"";
-                        Logging.Information("SQL: {sql}", sql);
-                        var query = client.CreateDocumentQuery<Tuple<string,object>>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), sql, new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = enableCrossPartition });
-                        var items = query.Select(i => new Tuple<string,string>(i.Item1, i.Item2.ToString())).ToList();
+                        IQueryable<string> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId),
+                            new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = enableCrossPartition }).Where(predicate).Select(idExpression);
+                        var items = query.AsEnumerable().Select(i => new Tuple<string, string>(partitionKey.ToString(), i)).ToList();
+                        Logging.Information("Items: {Count} {@Items}", items.Count, items);
 
                         // Set retry options high for initialization (default values).
                         client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
