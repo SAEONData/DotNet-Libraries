@@ -4,8 +4,6 @@
     {
         public static readonly string AcceptEncoding = "Accept-Encoding";
         public static readonly string ApplicationJson = "application/json";
-        public static readonly string ApplicationOctetStream = "application/octet-stream";
-        public static readonly string ApplicationZip = "application/zip";
         public static readonly string ClaimClientId = "client_id";
         public static readonly string ClaimRole = "role";
         public static readonly string ClaimSubject = "sub";

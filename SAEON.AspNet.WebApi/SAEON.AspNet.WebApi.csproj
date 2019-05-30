@@ -16,7 +16,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
-        <PackageReference Include="SAEON.AspNet.Common" Version="1.0.8" />
+        <PackageReference Include="SAEON.AspNet.Common" Version="1.0.9" />
         <PackageReference Include="SAEON.Logs" Version="1.0.42" />
     </ItemGroup>
 
