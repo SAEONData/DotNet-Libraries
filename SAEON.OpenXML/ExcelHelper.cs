@@ -17,7 +17,7 @@ namespace SAEON.OpenXML
     {
         public static bool UseSharedStrings { get; set; } = true;
 
-        #region Sheets 
+        #region Sheets
         public static Sheet GetSheet(SpreadsheetDocument document, int sheetId)
         {
             return document.WorkbookPart.Workbook.Descendants<Sheet>().Where(s => s.SheetId.Value == sheetId).FirstOrDefault();
@@ -89,7 +89,7 @@ namespace SAEON.OpenXML
                     }
                     Logging.Verbose("sheetId: {sheetId}", sheetId);
 
-                    // Give the new worksheet a name. 
+                    // Give the new worksheet a name.
                     if (string.IsNullOrEmpty(sheetName))
                     {
                         sheetName = "Sheet" + sheetId;
@@ -234,8 +234,8 @@ namespace SAEON.OpenXML
 
         #region Cells
 
-        // Given a column name, a Row, and a SheetData, inserts a cell into the worksheet. 
-        // If the cell already exists, returns it. 
+        // Given a column name, a Row, and a SheetData, inserts a cell into the worksheet.
+        // If the cell already exists, returns it.
         private static Cell InsertCellInWorksheet(SheetData sheetData, string columnName, Row row)
         {
             if (sheetData == null)
@@ -250,7 +250,7 @@ namespace SAEON.OpenXML
 
             string cellReference = columnName + row.RowIndex;
 
-            // If there is not a cell with the specified column name, insert one.  
+            // If there is not a cell with the specified column name, insert one.
             Cell cell = row.Elements<Cell>().Where(c => c.CellReference.Value == cellReference).FirstOrDefault();
             if (cell != null)
             {
@@ -277,31 +277,31 @@ namespace SAEON.OpenXML
             }
         }
 
-        // Given a column name, a Row, and a SheetDatam inserts a cell into the worksheet. 
-        // If the cell already exists, returns it. 
+        // Given a column name, a Row, and a SheetDatam inserts a cell into the worksheet.
+        // If the cell already exists, returns it.
         private static Cell InsertCellInWorksheet(SheetData sheetData, string columnName, int rowIndex)
         {
             var row = InsertRowInWorksheet(sheetData, rowIndex);
             return InsertCellInWorksheet(sheetData, columnName, row);
         }
 
-        // Given a column name, a Row, and a WorksheetPart, inserts a cell into the worksheet. 
-        // If the cell already exists, returns it. 
+        // Given a column name, a Row, and a WorksheetPart, inserts a cell into the worksheet.
+        // If the cell already exists, returns it.
         private static Cell InsertCellInWorksheet(WorksheetPart worksheetPart, string columnName, Row row)
         {
             SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
             return InsertCellInWorksheet(sheetData, columnName, row);
         }
 
-        // Given a column name, a row index, and a WorksheetPart, inserts a cell into the worksheet. 
-        // If the cell already exists, returns it. 
+        // Given a column name, a row index, and a WorksheetPart, inserts a cell into the worksheet.
+        // If the cell already exists, returns it.
         private static Cell InsertCellInWorksheet(WorksheetPart worksheetPart, string columnName, int rowIndex)
         {
             SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
             return InsertCellInWorksheet(sheetData, columnName, rowIndex);
         }
 
-        // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text 
+        // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text
         // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
         private static int InsertSharedStringItem(string text, SharedStringTablePart shareStringPart, bool save = false)
         {
@@ -375,12 +375,13 @@ namespace SAEON.OpenXML
                     cell.DataType = new EnumValue<CellValues>(CellValues.SharedString);
                 }
             }
-            else if ((value is int) || (value is double) || (value is float) || (value is decimal))
+            else if ((value is int) || value is long || (value is double) || (value is float) || (value is decimal))
             {
                 cell.CellValue = new CellValue(value.ToString());
                 cell.DataType = new EnumValue<CellValues>(CellValues.Number);
             }
             else if (((value is int?) && ((int?)value).HasValue) ||
+                     ((value is long?) && ((long?)value).HasValue) ||
                      ((value is double?) && ((double?)value).HasValue) ||
                      ((value is float?) && ((float?)value).HasValue) ||
                      ((value is decimal?) && ((decimal?)value).HasValue))
@@ -485,13 +486,11 @@ namespace SAEON.OpenXML
                         result = DateTime.FromOADate(double.Parse(text));
                         break;
                     case CellValues.Number:
-                        int i;
-                        double d;
-                        if (int.TryParse(text, out i))
+                        if (int.TryParse(text, out int i))
                         {
                             result = i;
                         }
-                        else if (double.TryParse(text, out d))
+                        else if (double.TryParse(text, out double d))
                         {
                             result = d;
                         }
@@ -504,9 +503,9 @@ namespace SAEON.OpenXML
                         // shared strings table.
                         var stringTable = document.WorkbookPart.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
 
-                        // If the shared string table is missing, something 
+                        // If the shared string table is missing, something
                         // is wrong. Return the index that is in
-                        // the cell. Otherwise, look up the correct text in 
+                        // the cell. Otherwise, look up the correct text in
                         // the table.
                         if (stringTable != null)
                         {
