@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net461;net472;netcoreapp2.2;netstandard2.0;</TargetFrameworks>
+    <TargetFrameworks>net472;netcoreapp2.2;netstandard2.0;</TargetFrameworks>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
     <Authors>Tim Parker-Nance</Authors>
     <Company>South African Environmental Observation Network (SAEON)</Company>
@@ -9,7 +9,7 @@
     <Description>OpenXML utilities for SAEON .Net</Description>
     <Copyright>Copyright © 2017-2019 South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.46</Version>
+    <Version>1.0.47</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -22,7 +22,7 @@
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.9.1" />
-    <PackageReference Include="SAEON.Logs" Version="1.0.44" />
+    <PackageReference Include="SAEON.Logs" Version="1.0.46" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 

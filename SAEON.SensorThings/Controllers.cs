@@ -45,7 +45,7 @@ namespace SAEON.SensorThings
         [Route]
         public virtual JToken GetAll()
         {
-            using (Logging.MethodCall<TEntity>(GetType())) 
+            using (Logging.MethodCall<TEntity>(GetType()))
             {
                 try
                 {

@@ -1,9 +1,10 @@
-﻿#if NETCOREAPP2_1 || NETCOREAPP2_2
+﻿#if NETCOREAPP2_2
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog.AspNetCore;
+using se = Serilog.Extensions.Logging;
 #elif NETSTANDARD2_0
 using Microsoft.Extensions.Configuration;
 #endif
@@ -22,7 +23,7 @@ namespace SAEON.Logs
     {
         public static bool UseFullName { get; set; } = true;
 
-#if NETSTANDARD2_0 || NETCOREAPP2_1 || NETCOREAPP2_2
+#if NETSTANDARD2_0 || NETCOREAPP2_2
         public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config)
         {
             return new LoggerConfiguration()
@@ -165,14 +166,14 @@ namespace SAEON.Logs
         }
     }
 
-#if NETCOREAPP2_1|| NETCOREAPP2_2
+#if NETCOREAPP2_2
     public static class SAEONWebHostExtensions
     {
         public static IWebHostBuilder UseSAEONLogs(this IWebHostBuilder builder, Serilog.ILogger logger = null, bool dispose = false)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
             builder.ConfigureServices(collection =>
-                collection.AddSingleton<ILoggerFactory>(services => new SerilogLoggerFactory(logger, dispose)));
+                collection.AddSingleton<ILoggerFactory>(services => new se.SerilogLoggerFactory(logger, dispose)));
             return builder;
         }
 
@@ -187,14 +188,14 @@ namespace SAEON.Logs
                 var logger = loggerConfiguration.CreateLogger();
                 if (preserveStaticLogger)
                 {
-                    collection.AddSingleton<ILoggerFactory>(services => new SerilogLoggerFactory(logger, true));
+                    collection.AddSingleton<ILoggerFactory>(services => new se.SerilogLoggerFactory(logger, true));
                 }
                 else
                 {
                     // Passing a `null` logger to `SerilogLoggerFactory` results in disposal via
                     // `Log.CloseAndFlush()`, which additionally replaces the static logger with a no-op.
                     Log.Logger = logger;
-                    collection.AddSingleton<ILoggerFactory>(services => new SerilogLoggerFactory(null, true));
+                    collection.AddSingleton<ILoggerFactory>(services => new se.SerilogLoggerFactory(null, true));
                 }
             });
             return builder;
