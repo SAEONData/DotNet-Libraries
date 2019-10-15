@@ -52,17 +52,25 @@ namespace SAEON.SensorThings
                     SetBaseUrl();
                     var queryString = Request.RequestUri.Query.Replace("$", "");
                     Logging.Verbose("QueryString: {QueryString}", queryString);
-                    var entities = Entities.AsQueryable().AutoQueryable(queryString);
-                    string json = JsonConvert.SerializeObject(entities);
-                    //Logging.Verbose("json: {json}", json);
-                    var arr = JArray.Parse(json);
-                    Logging.Verbose("List: {count} {@list}", arr.Count(), arr.ToString());
+                    //var entities = Entities.AsQueryable().AutoQueryable(queryString);
+                    //string json = JsonConvert.SerializeObject(entities);
+                    ////Logging.Verbose("json: {json}", json);
+                    //var arr = JArray.Parse(json);
+                    //Logging.Verbose("List: {count} {@list}", arr.Count(), arr.ToString());
+                    //var result = new JObject
+                    //{
+                    //    new JProperty("@iot.count", arr.Count()),
+                    //    new JProperty("value", arr)
+                    //};
+                    //return result;
+                    var entities = Entities;
+                    Logging.Verbose("List: {count} {@list}", entities.Count, entities);
                     var result = new JObject
                     {
-                        new JProperty("@iot.count", arr.Count()),
-                        new JProperty("value", arr)
+                        new JProperty("@iot.count", entities.Count),
+                        new JProperty("value", entities.Select(i => i.AsJSON))
                     };
-                    return result;
+
                 }
                 catch (Exception ex)
                 {
@@ -73,8 +81,8 @@ namespace SAEON.SensorThings
         }
 
         [HttpGet]
-        //[Route("Entity({id:int})")]
-        public virtual JToken GetById([FromUri]int id)
+        //[Route("Entity({id:guid})")]
+        public virtual JToken GetById([FromUri]Guid id)
         {
             using (Logging.MethodCall<TEntity>(GetType()))
             {
@@ -101,7 +109,7 @@ namespace SAEON.SensorThings
 
         [HttpGet]
         //[Route("Entity({id:int})/Related")]
-        public virtual JToken GetSingle<TRelated>([FromUri]int id, Expression<Func<TEntity, TRelated>> select) where TRelated : SensorThingEntity
+        public virtual JToken GetSingle<TRelated>([FromUri]Guid id, Expression<Func<TEntity, TRelated>> select) where TRelated : SensorThingEntity
         {
             using (Logging.MethodCall<TEntity, TRelated>(GetType()))
             {
@@ -132,7 +140,7 @@ namespace SAEON.SensorThings
 
         [HttpGet]
         //[Route("Entity({id:int})/Related")]
-        public virtual JToken GetMany<TRelated>([FromUri]int id, Expression<Func<TEntity, IEnumerable<TRelated>>> select) where TRelated : SensorThingEntity
+        public virtual JToken GetMany<TRelated>([FromUri]Guid id, Expression<Func<TEntity, IEnumerable<TRelated>>> select) where TRelated : SensorThingEntity
         {
             using (Logging.MethodCall<TEntity, TRelated>(GetType()))
             {

@@ -11,7 +11,7 @@ using System.Web.Http.Filters;
 namespace SAEON.AspNet.WebApi
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class RoleAuthorizationAttribute : AuthorizationFilterAttribute
+    public sealed class RoleAuthorizationAttribute : AuthorizationFilterAttribute
     {
         private readonly string role;
 

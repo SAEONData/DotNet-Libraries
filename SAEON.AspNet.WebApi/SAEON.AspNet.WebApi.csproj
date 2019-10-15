@@ -9,7 +9,7 @@
         <Description>Asp.Net WebApi for SAEON in .Net</Description>
         <Copyright>Copyright © 2017-2019 South African Environmental Observation Network (SAEON)</Copyright>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.55</Version>
+        <Version>1.0.56</Version>
         <PackageTags />
         <PackageReleaseNotes />
     </PropertyGroup>
@@ -17,7 +17,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
         <PackageReference Include="SAEON.AspNet.Common" Version="1.0.10" />
-        <PackageReference Include="SAEON.Logs" Version="1.0.46" />
+        <PackageReference Include="SAEON.Logs" Version="1.0.47" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

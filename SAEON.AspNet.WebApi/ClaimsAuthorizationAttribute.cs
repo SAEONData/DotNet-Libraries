@@ -10,7 +10,7 @@ using System.Web.Http.Filters;
 namespace SAEON.AspNet.WebApi
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class ClaimsAuthorizationAttribute : AuthorizationFilterAttribute
+    public sealed class ClaimsAuthorizationAttribute : AuthorizationFilterAttribute
     {
         public string ClaimType { get; set; }
         public string ClaimValue { get; set; }

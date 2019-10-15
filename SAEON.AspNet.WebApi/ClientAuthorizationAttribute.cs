@@ -12,7 +12,7 @@ using System.Web.Http.Filters;
 namespace SAEON.AspNet.WebApi
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class ClientAuthorizationAttribute : AuthorizationFilterAttribute
+    public sealed class ClientAuthorizationAttribute : AuthorizationFilterAttribute
     {
         private List<string> Clients { get; } = new List<string>();
 

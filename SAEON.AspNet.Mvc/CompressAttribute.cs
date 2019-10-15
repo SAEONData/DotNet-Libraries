@@ -5,7 +5,7 @@ using System.Web.Mvc;
 
 namespace SAEON.AspNet.Mvc
 {
-    public class CompressAttribute : ActionFilterAttribute
+    public sealed class CompressAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {

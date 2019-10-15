@@ -1,11 +1,11 @@
-﻿#if NETCOREAPP2_2
+﻿#if NETCOREAPP2_2 || NETCOREAPP3_0
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog.AspNetCore;
 using se = Serilog.Extensions.Logging;
-#elif NETSTANDARD2_0
+#elif NETSTANDARD2_0 || NETSTANDARD2_1
 using Microsoft.Extensions.Configuration;
 #endif
 
@@ -17,13 +17,15 @@ using System.Runtime.CompilerServices;
 
 namespace SAEON.Logs
 {
+#pragma warning disable CA2237 // Mark ISerializable types with serializable
     public class ParameterList : Dictionary<string, object> { }
+#pragma warning restore CA2237 // Mark ISerializable types with serializable
 
     public static class Logging
     {
         public static bool UseFullName { get; set; } = true;
 
-#if NETSTANDARD2_0 || NETCOREAPP2_2
+#if NETSTANDARD2_0 || NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP3_0
         public static LoggerConfiguration CreateConfiguration(string fileName, IConfiguration config)
         {
             return new LoggerConfiguration()
@@ -166,7 +168,7 @@ namespace SAEON.Logs
         }
     }
 
-#if NETCOREAPP2_2
+#if NETCOREAPP2_2 || NETCOREAPP3_0
     public static class SAEONWebHostExtensions
     {
         public static IWebHostBuilder UseSAEONLogs(this IWebHostBuilder builder, Serilog.ILogger logger = null, bool dispose = false)

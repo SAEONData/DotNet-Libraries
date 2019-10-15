@@ -15,7 +15,7 @@ using System.Web.Http.Filters;
 namespace SAEON.AspNet.WebApi
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class TenantAuthorizationAttribute : AuthorizationFilterAttribute
+    public sealed class TenantAuthorizationAttribute : AuthorizationFilterAttribute
     {
         public List<string> Tenants { get; private set; } = new List<string>();
         public string DefaultTenant { get; private set; } = string.Empty;
