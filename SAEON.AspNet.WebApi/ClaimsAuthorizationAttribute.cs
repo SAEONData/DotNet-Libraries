@@ -6,11 +6,12 @@ using System.Net.Http;
 using System.Security.Claims;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
- 
-namespace SAEON.AspNet.WebApi 
-{  
-    public class ClaimsAuthorizationAttribute : AuthorizationFilterAttribute
-    {  
+
+namespace SAEON.AspNet.WebApi
+{
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public sealed class ClaimsAuthorizationAttribute : AuthorizationFilterAttribute
+    {
         public string ClaimType { get; set; }
         public string ClaimValue { get; set; }
 
@@ -31,16 +32,14 @@ namespace SAEON.AspNet.WebApi
                 if (!principal.Identity.IsAuthenticated)
                 {
                     Logging.Error("Not Authenticated");
-                    actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Unauthorized);
-                    actionContext.Response.ReasonPhrase = "Not Authenticated";
+                    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "Not Authenticated");
                     return;
                 }
                 Logging.Verbose("Claims: {claims}", principal.Claims.Select(i => i.Type + "=" + i.Value));
-                if (!(principal.HasClaim(x => x.Type.Equals(ClaimType,StringComparison.CurrentCultureIgnoreCase) && x.Value.Equals(ClaimValue,StringComparison.CurrentCultureIgnoreCase))))
+                if (!(principal.HasClaim(x => x.Type.Equals(ClaimType, StringComparison.CurrentCultureIgnoreCase) && x.Value.Equals(ClaimValue, StringComparison.CurrentCultureIgnoreCase))))
                 {
                     Logging.Error("Claims Authorization Failed");
-                    actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Forbidden);
-                    actionContext.Response.ReasonPhrase = "Claims Authorization Failed";
+                    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Claims Authorization Failed");
                     return;
                 }
             }

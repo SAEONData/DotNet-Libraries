@@ -16,10 +16,10 @@ namespace SAEON.ImageProcessing
         public static ImageFactory Overlay(this ImageFactory factory, string fileName, Point position, Size size)
         {
             if (factory.ShouldProcess)
-            { 
+            {
                 OverlayLayer overlayLayer = new OverlayLayer(fileName, position, size);
-                return factory.Overlay(overlayLayer); 
-            } 
+                return factory.Overlay(overlayLayer);
+            }
             return factory;
         }
 

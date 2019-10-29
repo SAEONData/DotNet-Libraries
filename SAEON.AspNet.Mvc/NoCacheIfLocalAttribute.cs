@@ -1,9 +1,9 @@
 ﻿using System.Web;
-using System.Web.Mvc; 
+using System.Web.Mvc;
 
 namespace SAEON.AspNet.Mvc
-{ 
-    public class NoCacheIfLocalAttribute : ActionFilterAttribute
+{
+    public sealed class NoCacheIfLocalAttribute : ActionFilterAttribute
     {
         public override void OnResultExecuted(ResultExecutedContext filterContext)
         {

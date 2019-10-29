@@ -88,7 +88,7 @@ namespace SAEON.SensorThings
                 };
                 return new JObject(
                     new JProperty("type", "Polygon"),
-                    new JProperty("coordinates", exterior)); 
+                    new JProperty("coordinates", exterior));
             }
         }
     }
@@ -141,7 +141,7 @@ namespace SAEON.SensorThings
         public DateTime? End { get; set; }
 
         [JsonIgnore]
-        public JValue AsJSON 
+        public JValue AsJSON
         {
             get
             {
@@ -159,12 +159,12 @@ namespace SAEON.SensorThings
     {
         public static string BaseUrl { get; set; }
     }
-     
+
     public abstract class SensorThingEntity
     {
         public string EntitySetName { get; protected set; }
 
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string SelfLink { get { return $"{SensorThingsConfig.BaseUrl}/{EntitySetName}({Id})"; } set {; } }
         public List<string> NavigationLinks { get; } = new List<string>();
 
@@ -285,6 +285,7 @@ namespace SAEON.SensorThings
             Time.Value = time ?? DateTime.Now;
         }
 
+        /*
         private void SetId()
         {
             unchecked // Overflow is fine, just wrap
@@ -301,12 +302,13 @@ namespace SAEON.SensorThings
                 Id = hash;
             }
         }
+        */
 
         public override JObject AsJSON
         {
             get
             {
-                SetId();
+                //SetId();
                 var result = base.AsJSON;
                 result.Add(new JProperty("time", Time.AsJSON));
                 return result;
@@ -457,7 +459,7 @@ namespace SAEON.SensorThings
     {
         public Coordinate Coordinate { get; set; } = null;
         public double Longitude { get; set; }
-        public double Latitude { get; set; } 
+        public double Latitude { get; set; }
         public double? Elevation { get; set; } = null;
         public List<Observation> Observations { get; } = new List<Observation>();
 
