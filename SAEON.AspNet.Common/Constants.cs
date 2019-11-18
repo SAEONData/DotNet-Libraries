@@ -1,5 +1,12 @@
-﻿namespace SAEON.AspNet.Common
+﻿using System;
+
+namespace SAEON.AspNet.Common
 {
+#if NET472
+    [Obsolete]
+#else
+    //[Obsolete("Constants in now obsolete",true)]
+#endif
     public static class Constants
     {
         public static readonly string AcceptEncoding = "Accept-Encoding";
@@ -14,6 +21,7 @@
         public static readonly string TenantDefault = "DefaultTenant"; // Config
         public static readonly string TenantHeader = "Tenant"; // Header
         public static readonly string TenantSession = "Tenant"; // Session
-        public static readonly string TenantTenants = "Tenants"; // Config 
+        public static readonly string TenantTenants = "Tenants"; // Config
+        public const string TenantPolicy = "TenantHeaderPolicy";
     }
 }

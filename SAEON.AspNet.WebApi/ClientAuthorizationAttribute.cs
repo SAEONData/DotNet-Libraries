@@ -11,6 +11,8 @@ using System.Web.Http.Filters;
 
 namespace SAEON.AspNet.WebApi
 {
+    //[Obsolete("ClientAuthorizationAttribute is obsolete", true)]
+    [Obsolete]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public sealed class ClientAuthorizationAttribute : AuthorizationFilterAttribute
     {

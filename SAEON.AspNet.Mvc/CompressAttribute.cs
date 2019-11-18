@@ -1,10 +1,13 @@
 ﻿using SAEON.AspNet.Common;
+using System;
 using System.IO.Compression;
 using System.Web;
 using System.Web.Mvc;
 
 namespace SAEON.AspNet.Mvc
 {
+    //[Obsolete("CompressAttribute is obsolete", true)]
+    [Obsolete]
     public sealed class CompressAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)

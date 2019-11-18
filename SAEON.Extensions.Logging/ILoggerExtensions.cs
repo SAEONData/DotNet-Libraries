@@ -7,6 +7,7 @@ namespace SAEON.Extensions.Logging
 {
     public class LoggerParameters : Dictionary<string, object> { }
 
+    [Obsolete("SAEON.Extensions.Logging is obsolete. Use SAEON.Logs.NetCore",true)]
     public static class ILoggerExtensions
     {
         public static bool UseFullName { get; set; } = true;
