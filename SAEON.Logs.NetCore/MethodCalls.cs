@@ -3,7 +3,9 @@ using System.Collections.Generic;
 
 namespace SAEON.Logs
 {
+#pragma warning disable CA2237 // Mark ISerializable types with serializable
     public class MethodCallParameters : Dictionary<string, object> { }
+#pragma warning restore CA2237 // Mark ISerializable types with serializable
 
     public static class MethodCalls
     {
