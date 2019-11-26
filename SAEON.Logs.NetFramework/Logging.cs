@@ -3,7 +3,6 @@ using Serilog;
 using Serilog.Context;
 using Serilog.Events;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -28,7 +27,7 @@ namespace SAEON.Logs
                             .ReadFrom.AppSettings()
                             .Enrich.FromLogContext()
                             .WriteTo.Seq("http://localhost:5341/");
-            if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName+".txt");
+            if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + ".txt");
             if (!string.IsNullOrWhiteSpace(fileName)) result.WriteTo.RollingFile(fileName);
             return result;
         }
