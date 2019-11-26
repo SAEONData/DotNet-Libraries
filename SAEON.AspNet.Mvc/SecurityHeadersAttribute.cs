@@ -7,8 +7,6 @@ using System.Web.Mvc;
 
 namespace SAEON.AspNet.Mvc
 {
-    //[Obsolete("SecurityHeadersAttribute is obsolete", true)]
-    [Obsolete]
     public sealed class SecurityHeadersAttribute : ActionFilterAttribute
     {
         public override void OnResultExecuted(ResultExecutedContext context)

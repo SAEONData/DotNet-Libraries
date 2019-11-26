@@ -2,11 +2,6 @@
 
 namespace SAEON.AspNet.Common
 {
-#if NET472
-    [Obsolete]
-#else
-    //[Obsolete("Constants in now obsolete",true)]
-#endif
     public static class Constants
     {
         public static readonly string AcceptEncoding = "Accept-Encoding";

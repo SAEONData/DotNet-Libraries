@@ -7,8 +7,6 @@ using System.Web.Mvc;
 
 namespace SAEON.AspNet.Mvc
 {
-    //[Obsolete("JsonNetResult is obsolete", true)]
-    [Obsolete]
     public class JsonNetResult : ActionResult
     {
         public Encoding ContentEncoding { get; set; }
