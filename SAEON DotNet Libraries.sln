@@ -65,8 +65,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.Azure.CosmosDB", "SAE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.Extensions.Logging", "SAEON.Extensions.Logging\SAEON.Extensions.Logging.csproj", "{31A07E39-EAC7-4B1B-AD23-DFFAC6F10582}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.Extensions.Logging.ConsoleTests", "SAEON.Extensions.Logging.ConsoleTests\SAEON.Extensions.Logging.ConsoleTests.csproj", "{F5162B78-EC97-492D-BA7B-F13D247E6420}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.OpenXML.ConsoleTests", "SAEON.OpenXML.ConsoleTests\SAEON.OpenXML.ConsoleTests.csproj", "{4CD15722-9A31-4956-A119-358E9A67A862}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SAEON.AspNet.Common", "SAEON.AspNet.Common\SAEON.AspNet.Common.csproj", "{08028905-2B1F-46B3-9FC9-E6DD2D84A54E}"
@@ -129,10 +127,6 @@ Global
 		{31A07E39-EAC7-4B1B-AD23-DFFAC6F10582}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31A07E39-EAC7-4B1B-AD23-DFFAC6F10582}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31A07E39-EAC7-4B1B-AD23-DFFAC6F10582}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F5162B78-EC97-492D-BA7B-F13D247E6420}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F5162B78-EC97-492D-BA7B-F13D247E6420}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F5162B78-EC97-492D-BA7B-F13D247E6420}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F5162B78-EC97-492D-BA7B-F13D247E6420}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4CD15722-9A31-4956-A119-358E9A67A862}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4CD15722-9A31-4956-A119-358E9A67A862}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CD15722-9A31-4956-A119-358E9A67A862}.Release|Any CPU.ActiveCfg = Release|Any CPU

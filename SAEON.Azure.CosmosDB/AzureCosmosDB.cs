@@ -1031,7 +1031,7 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<AzureCost> BulkDeleteItemsAsync(object partitionKey, Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
+        public async Task<AzureCost> BulkDeleteItemsAsync(object partitionKey, Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
@@ -1051,9 +1051,9 @@ namespace SAEON.Azure.CosmosDB
                     {
                         await LoadCollectionAsync();
                         IQueryable<string> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId),
-                            new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = enableCrossPartition }).Where(predicate).Select(idExpression);
+                            new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true }).Where(predicate).Select(idExpression);
                         var items = query.AsEnumerable().Select(i => new Tuple<string, string>(partitionKey.ToString(), i)).ToList();
-                        Logging.Information("Items: {Count} {@Items}", items.Count, items);
+                        Logging.Verbose("Items: {Count} {@Items}", items.Count, items);
 
                         // Set retry options high for initialization (default values).
                         client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
@@ -1095,6 +1095,7 @@ namespace SAEON.Azure.CosmosDB
                 }
             }
         }
+
         #endregion
 
         #endregion
