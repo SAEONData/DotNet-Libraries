@@ -21,11 +21,7 @@ using System.Threading.Tasks;
 
 namespace SAEON.Azure.CosmosDB
 {
-    public class AzureDocument
-    {
-        [JsonProperty("id")]
-        public string Id { get; set; }
-    }
+    public class AzureDocument : Document { }
 
     public class AzureSubDocument { }
 
@@ -932,7 +928,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, AzureCost cost)> DeleteItemAsync(object partitionKey, string id)
         {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey }, { "Id", id }}))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey }, { "Id", id } }))
             {
                 try
                 {
