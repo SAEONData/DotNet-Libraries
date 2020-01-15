@@ -2,7 +2,7 @@
 using ImageProcessor.Imaging.MetaData;
 using Microsoft.WindowsAPICodePack.Shell;
 using System;
-using System.Collections.Generic;
+using System.Collections.Generic; 
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;

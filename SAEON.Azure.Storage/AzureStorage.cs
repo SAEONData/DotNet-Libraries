@@ -8,7 +8,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace SAEON.Azure.Storage
+namespace SAEON.Azure.Storage 
 {
     public abstract class AzureTableEntity : TableEntity
     {

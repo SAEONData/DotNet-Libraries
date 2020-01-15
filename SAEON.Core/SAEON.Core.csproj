@@ -7,9 +7,9 @@
     <Company>South African Environmental Observation Network (SAEON)</Company>
     <Product>SAEON .Net Libraries</Product>
     <Description>Core utilities for SAEON in .Net</Description>
-    <Copyright>Copyright © 2017-2019 South African Environmental Observation Network (SAEON)</Copyright>
+    <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.18</Version>
+    <Version>1.0.19</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

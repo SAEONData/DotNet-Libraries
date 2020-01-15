@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using SAEON.Core;
 using Serilog;
 using Serilog.Extensions.Logging;
-using System;
+using System; 
 using System.IO;
 
 namespace SAEON.Logs
