@@ -9,7 +9,7 @@ namespace SAEON.SensorThings
 {
     public static class ValueCodes
     {
-        public static readonly string GeoJson = "application/vnd.geo+json"; 
+        public static readonly string GeoJson = "application/vnd.geo+json";
         public static readonly string Pdf = "application/pdf";
         public static readonly string SensorML = "http://www.opengis.net/doc/IS/SensorML/2.0";
         public static readonly string OM_Measurement = "http://www.opengis.net/def/observationType/OGC-OM/2.0/OM_Measurement";

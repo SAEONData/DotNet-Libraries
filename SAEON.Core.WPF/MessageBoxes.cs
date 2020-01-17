@@ -3,7 +3,7 @@ using System.Windows;
 
 namespace SAEON.Core
 {
-    public static class MessageBoxes 
+    public static class MessageBoxes
     {
         public static bool ConfirmBox(string message, params object[] values)
         {

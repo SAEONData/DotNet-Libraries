@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SAEON.AspNet.Common
+﻿namespace SAEON.AspNet.Common
 {
     public static class Constants
     {

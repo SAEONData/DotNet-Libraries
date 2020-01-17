@@ -1,13 +1,11 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
-using SAEON.OpenXML;
 using System;
-using System.Text.RegularExpressions;
 
 namespace SAEON.OpenXML.ConsoleTests
 {
     class Program
     {
-        private static void Dump(object[,] array, bool showTypes=false)
+        private static void Dump(object[,] array, bool showTypes = false)
         {
             Console.WriteLine($"Rows: {array.GetUpperBound(0) + 1} Cols: {array.GetUpperBound(1) + 1}");
             for (var r = 0; r <= array.GetUpperBound(0); r++)
