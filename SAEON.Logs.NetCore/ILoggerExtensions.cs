@@ -28,17 +28,17 @@ namespace SAEON.Logs
             return "Unknown";
         }
 
-        public static void LogError(this ILogger logger, string message = "", params object[] args)
-        {
-            if (string.IsNullOrWhiteSpace(message)) message = "An error occurred";
-            logger.LogError(message, args);
-        }
+        //public static void LogError(this ILogger logger, string message = "", params object[] args)
+        //{
+        //    if (string.IsNullOrWhiteSpace(message)) message = "An error occurred";
+        //    logger.LogError(message, args);
+        //}
 
-        public static void LogError<T>(this ILogger<T> logger, string message = "", params object[] args)
-        {
-            if (string.IsNullOrWhiteSpace(message)) message = "An error occurred";
-            logger.LogError(message, args);
-        }
+        //public static void LogError<T>(this ILogger<T> logger, string message = "", params object[] args)
+        //{
+        //    if (string.IsNullOrWhiteSpace(message)) message = "An error occurred";
+        //    logger.LogError(message, args);
+        //}
 
         public static void LogException(this ILogger logger, Exception ex, string message = "", params object[] args)
         {
