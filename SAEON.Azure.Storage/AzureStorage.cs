@@ -134,13 +134,27 @@ namespace SAEON.Azure.Storage
         public async Task DeleteQueueAsync(string name)
         {
             CloudQueue queue = GetQueue(name);
-            await queue.DeleteIfExistsAsync();
+            if (!UseExists)
+            {
+                await queue.DeleteIfExistsAsync();
+            }
+            else if (await queue.ExistsAsync())
+            {
+                await queue.DeleteAsync();
+            }
         }
 
         public async Task<CloudQueue> EnsureQueueAsync(string name)
         {
             CloudQueue queue = GetQueue(name);
-            await queue.CreateIfNotExistsAsync();
+            if (!UseExists)
+            {
+                await queue.CreateIfNotExistsAsync();
+            }
+            else if (! await queue.ExistsAsync())
+            {
+                await queue.CreateAsync();
+            }
             return queue;
         }
 
