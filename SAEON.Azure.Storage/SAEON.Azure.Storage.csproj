@@ -9,7 +9,7 @@
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <Description>SAEON Azure Storage library</Description>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.56</Version>
+    <Version>1.0.57</Version>
   </PropertyGroup>
 
   <ItemGroup>
