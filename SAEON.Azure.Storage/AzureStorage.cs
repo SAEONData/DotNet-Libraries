@@ -151,7 +151,7 @@ namespace SAEON.Azure.Storage
             {
                 await queue.CreateIfNotExistsAsync();
             }
-            else if (! await queue.ExistsAsync())
+            else if (!await queue.ExistsAsync())
             {
                 await queue.CreateAsync();
             }
