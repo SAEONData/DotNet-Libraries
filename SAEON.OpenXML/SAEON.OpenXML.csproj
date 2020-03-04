@@ -9,7 +9,7 @@
     <Description>OpenXML utilities for SAEON .Net</Description>
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.55</Version>
+    <Version>1.0.56</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -21,7 +21,7 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.10.0" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.10.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
