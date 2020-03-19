@@ -8,6 +8,8 @@
         public static readonly string ClaimRole = "role";
         public static readonly string ClaimSubject = "sub";
         public static readonly string ClaimUserName = "name";
+        public const string ClientIdQuerySite = "SAEON.Observations.QuerySite";
+        public const string ClientIdNodes = "SAEON.Observations.Nodes";
         public static readonly string ContentEncoding = "Content-Encoding";
         public static readonly string ContentSecurityPolicy = "ContentSecurityPolicy";
         public static readonly string RefreshTokens = "RefreshTokens"; // In seconds before expiry 

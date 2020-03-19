@@ -44,13 +44,13 @@ namespace SAEON.AspNet.WebApi
 
         private void DoTenantAuthorization(HttpActionContext actionContext)
         {
-            if (!actionContext.Request.Headers.Contains(Constants.TenantHeader))
-            {
-                Logging.Error("Tenant Authorization Failed (No tenant header)");
-                actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenant header)");
-                return;
-            }
-            var tenant = actionContext.Request.Headers.GetValues(Constants.TenantHeader).FirstOrDefault();
+            //if (!actionContext.Request.Headers.Contains(Constants.TenantHeader))
+            //{
+            //    Logging.Error("Tenant Authorization Failed (No tenant header)");
+            //    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenant header)");
+            //    return;
+            //}
+            var tenant = actionContext.Request.Headers.Contains(Constants.TenantHeader) ? actionContext.Request.Headers.GetValues(Constants.TenantHeader).FirstOrDefault() : null;
             Logging.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant} Tenant: {Tenant}", Tenants.ToArray(), DefaultTenant, tenant);
             if (string.IsNullOrWhiteSpace(tenant))
             {
@@ -96,17 +96,23 @@ namespace SAEON.AspNet.WebApi
 
         public static string GetTenantFromHeaders(HttpRequestMessage request)
         {
-            if (request == null)
+            //using (Logging.MethodCall(GetType()))
             {
-                throw new ArgumentNullException(nameof(request));
+                if (request == null)
+                {
+                    throw new ArgumentNullException(nameof(request));
+                }
+                var tenant = request.Headers.Contains(Constants.TenantHeader) ? request.Headers.GetValues(Constants.TenantHeader).FirstOrDefault() : null;
+                if (string.IsNullOrWhiteSpace(tenant))
+                {
+                    tenant = (ConfigurationManager.AppSettings[Constants.TenantDefault] ?? string.Empty);
+                }
+                if (string.IsNullOrWhiteSpace(tenant))
+                {
+                    throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.NotFound, "Tenant header not found"));
+                }
+                return tenant;
             }
-
-            var tenant = request.Headers.Contains(Constants.TenantHeader) ? request.Headers.GetValues(Constants.TenantHeader).FirstOrDefault() : null;
-            if (string.IsNullOrWhiteSpace(tenant))
-            {
-                throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.NotFound, "Tenant header not found"));
-            }
-            return tenant;
         }
 
     }
