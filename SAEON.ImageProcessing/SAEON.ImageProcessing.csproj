@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net461;</TargetFrameworks>
+        <TargetFramework>net472</TargetFramework>
         <ApplicationIcon>SAEON.ico</ApplicationIcon>
         <Authors>Tim Parker-Nance</Authors>
         <Company>South African Environmental Observation Network (SAEON)</Company>
@@ -9,7 +9,7 @@
         <Description>Image processing utilities for SAEON in .Net</Description>
         <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.8</Version>
+        <Version>1.0.9</Version>
     </PropertyGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -17,9 +17,9 @@
     </Target>
 
     <ItemGroup>
-      <PackageReference Include="ImageProcessor" Version="2.7.0.100" />
+      <PackageReference Include="ImageProcessor" Version="2.8.0" />
       <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="2.0.1" />
-      <PackageReference Include="Microsoft.CSharp" Version="4.6.0" />
+      <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
       <PackageReference Include="Microsoft.WindowsAPICodePack-Shell" Version="1.1.0" />
     </ItemGroup>
 

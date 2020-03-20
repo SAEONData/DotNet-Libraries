@@ -160,6 +160,7 @@ namespace SAEON.SensorThings
         public static string BaseUrl { get; set; }
     }
 
+    [Obsolete]
     public abstract class SensorThingEntity
     {
         public string EntitySetName { get; protected set; }

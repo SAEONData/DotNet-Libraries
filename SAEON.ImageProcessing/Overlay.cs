@@ -4,7 +4,7 @@ using ImageProcessor.Processors;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D; 
+using System.Drawing.Drawing2D;
 using System.IO;
 
 namespace SAEON.ImageProcessing
@@ -17,7 +17,7 @@ namespace SAEON.ImageProcessing
         public dynamic DynamicParameter { get; set; }
 
         /// <summary> 
-        /// Gets or sets any additional settings required by the processor.
+        /// Gets or sets any additional settings required by the processor. 
         /// </summary>
         public Dictionary<string, string> Settings { get; set; }
 

@@ -24,6 +24,7 @@ namespace SAEON.Azure.Storage
         private CloudBlobClient blobClient = null;
         private CloudQueueClient queueClient = null;
         private CloudTableClient tableClient = null;
+        public static bool UseExists { get; set; } = true;
 
         public AzureStorage(string connectionString)
         {
@@ -46,13 +47,29 @@ namespace SAEON.Azure.Storage
         public async Task<bool> DeleteContainerAsync(string name)
         {
             CloudBlobContainer container = GetContainer(name);
-            return await container.DeleteIfExistsAsync();
+            if (!UseExists)
+            {
+                return await container.DeleteIfExistsAsync();
+            }
+            else if (await container.ExistsAsync())
+            {
+                await container.DeleteAsync();
+                return true;
+            }
+            return false;
         }
 
         public async Task<CloudBlobContainer> EnsureContainerAsync(string name)
         {
             CloudBlobContainer container = GetContainer(name);
-            await container.CreateIfNotExistsAsync();
+            if (!UseExists)
+            {
+                await container.CreateIfNotExistsAsync();
+            }
+            else if (!await container.ExistsAsync())
+            {
+                await container.CreateAsync();
+            }
             return container;
         }
 
@@ -117,13 +134,27 @@ namespace SAEON.Azure.Storage
         public async Task DeleteQueueAsync(string name)
         {
             CloudQueue queue = GetQueue(name);
-            await queue.DeleteIfExistsAsync();
+            if (!UseExists)
+            {
+                await queue.DeleteIfExistsAsync();
+            }
+            else if (await queue.ExistsAsync())
+            {
+                await queue.DeleteAsync();
+            }
         }
 
         public async Task<CloudQueue> EnsureQueueAsync(string name)
         {
             CloudQueue queue = GetQueue(name);
-            await queue.CreateIfNotExistsAsync();
+            if (!UseExists)
+            {
+                await queue.CreateIfNotExistsAsync();
+            }
+            else if (!await queue.ExistsAsync())
+            {
+                await queue.CreateAsync();
+            }
             return queue;
         }
 
@@ -169,13 +200,27 @@ namespace SAEON.Azure.Storage
         public async Task DeleteTableAsync(string name)
         {
             CloudTable table = GetTable(name);
-            await table.DeleteIfExistsAsync();
+            if (!UseExists)
+            {
+                await table.DeleteIfExistsAsync();
+            }
+            else if (await table.ExistsAsync())
+            {
+                await table.DeleteAsync();
+            }
         }
 
         public async Task<CloudTable> EnsureTableAsync(string name)
         {
             CloudTable table = GetTable(name);
-            await table.CreateIfNotExistsAsync();
+            if (!UseExists)
+            {
+                await table.CreateIfNotExistsAsync();
+            }
+            else if (!await table.ExistsAsync())
+            {
+                await table.CreateAsync();
+            }
             return table;
         }
 
@@ -225,10 +270,22 @@ namespace SAEON.Azure.Storage
     {
         #region Blobs
 
+        private static async Task DeleteBlobIfExists(CloudBlockBlob blockBlob)
+        {
+            if (!AzureStorage.UseExists)
+            {
+                await blockBlob.DeleteIfExistsAsync();
+            }
+            else if (await blockBlob.ExistsAsync())
+            {
+                await blockBlob.DeleteAsync();
+            }
+        }
+
         public static async Task DeleteBlobAsync(this CloudBlobContainer container, string name)
         {
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            await blockBlob.DeleteIfExistsAsync();
+            await DeleteBlobIfExists(blockBlob);
         }
 
         public static async Task<bool> DownloadBlobAsync(this CloudBlobContainer container, string name, Stream stream)
@@ -275,21 +332,21 @@ namespace SAEON.Azure.Storage
         public static async Task UploadBlobAsync(this CloudBlobContainer container, string name, Stream stream)
         {
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            await blockBlob.DeleteIfExistsAsync();
+            await DeleteBlobIfExists(blockBlob);
             await blockBlob.UploadFromStreamAsync(stream);
         }
 
         public static async Task UploadBlobAsync(this CloudBlobContainer container, string name, byte[] byteArray)
         {
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            await blockBlob.DeleteIfExistsAsync();
+            await DeleteBlobIfExists(blockBlob);
             await blockBlob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
         }
 
         public static async Task UploadBlobAsync(this CloudBlobContainer container, string name, string content)
         {
             CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            await blockBlob.DeleteIfExistsAsync();
+            await DeleteBlobIfExists(blockBlob);
             await blockBlob.UploadTextAsync(content);
         }
 

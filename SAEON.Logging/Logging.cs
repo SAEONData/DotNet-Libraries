@@ -9,6 +9,7 @@ namespace SAEON.Logs
 {
     public class LogParameters : Dictionary<string, object> { }
 
+    [Obsolete("SAEON.Logging is obsolete. Use SAEON.Logs.NetCore or SAEON.Logs.NetFramework")]
     public static class Logging
     {
         public static bool UseFullName { get; set; } = true;

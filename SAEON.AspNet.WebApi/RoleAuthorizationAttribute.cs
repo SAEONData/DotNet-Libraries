@@ -24,7 +24,7 @@ namespace SAEON.AspNet.WebApi
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
-            using (Logging.MethodCall(GetType(), new ParameterList { { "Role", role } }))
+            using (Logging.MethodCall(GetType(), new MethodCallParameters { { "Role", role } }))
             {
                 base.OnAuthorization(actionContext);
                 var principal = actionContext.RequestContext.Principal as ClaimsPrincipal;

@@ -21,11 +21,7 @@ using System.Threading.Tasks;
 
 namespace SAEON.Azure.CosmosDB
 {
-    public class AzureDocument
-    {
-        [JsonProperty("id")]
-        public string Id { get; set; }
-    }
+    public class AzureDocument : Document { }
 
     public class AzureSubDocument { }
 
@@ -154,7 +150,7 @@ namespace SAEON.Azure.CosmosDB
                 return;
             }
 
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "DatabaseId", DatabaseId } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId } }))
             {
                 try
                 {
@@ -176,7 +172,7 @@ namespace SAEON.Azure.CosmosDB
                 return;
             }
 
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "DatabaseId", DatabaseId } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId } }))
             {
                 try
                 {
@@ -202,7 +198,7 @@ namespace SAEON.Azure.CosmosDB
                 return;
             }
 
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "DatabaseId", DatabaseId }, { "CollectionId", CollectionId }, { "PartitionKey", PartitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId }, { "CollectionId", CollectionId }, { "PartitionKey", PartitionKey } }))
             {
                 try
                 {
@@ -260,7 +256,7 @@ namespace SAEON.Azure.CosmosDB
                 return;
             }
 
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "DatabaseId", DatabaseId }, { "CollectionId", CollectionId }, { "PartitionKey", PartitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId }, { "CollectionId", CollectionId }, { "PartitionKey", PartitionKey } }))
             {
                 try
                 {
@@ -280,7 +276,7 @@ namespace SAEON.Azure.CosmosDB
         #region Items
         public async Task<T> GetItemAsync(string id)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "Id", id } }))
             {
                 try
                 {
@@ -317,7 +313,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<T> GetItemAsync(object partitionKey, string id)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey }, { "Id", id } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey }, { "Id", id } }))
             {
                 try
                 {
@@ -449,7 +445,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, AzureCost cost)> CreateItemAsync(T item, object partitionKey)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
             {
                 try
                 {
@@ -479,7 +475,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<AzureCost> CreateItemsAsync(List<T> items, object partitionKey)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
             {
                 try
                 {
@@ -570,7 +566,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, AzureCost cost)> UpdateItemAsync(T item, object partitionKey)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
             {
                 try
                 {
@@ -600,7 +596,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<AzureCost> UpdateItemsAsync(List<T> items, object partitionKey)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
             {
                 try
                 {
@@ -771,7 +767,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, AzureCost cost)> UpsertItemAsync(T item, object partitionKey)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
             {
                 try
                 {
@@ -835,7 +831,7 @@ namespace SAEON.Azure.CosmosDB
         #region Delete
         public async Task<(T item, AzureCost cost)> DeleteItemAsync(string id)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "Id", id } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "Id", id } }))
             {
                 try
                 {
@@ -932,7 +928,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, AzureCost cost)> DeleteItemAsync(object partitionKey, string id)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey }, { "Id", id }}))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey }, { "Id", id } }))
             {
                 try
                 {
@@ -967,7 +963,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<AzureCost> DeleteItemsAsync(List<T> items, object partitionKey)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
             {
                 try
                 {
@@ -999,7 +995,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<AzureCost> DeleteItemsAsync(object partitionKey, Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
         {
-            using (Logging.MethodCall<T>(GetType(), new ParameterList { { "PartitionKey", partitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
             {
                 try
                 {
@@ -1031,7 +1027,7 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<AzureCost> BulkDeleteItemsAsync(object partitionKey, Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
+        public async Task<AzureCost> BulkDeleteItemsAsync(object partitionKey, Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
@@ -1051,9 +1047,9 @@ namespace SAEON.Azure.CosmosDB
                     {
                         await LoadCollectionAsync();
                         IQueryable<string> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId),
-                            new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = enableCrossPartition }).Where(predicate).Select(idExpression);
+                            new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true }).Where(predicate).Select(idExpression);
                         var items = query.AsEnumerable().Select(i => new Tuple<string, string>(partitionKey.ToString(), i)).ToList();
-                        Logging.Information("Items: {Count} {@Items}", items.Count, items);
+                        Logging.Verbose("Items: {Count} {@Items}", items.Count, items);
 
                         // Set retry options high for initialization (default values).
                         client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
@@ -1095,6 +1091,7 @@ namespace SAEON.Azure.CosmosDB
                 }
             }
         }
+
         #endregion
 
         #endregion

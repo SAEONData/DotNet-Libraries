@@ -1,7 +1,4 @@
-﻿using AutoQueryable.AspNet.Filter.FilterAttributes;
-using AutoQueryable.Extensions;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using SAEON.Logs;
 using System;
 using System.Collections.Generic;
@@ -11,6 +8,7 @@ using System.Web.Http;
 
 namespace SAEON.SensorThings
 {
+    [Obsolete]
     public abstract class SensorThingsApiController<TEntity> : ApiController where TEntity : SensorThingEntity
     {
         protected List<TEntity> Entities { get; private set; } = new List<TEntity>();
@@ -70,6 +68,7 @@ namespace SAEON.SensorThings
                         new JProperty("@iot.count", entities.Count),
                         new JProperty("value", entities.Select(i => i.AsJSON))
                     };
+                    return result;
 
                 }
                 catch (Exception ex)

@@ -21,6 +21,7 @@ namespace SAEON.Logs
     public class ParameterList : Dictionary<string, object> { }
 #pragma warning restore CA2237 // Mark ISerializable types with serializable
 
+    [Obsolete("SAEON.Logs is obsolete. Please use SAEON.Logs.NetCore or SAEON.Logs.NetFramework",true)]
     public static class Logging
     {
         public static bool UseFullName { get; set; } = true;
