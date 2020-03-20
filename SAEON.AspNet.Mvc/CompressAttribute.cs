@@ -11,7 +11,7 @@ namespace SAEON.AspNet.Mvc
         {
             HttpRequestBase request = filterContext.HttpContext.Request;
 
-            string acceptEncoding = request.Headers[Constants.AcceptEncoding];
+            string acceptEncoding = request.Headers[AspNetConstants.AcceptEncoding];
 
             if (string.IsNullOrEmpty(acceptEncoding)) return;
 
@@ -21,12 +21,12 @@ namespace SAEON.AspNet.Mvc
 
             if (acceptEncoding.Contains("GZIP"))
             {
-                response.AppendHeader(Constants.ContentEncoding, "gzip");
+                response.AppendHeader(AspNetConstants.ContentEncoding, "gzip");
                 response.Filter = new GZipStream(response.Filter, CompressionMode.Compress);
             }
             else if (acceptEncoding.Contains("DEFLATE"))
             {
-                response.AppendHeader(Constants.ContentEncoding, "deflate");
+                response.AppendHeader(AspNetConstants.ContentEncoding, "deflate");
                 response.Filter = new DeflateStream(response.Filter, CompressionMode.Compress);
             }
         }

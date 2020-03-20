@@ -43,11 +43,13 @@ namespace SAEON.AspNet.WebApi
             {
                 base.OnAuthorization(actionContext);
                 var principal = actionContext.RequestContext.Principal as ClaimsPrincipal;
+                var callerClientId = principal.Claims.FirstOrDefault(i => i.Type == AspNetConstants.ClaimClientId)?.Value;
+                Logging.Information("ClientId: {ClientId}", callerClientId);
                 bool found = false;
-                foreach (var client in Clients)
+                foreach (var clientId in Clients)
                 {
-                    Logging.Verbose("Client: {client} Claims: {claims}", client, principal.Claims.Select(i => i.Type + "=" + i.Value));
-                    if (principal.HasClaim(x => x.Type == Constants.ClaimClientId && x.Value == client))
+                    Logging.Verbose("Client: {client} Claims: {claims}", clientId, principal.Claims.Select(i => i.Type + "=" + i.Value));
+                    if (callerClientId == clientId)
                     {
                         found = true;
                         break;

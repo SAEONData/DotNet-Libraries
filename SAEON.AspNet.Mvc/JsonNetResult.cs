@@ -30,7 +30,7 @@ namespace SAEON.AspNet.Mvc
 
             HttpResponseBase response = context.HttpContext.Response;
 
-            response.ContentType = !string.IsNullOrEmpty(ContentType) ? ContentType : Constants.ApplicationJson;
+            response.ContentType = !string.IsNullOrEmpty(ContentType) ? ContentType : AspNetConstants.ApplicationJson;
 
             if (ContentEncoding != null)
             {
