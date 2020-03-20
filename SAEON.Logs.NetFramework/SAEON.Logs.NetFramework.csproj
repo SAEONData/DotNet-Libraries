@@ -10,7 +10,7 @@
     <Description>Logging for SAEON in .NetFramework</Description>
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.12</Version>
+    <Version>1.0.14</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

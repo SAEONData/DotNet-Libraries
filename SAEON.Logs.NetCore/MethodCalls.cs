@@ -37,17 +37,23 @@ namespace SAEON.Logs
                     {
                         result += "Null";
                     }
-                    else if (kvPair.Value is string)
-                    {
-                        result += string.Format("'{0}'", kvPair.Value);
-                    }
-                    else if (kvPair.Value is Guid)
-                    {
-                        result += string.Format("{0}", kvPair.Value);
-                    }
                     else
                     {
-                        result += kvPair.Value.ToString();
+                        switch (kvPair.Value)
+                        {
+                            case string str:
+                                result += $"'{kvPair.Value}'";
+                                break;
+                            case List<string> list:
+                                result += $"[{string.Join(",", list)}]";
+                                break;
+                            case string[] strings:
+                                result += $"[{string.Join(",", strings)}]";
+                                break;
+                            default:
+                                result += $"{kvPair.Value}";
+                                break;
+                        }
                     }
                 }
             }
