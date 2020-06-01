@@ -9,11 +9,11 @@
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <Description>SAEON Azure CosmosDB library</Description>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.122</Version>
+    <Version>1.0.123</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.CosmosDB.BulkExecutor" Version="1.8.8" />
+    <PackageReference Include="Microsoft.Azure.CosmosDB.BulkExecutor" Version="1.8.9" />
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.10.3" />
     <PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.14" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
