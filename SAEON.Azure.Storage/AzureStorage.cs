@@ -1,11 +1,11 @@
-﻿using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Queues;
+using Microsoft.Azure.Cosmos.Table;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace SAEON.Azure.Storage
@@ -20,179 +20,195 @@ namespace SAEON.Azure.Storage
 
     public class AzureStorage
     {
-        private CloudStorageAccount storageAccount = null;
-        private CloudBlobClient blobClient = null;
-        private CloudQueueClient queueClient = null;
-        private CloudTableClient tableClient = null;
-        public static bool UseExists { get; set; } = true;
+        private BlobServiceClient blobServiceClient = null;
+        private QueueServiceClient queueServiceClient = null;
+        private CloudStorageAccount cloudStorageAccount = null;
+        private CloudTableClient cloudTableClient = null;
+        public static bool UseExists { get; set; } = false;
 
         public AzureStorage(string connectionString)
         {
-            storageAccount = CloudStorageAccount.Parse(connectionString);
-            blobClient = storageAccount.CreateCloudBlobClient();
-            queueClient = storageAccount.CreateCloudQueueClient();
-            tableClient = storageAccount.CreateCloudTableClient();
+            blobServiceClient = new BlobServiceClient(connectionString);
+            queueServiceClient = new QueueServiceClient(connectionString);
+            cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+            cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
         }
 
         ~AzureStorage()
         {
-            blobClient = null;
-            queueClient = null;
-            tableClient = null;
-            storageAccount = null;
+            blobServiceClient = null;
+            queueServiceClient = null;
+            cloudTableClient = null;
+            cloudStorageAccount = null;
         }
 
         #region Containers
 
         public async Task<bool> DeleteContainerAsync(string name)
         {
-            CloudBlobContainer container = GetContainer(name);
+            var blobContainerClient = GetBlobContainerClient(name);
             if (!UseExists)
             {
-                return await container.DeleteIfExistsAsync();
+                return await blobContainerClient.DeleteIfExistsAsync();
             }
-            else if (await container.ExistsAsync())
+            else if (await blobContainerClient.ExistsAsync())
             {
-                await container.DeleteAsync();
+                await blobContainerClient.DeleteAsync();
                 return true;
             }
             return false;
         }
 
-        public async Task<CloudBlobContainer> EnsureContainerAsync(string name)
+        public async Task EnsureContainerAsync(string name)
         {
-            CloudBlobContainer container = GetContainer(name);
+            var blobContainerClient = GetBlobContainerClient(name);
             if (!UseExists)
             {
-                await container.CreateIfNotExistsAsync();
+                await blobContainerClient.CreateIfNotExistsAsync();
             }
-            else if (!await container.ExistsAsync())
+            else if (!await blobContainerClient.ExistsAsync())
             {
-                await container.CreateAsync();
+                await blobContainerClient.CreateAsync();
             }
-            return container;
         }
 
-        public CloudBlobContainer GetContainer(string name)
+        public BlobContainerClient GetBlobContainerClient(string name)
         {
-            return blobClient.GetContainerReference(name.ToLower());
+            return blobServiceClient.GetBlobContainerClient(name.ToLower());
         }
-
         #endregion Containers
 
         #region Blobs
-
-        public async Task DeleteBlobAsync(CloudBlobContainer container, string name)
+        public async Task DeleteBlobAsync(BlobContainerClient blobContainerClient, string name)
         {
-            await container.DeleteBlobAsync(name);
+            await blobContainerClient.DeleteBlobIfExistsAsync(name);
         }
 
-        public static async Task<bool> DownloadBlobAsync(CloudBlobContainer container, string name, Stream stream)
+        public static async Task DownloadBlobAsync(BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            return await container.DownloadBlobAsync(name, stream);
+            var blobClient = blobContainerClient.GetBlobClient(name);
+            await blobClient.DownloadToAsync(stream);
         }
 
-        public static async Task<List<string>> FolderList(CloudBlobContainer container, string folder)
+        //public static async Task<List<string>> FolderList(CloudBlobContainer container, string folder)
+        //{
+        //    return await container.FolderList(folder);
+        //}
+
+        //public static async Task<List<string>> FolderList(BlobContainerClient blobContainerClient, string folder)
+
+        //{
+        //    blobContainerClient.GetBlobsByHierarchyAsync()
+        //    return await container.FolderList(folder);
+        //}
+
+        public static async Task UploadBlobAsync(BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            return await container.FolderList(folder);
+            await blobContainerClient.UploadBlobAsync(name, stream);
         }
 
-        public static async Task UploadBlobAsync(CloudBlobContainer container, string name, Stream stream)
+        public static async Task UploadBlobAsync(BlobContainerClient blobContainerClient, string name, byte[] byteArray)
         {
-            await container.UploadBlobAsync(name, stream);
+            using (var stream = new MemoryStream(byteArray))
+            {
+                await UploadBlobAsync(blobContainerClient, name, stream);
+            }
         }
 
-        public static async Task UploadBlobAsync(CloudBlobContainer container, string name, byte[] byteArray)
+        public static async Task UploadBlobAsync(BlobContainerClient blobContainerClient, string name, string content)
         {
-            await container.UploadBlobAsync(name, byteArray);
+            using (var stream = new MemoryStream(Encoding.ASCII.GetBytes(content)))
+            {
+                await UploadBlobAsync(blobContainerClient, name, stream);
+            }
         }
 
-        public static async Task UploadBlobAsync(CloudBlobContainer container, string name, string content)
+        public static async Task UploadBlobIfNotExistsAsync(BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            await container.UploadBlobAsync(name, content);
+            var blobClient = blobContainerClient.GetBlobClient(name);
+            if (!await blobClient.ExistsAsync())
+            {
+                await blobClient.UploadAsync(stream);
+            }
         }
 
-        public static async Task UploadBlobIfNotExistsAsync(CloudBlobContainer container, string name, Stream stream)
+        public static async Task UploadBlobIfNotExistsAsync(BlobContainerClient blobContainerClient, string name, byte[] byteArray)
         {
-            await container.UploadBlobIfNotExistsAsync(name, stream);
+            using (var stream = new MemoryStream(byteArray))
+            {
+                await UploadBlobIfNotExistsAsync(blobContainerClient, name, stream);
+            }
         }
 
-        public static async Task UploadBlobIfNotExistsAsync(CloudBlobContainer container, string name, byte[] byteArray)
+        public static async Task UploadBlobIfNotExistsAsync(BlobContainerClient blobContainerClient, string name, string content)
         {
-            await container.UploadBlobIfNotExistsAsync(name, byteArray);
-        }
-
-        public static async Task UploadBlobIfNotExistsAsync(CloudBlobContainer container, string name, string content)
-        {
-            await container.UploadBlobIfNotExistsAsync(name, content);
+            using (var stream = new MemoryStream(Encoding.ASCII.GetBytes(content)))
+            {
+                await UploadBlobIfNotExistsAsync(blobContainerClient, name, stream);
+            }
         }
 
         #endregion Blobs
 
         #region Queues
-
         public async Task DeleteQueueAsync(string name)
         {
-            CloudQueue queue = GetQueue(name);
+            var queueClient = GetQueueClient(name);
             if (!UseExists)
             {
-                await queue.DeleteIfExistsAsync();
+                await queueClient.DeleteIfExistsAsync();
             }
-            else if (await queue.ExistsAsync())
+            else if (await queueClient.ExistsAsync())
             {
-                await queue.DeleteAsync();
+                await queueClient.DeleteAsync();
             }
         }
 
-        public async Task<CloudQueue> EnsureQueueAsync(string name)
+        public async Task EnsureQueueAsync(string name)
         {
-            CloudQueue queue = GetQueue(name);
+            var queueClient = GetQueueClient(name);
             if (!UseExists)
             {
-                await queue.CreateIfNotExistsAsync();
+                await queueClient.CreateIfNotExistsAsync();
             }
-            else if (!await queue.ExistsAsync())
+            else if (!await queueClient.ExistsAsync())
             {
-                await queue.CreateAsync();
+                await queueClient.CreateAsync();
             }
-            return queue;
         }
 
-        public CloudQueue GetQueue(string name)
+        public QueueClient GetQueueClient(string name)
         {
-            CloudQueue queue = queueClient.GetQueueReference(name.ToLower());
-            return queue;
+            return queueServiceClient.GetQueueClient(name.ToLower());
         }
 
-        public async Task<List<string>> ListQueuesAsync()
-        {
-            var result = new List<string>();
-            QueueContinuationToken continuationToken = null;
-            var allTables = new List<CloudTable>();
-            do
-            {
-                var segment = await queueClient.ListQueuesSegmentedAsync(continuationToken);
-                foreach (var queue in segment.Results)
-                {
-                    result.Add(queue.Name);
-                }
-                continuationToken = segment.ContinuationToken;
-            }
-            while (continuationToken != null);
-            return result;
-        }
+        //public async Task<List<string>> ListQueuesAsync()
+        //{
+        //    var result = new List<string>();
+        //    QueueContinuationToken continuationToken = null;
+        //    var allTables = new List<CloudTable>();
+        //    do
+        //    {
+        //        var segment = await queueClient.ListQueuesSegmentedAsync(continuationToken);
+        //        foreach (var queue in segment.Results)
+        //        {
+        //            result.Add(queue.Name);
+        //        }
+        //        continuationToken = segment.ContinuationToken;
+        //    }
+        //    while (continuationToken != null);
+        //    return result;
+        //}
 
-#if NET461 || NET472
         public List<string> ListQueues()
         {
             var result = new List<string>();
-            foreach (var queue in queueClient.ListQueues())
+            foreach (var queue in queueServiceClient.GetQueues())
             {
                 result.Add(queue.Name);
             }
             return result;
         }
-#endif
         #endregion
 
         #region Tables
@@ -226,7 +242,7 @@ namespace SAEON.Azure.Storage
 
         public CloudTable GetTable(string name)
         {
-            CloudTable table = tableClient.GetTableReference(name);
+            CloudTable table = cloudTableClient.GetTableReference(name);
             return table;
         }
 
@@ -237,7 +253,7 @@ namespace SAEON.Azure.Storage
             var allTables = new List<CloudTable>();
             do
             {
-                var segment = await tableClient.ListTablesSegmentedAsync(continuationToken);
+                var segment = await cloudTableClient.ListTablesSegmentedAsync(continuationToken);
                 foreach (var table in segment.Results)
                 {
                     result.Add(table.Name);
@@ -248,17 +264,15 @@ namespace SAEON.Azure.Storage
             return result;
         }
 
-#if NET461 || NET472
         public List<string> ListTables()
         {
             var result = new List<string>();
-            foreach (var table in tableClient.ListTables())
+            foreach (var table in cloudTableClient.ListTables())
             {
                 result.Add(table.Name);
             }
             return result;
         }
-#endif
 
         #endregion
 
@@ -268,115 +282,108 @@ namespace SAEON.Azure.Storage
 
     public static class AzureStorageExtensions
     {
-        #region Blobs
 
-        private static async Task DeleteBlobIfExists(CloudBlockBlob blockBlob)
+        #region Blobs
+        public static async Task DeleteBlobAsync(this BlobContainerClient blobContainerClient, string name)
         {
             if (!AzureStorage.UseExists)
             {
-                await blockBlob.DeleteIfExistsAsync();
+                await blobContainerClient.DeleteBlobIfExistsAsync(name);
             }
-            else if (await blockBlob.ExistsAsync())
+            else
             {
-                await blockBlob.DeleteAsync();
+                var blobClient = blobContainerClient.GetBlobClient(name);
+                if (await blobClient.ExistsAsync())
+                {
+                    await blobClient.DeleteAsync();
+                }
             }
         }
 
-        public static async Task DeleteBlobAsync(this CloudBlobContainer container, string name)
+        public static async Task<bool> DownloadBlobAsync(this BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            await DeleteBlobIfExists(blockBlob);
-        }
-
-        public static async Task<bool> DownloadBlobAsync(this CloudBlobContainer container, string name, Stream stream)
-        {
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            if (!await blockBlob.ExistsAsync())
-            {
-                return false;
-            }
-            await blockBlob.DownloadToStreamAsync(stream);
+            var blobClient = blobContainerClient.GetBlobClient(name);
+            if (!await blobClient.ExistsAsync()) return false;
+            await blobClient.DownloadToAsync(stream);
             return true;
         }
 
-        public static async Task<List<string>> FolderList(this CloudBlobContainer container, string folder)
+        //public static async Task<List<string>> FolderList(this CloudBlobContainer container, string folder)
+        //{
+        //    string GetFileNameFromBlobURI(Uri theUri, string containerName)
+        //    {
+        //        string theFile = theUri.ToString();
+        //        int dirIndex = theFile.IndexOf(containerName);
+        //        string oneFile = theFile.Substring(dirIndex + containerName.Length + 1,
+        //            theFile.Length - (dirIndex + containerName.Length + 1));
+        //        return oneFile;
+        //    }
+
+        //    var result = new List<string>();
+        //    BlobContinuationToken token = null;
+        //    do
+        //    {
+        //        var dir = container.GetDirectoryReference(folder);
+        //        var segment = await dir.ListBlobsSegmentedAsync(false, BlobListingDetails.None, null, token, null, null);
+        //        foreach (var blob in segment.Results)
+        //        {
+        //            if (blob is CloudBlockBlob)
+        //            {
+        //                result.Add(GetFileNameFromBlobURI(blob.Uri, container.Name));
+        //            }
+        //        }
+        //        token = segment.ContinuationToken;
+        //    }
+        //    while (token != null);
+        //    return result;
+        //}
+
+        public static async Task UploadBlobAsync(this BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            string GetFileNameFromBlobURI(Uri theUri, string containerName)
+            await blobContainerClient.DeleteBlobIfExistsAsync(name);
+            await blobContainerClient.UploadBlobAsync(name, stream);
+        }
+
+        public static async Task UploadBlobAsync(this BlobContainerClient blobContainerClient, string name, byte[] byteArray)
+        {
+            using (var stream = new MemoryStream(byteArray))
             {
-                string theFile = theUri.ToString();
-                int dirIndex = theFile.IndexOf(containerName);
-                string oneFile = theFile.Substring(dirIndex + containerName.Length + 1,
-                    theFile.Length - (dirIndex + containerName.Length + 1));
-                return oneFile;
-            }
-
-            var result = new List<string>();
-            BlobContinuationToken token = null;
-            do
-            {
-                var dir = container.GetDirectoryReference(folder);
-                var segment = await dir.ListBlobsSegmentedAsync(false, BlobListingDetails.None, null, token, null, null);
-                foreach (var blob in segment.Results)
-                {
-                    if (blob is CloudBlockBlob)
-                    {
-                        result.Add(GetFileNameFromBlobURI(blob.Uri, container.Name));
-                    }
-                }
-                token = segment.ContinuationToken;
-            }
-            while (token != null);
-            return result;
-        }
-
-        public static async Task UploadBlobAsync(this CloudBlobContainer container, string name, Stream stream)
-        {
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            await DeleteBlobIfExists(blockBlob);
-            await blockBlob.UploadFromStreamAsync(stream);
-        }
-
-        public static async Task UploadBlobAsync(this CloudBlobContainer container, string name, byte[] byteArray)
-        {
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            await DeleteBlobIfExists(blockBlob);
-            await blockBlob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
-        }
-
-        public static async Task UploadBlobAsync(this CloudBlobContainer container, string name, string content)
-        {
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            await DeleteBlobIfExists(blockBlob);
-            await blockBlob.UploadTextAsync(content);
-        }
-
-        public static async Task UploadBlobIfNotExistsAsync(this CloudBlobContainer container, string name, Stream stream)
-        {
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            if (!await blockBlob.ExistsAsync())
-            {
-                await blockBlob.UploadFromStreamAsync(stream);
+                await blobContainerClient.UploadBlobAsync(name, stream);
             }
         }
 
-        public static async Task UploadBlobIfNotExistsAsync(this CloudBlobContainer container, string name, byte[] byteArray)
+        public static async Task UploadBlobAsync(this BlobContainerClient blobContainerClient, string name, string content)
         {
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            if (!await blockBlob.ExistsAsync())
+            using (var stream = new MemoryStream(Encoding.ASCII.GetBytes(content)))
             {
-                await blockBlob.UploadFromByteArrayAsync(byteArray, 0, byteArray.Length);
+                await blobContainerClient.UploadBlobAsync(name, stream);
             }
         }
 
-        public static async Task UploadBlobIfNotExistsAsync(this CloudBlobContainer container, string name, string content)
+        public static async Task UploadBlobIfNotExistsAsync(this BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(name);
-            if (!await blockBlob.ExistsAsync())
+            var blobClient = blobContainerClient.GetBlobClient(name);
+            if (!await blobClient.ExistsAsync())
             {
-                await blockBlob.UploadTextAsync(content);
+                await blobClient.UploadAsync(stream);
             }
         }
 
+        public static async Task UploadBlobIfNotExistsAsync(this BlobContainerClient blobContainerClient, string name, byte[] byteArray)
+        {
+            using (var stream = new MemoryStream(byteArray))
+            {
+                await blobContainerClient.UploadBlobIfNotExistsAsync(name, stream);
+            }
+        }
+
+        public static async Task UploadBlobIfNotExistsAsync(this BlobContainerClient blobContainerClient, string name, string content)
+        {
+            using (var stream = new MemoryStream(Encoding.ASCII.GetBytes(content)))
+            {
+                await blobContainerClient.UploadBlobIfNotExistsAsync(name, stream);
+            }
+        }
         #endregion
 
         #region Queues
