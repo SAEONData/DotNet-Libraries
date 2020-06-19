@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SAEON.Core.Extensions
+namespace SAEON.Core
 {
     public static class EpochExtensions
     {
