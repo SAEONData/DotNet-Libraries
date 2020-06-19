@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
-using SAEON.Core.Extensions;
+using SAEON.Core;
 using SAEON.Logs;
 using System;
 using System.Collections.Generic;
