@@ -17,6 +17,13 @@
     </Target>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
       <Reference Include="PresentationFramework" />
       <Reference Include="WindowsBase" />
     </ItemGroup>
