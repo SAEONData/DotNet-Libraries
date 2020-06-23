@@ -31,6 +31,7 @@ namespace SAEON.Azure.CosmosDB
 
         public CosmosDBCost(ItemResponse<T> response)
         {
+            if (response == null) throw new ArgumentNullException("response");
             NumberOfItems = 1;
             RequestUnitsConsumed = response.RequestCharge;
             Duration = response.Diagnostics.GetClientElapsedTime();
@@ -38,6 +39,7 @@ namespace SAEON.Azure.CosmosDB
 
         public CosmosDBCost(FeedResponse<T> response)
         {
+            if (response == null) throw new ArgumentNullException("response");
             NumberOfItems = response.Count;
             RequestUnitsConsumed = response.RequestCharge;
             Duration = response.Diagnostics.GetClientElapsedTime();
@@ -94,6 +96,8 @@ namespace SAEON.Azure.CosmosDB
 
         public static int DefaultThroughput { get; set; } = 1000;
         public static int DefaultBatchSize { get; set; } = 100000;
+        public static int DefaultRetries { get; set; } = 500;
+        public static int DefaultRetryWaitSecs { get; set; } = 60;
 
         private string DatabaseId { get; set; }
         private string ContainerId { get; set; }
@@ -119,14 +123,19 @@ namespace SAEON.Azure.CosmosDB
                     {
                         throw new ArgumentNullException("AppSettings.AzureCosmosDBAuthKey cannot be null");
                     }
-
-                    client = new CosmosClient(cosmosDBUrl, authKey, new CosmosClientOptions { AllowBulkExecution = allowBulkExecution });
+                    var clientOptions = new CosmosClientOptions
+                    {
+                        AllowBulkExecution = allowBulkExecution,
+                        MaxRetryAttemptsOnRateLimitedRequests = int.Parse(ConfigurationManager.AppSettings["AzureCosmosDBRetries"] ?? DefaultRetries.ToString()),
+                        MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(int.Parse(ConfigurationManager.AppSettings["AzureCosmosDBRetryWaitSecs"] ?? DefaultRetryWaitSecs.ToString()))
+                    };
+                    client = new CosmosClient(cosmosDBUrl, authKey, clientOptions);
                     DatabaseId = databaseId;
                     ContainerId = containerId;
                     PartitionKey = partitionKey;
                     Throughput = int.Parse(ConfigurationManager.AppSettings["AzureCosmosDBThroughput"] ?? DefaultThroughput.ToString());
-                    Logging.Information("CosmosDbUrl: {CosmosDbUrl} Database: {DatabaseId} Container: {ContainerId} PartitionKey: {PartitionKey} Throughput: {Throughput}",
-                        cosmosDBUrl, DatabaseId, ContainerId, PartitionKey, Throughput);
+                    Logging.Information("CosmosDbUrl: {CosmosDbUrl} Database: {DatabaseId} Container: {ContainerId} PartitionKey: {PartitionKey} Throughput: {Throughput} BulkExecution: {BulkExection}",
+                        cosmosDBUrl, DatabaseId, ContainerId, PartitionKey, Throughput, allowBulkExecution);
                 }
                 catch (Exception ex)
                 {
@@ -259,27 +268,31 @@ namespace SAEON.Azure.CosmosDB
             if (item == null) throw new ArgumentNullException("item");
         }
 
-        private PartitionKey GetPartitionKey(T item, Expression<Func<T, object>> partitionKeyExpression)
+        private PartitionKey GetPartitionKey(Object partitionKey)
         {
-            var key = partitionKeyExpression.Compile()(item);
-            PartitionKey partionKey;
-            switch (key)
+            PartitionKey result;
+            switch (partitionKey)
             {
                 case bool b:
-                    partionKey = new PartitionKey(b);
+                    result = new PartitionKey(b);
                     break;
                 case double d:
-                    partionKey = new PartitionKey(d);
+                    result = new PartitionKey(d);
                     break;
                 case string s:
-                    partionKey = new PartitionKey(s);
+                    result = new PartitionKey(s);
                     break;
                 default:
                     //throw new ArgumentOutOfRangeException("PartionKey type can only be string, double or bool");
-                    partionKey = new PartitionKey(key.ToString());
+                    result = new PartitionKey(partitionKey.ToString());
                     break;
             }
-            return partionKey;
+            return result;
+        }
+
+        private PartitionKey GetPartitionKey(T item, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            return GetPartitionKey(partitionKeyExpression.Compile()(item));
         }
 
         private string GetPartitionKeyValue(T item, Expression<Func<T, object>> partitionKeyExpression)
@@ -477,7 +490,11 @@ namespace SAEON.Azure.CosmosDB
                             tasks.Add(CreateItemWithCostAsync(item, partitionKeyExpression));
                         }
                         await Task.WhenAll(tasks);
-                        foreach (var task in tasks)
+                        if (tasks.Any(i => i.IsFaulted))
+                        {
+                            throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                        }
+                        foreach (var task in tasks.Where(i => !i.IsFaulted))
                         {
                             cost += task.Result.cost;
                         }
@@ -563,7 +580,11 @@ namespace SAEON.Azure.CosmosDB
                             tasks.Add(ReplaceItemWithCostAsync(item, partitionKeyExpression));
                         }
                         await Task.WhenAll(tasks);
-                        foreach (var task in tasks)
+                        if (tasks.Any(i => i.IsFaulted))
+                        {
+                            throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                        }
+                        foreach (var task in tasks.Where(i => !i.IsFaulted))
                         {
                             cost += task.Result.cost;
                         }
@@ -633,28 +654,41 @@ namespace SAEON.Azure.CosmosDB
                     {
                         await EnsureContainerAsync();
                     }
-                    var cost = new CosmosDBCost<T>();
-                    if (!client.ClientOptions.AllowBulkExecution)
+                    var oldAutoEnsureContainer = AutoEnsureContainer;
+                    try
                     {
-                        foreach (var item in items)
+                        AutoEnsureContainer = false;
+                        var cost = new CosmosDBCost<T>();
+                        if (!client.ClientOptions.AllowBulkExecution)
                         {
-                            cost += (await UpsertItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            foreach (var item in items)
+                            {
+                                cost += (await UpsertItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            }
                         }
+                        else
+                        {
+                            var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                            foreach (var item in items)
+                            {
+                                tasks.Add(UpsertItemWithCostAsync(item, partitionKeyExpression));
+                            }
+                            await Task.WhenAll(tasks);
+                            if (tasks.Any(i => i.IsFaulted))
+                            {
+                                throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                            }
+                            foreach (var task in tasks.Where(i => !i.IsFaulted))
+                            {
+                                cost += task.Result.cost;
+                            }
+                        }
+                        return cost;
                     }
-                    else
+                    finally
                     {
-                        var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
-                        foreach (var item in items)
-                        {
-                            tasks.Add(UpsertItemWithCostAsync(item, partitionKeyExpression));
-                        }
-                        await Task.WhenAll(tasks);
-                        foreach (var task in tasks)
-                        {
-                            cost += task.Result.cost;
-                        }
+                        AutoEnsureContainer = oldAutoEnsureContainer;
                     }
-                    return cost;
                 }
                 catch (Exception ex)
                 {
@@ -678,6 +712,27 @@ namespace SAEON.Azure.CosmosDB
                         await EnsureContainerAsync();
                     }
                     return await container.DeleteItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression));
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        private async Task<(T item, CosmosDBCost<T> cost)> DeleteItemWithCostAsync(string id, Object partitionKey)
+        {
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", id }, { "partitionKey", partitionKey } }))
+            {
+                try
+                {
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    var response = await container.DeleteItemAsync<T>(id, GetPartitionKey(partitionKey));
+                    return (response, new CosmosDBCost<T>(response));
                 }
                 catch (Exception ex)
                 {
@@ -719,28 +774,41 @@ namespace SAEON.Azure.CosmosDB
                     {
                         await EnsureContainerAsync();
                     }
-                    var cost = new CosmosDBCost<T>();
-                    if (!client.ClientOptions.AllowBulkExecution)
+                    var oldAutoEnsureContainer = AutoEnsureContainer;
+                    try
                     {
-                        foreach (var item in items)
+                        AutoEnsureContainer = false;
+                        var cost = new CosmosDBCost<T>();
+                        if (!client.ClientOptions.AllowBulkExecution)
                         {
-                            cost += (await DeleteItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            foreach (var item in items)
+                            {
+                                cost += (await DeleteItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            }
                         }
+                        else
+                        {
+                            var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                            foreach (var item in items)
+                            {
+                                tasks.Add(DeleteItemWithCostAsync(item, partitionKeyExpression));
+                            }
+                            await Task.WhenAll(tasks);
+                            if (tasks.Any(i => i.IsFaulted))
+                            {
+                                throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                            }
+                            foreach (var task in tasks.Where(i => !i.IsFaulted))
+                            {
+                                cost += task.Result.cost;
+                            }
+                        }
+                        return cost;
                     }
-                    else
+                    finally
                     {
-                        var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
-                        foreach (var item in items)
-                        {
-                            tasks.Add(DeleteItemWithCostAsync(item, partitionKeyExpression));
-                        }
-                        await Task.WhenAll(tasks);
-                        foreach (var task in tasks)
-                        {
-                            cost += task.Result.cost;
-                        }
+                        AutoEnsureContainer = oldAutoEnsureContainer;
                     }
-                    return cost;
                 }
                 catch (Exception ex)
                 {
@@ -750,7 +818,7 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<CosmosDBCost<T>> DeleteItemsAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> partitionKeyExpression)
+        public async Task<(CosmosDBCost<T> totalCost, CosmosDBCost<T> readCost, CosmosDBCost<T> deleteCost)> DeleteItemsAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> partitionKeyExpression)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
@@ -760,30 +828,106 @@ namespace SAEON.Azure.CosmosDB
                     {
                         await EnsureContainerAsync();
                     }
-                    var cost = new CosmosDBCost<T>();
-                    var (items, getCost) = await GetItemsWithCostAsync(predicate);
-                    cost += getCost;
-                    if (!client.ClientOptions.AllowBulkExecution)
+                    var oldAutoEnsureContainer = AutoEnsureContainer;
+                    try
                     {
-                        foreach (var item in items)
+                        AutoEnsureContainer = false;
+                        var (items, readCost) = await GetItemsWithCostAsync(predicate);
+                        var deleteCost = new CosmosDBCost<T>();
+                        if (!client.ClientOptions.AllowBulkExecution)
                         {
-                            cost += (await DeleteItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            foreach (var item in items)
+                            {
+                                deleteCost += (await DeleteItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            }
                         }
+                        else
+                        {
+                            var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                            foreach (var item in items)
+                            {
+                                tasks.Add(DeleteItemWithCostAsync(item, partitionKeyExpression));
+                            }
+                            await Task.WhenAll(tasks);
+                            if (tasks.Any(i => i.IsFaulted))
+                            {
+                                throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                            }
+                            foreach (var task in tasks.Where(i => !i.IsFaulted))
+                            {
+                                deleteCost += task.Result.cost;
+                            }
+                        }
+                        return (readCost + deleteCost, readCost, deleteCost);
                     }
-                    else
+                    finally
                     {
-                        var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
-                        foreach (var item in items)
-                        {
-                            tasks.Add(DeleteItemWithCostAsync(item, partitionKeyExpression));
-                        }
-                        await Task.WhenAll(tasks);
-                        foreach (var task in tasks)
-                        {
-                            cost += task.Result.cost;
-                        }
+                        AutoEnsureContainer = oldAutoEnsureContainer;
                     }
-                    return cost;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<(CosmosDBCost<T> totalCost, CosmosDBCost<T> readCost, CosmosDBCost<T> deleteCost)> DeleteItemsAsync(Expression<Func<T, bool>> predicate, object partitionKey)
+        {
+            using (Logging.MethodCall<T>(GetType()))
+            {
+                try
+                {
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    var oldAutoEnsureContainer = AutoEnsureContainer;
+                    try
+                    {
+                        AutoEnsureContainer = false;
+                        var readCost = new CosmosDBCost<T>();
+                        var items = new List<string>();
+                        var iterator = container.GetItemLinqQueryable<T>().Where(predicate).Select(i => i.Id).ToFeedIterator();
+                        while (iterator.HasMoreResults)
+                        {
+                            foreach (var item in await iterator.ReadNextAsync())
+                            {
+                                items.Add(item);
+                            }
+                        }
+                        var deleteCost = new CosmosDBCost<T>();
+                        if (!client.ClientOptions.AllowBulkExecution)
+                        {
+                            foreach (var item in items)
+                            {
+                                deleteCost += (await DeleteItemWithCostAsync(item, partitionKey)).cost;
+                            }
+                        }
+                        else
+                        {
+                            var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                            foreach (var item in items)
+                            {
+                                tasks.Add(DeleteItemWithCostAsync(item, partitionKey));
+                            }
+                            await Task.WhenAll(tasks);
+                            if (tasks.Any(i => i.IsFaulted))
+                            {
+                                throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                            }
+                            foreach (var task in tasks.Where(i => !i.IsFaulted))
+                            {
+                                deleteCost += task.Result.cost;
+                            }
+                        }
+                        return (readCost + deleteCost, readCost, deleteCost);
+                    }
+                    finally
+                    {
+                        AutoEnsureContainer = oldAutoEnsureContainer;
+                    }
                 }
                 catch (Exception ex)
                 {
