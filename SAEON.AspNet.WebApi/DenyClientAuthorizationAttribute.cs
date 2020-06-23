@@ -12,13 +12,13 @@ using System.Web.Http.Filters;
 namespace SAEON.AspNet.WebApi
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public sealed class ClientAuthorizationAttribute : AuthorizationFilterAttribute
+    public sealed class DenyClientAuthorizationAttribute : AuthorizationFilterAttribute
     {
         private List<string> Clients { get; } = new List<string>();
 
-        public ClientAuthorizationAttribute() : base() { }
+        public DenyClientAuthorizationAttribute() : base() { }
 
-        public ClientAuthorizationAttribute(string client) : this()
+        public DenyClientAuthorizationAttribute(string client) : this()
         {
             if (!Clients.Contains(client))
             {
@@ -26,7 +26,7 @@ namespace SAEON.AspNet.WebApi
             }
         }
 
-        public ClientAuthorizationAttribute(params string[] clients) : this()
+        public DenyClientAuthorizationAttribute(params string[] clients) : this()
         {
             foreach (var client in clients)
             {
@@ -55,7 +55,7 @@ namespace SAEON.AspNet.WebApi
                         break;
                     }
                 }
-                if (!found)
+                if (found)
                 {
                     Logging.Error("Client Authorization Failed");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Client Authorization Failed");

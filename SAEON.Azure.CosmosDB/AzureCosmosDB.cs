@@ -1,49 +1,55 @@
-﻿using Microsoft.Azure.CosmosDB.BulkExecutor;
-using Microsoft.Azure.CosmosDB.BulkExecutor.BulkDelete;
-using Microsoft.Azure.CosmosDB.BulkExecutor.BulkImport;
-using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.Documents.Linq;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
-using SAEON.Core.Extensions;
+using SAEON.Core;
 using SAEON.Logs;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Configuration;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
-using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SAEON.Azure.CosmosDB
 {
-    public class AzureDocument : Document { }
-
-    public class AzureSubDocument { }
-
-    public class AzureCost
+    public class CosmosDBItem
     {
-        public int NumberOfDocuments { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; set; }
+    }
+
+    //public class AzureSubDocument { }
+
+    public class CosmosDBCost<T> where T : CosmosDBItem
+    {
+        public int NumberOfItems { get; set; }
         public double RequestUnitsConsumed { get; set; }
         public TimeSpan Duration { get; set; }
 
-        public AzureCost() { }
+        public CosmosDBCost() { }
 
-        public AzureCost(ResourceResponse<Document> response, Stopwatch stopWatch)
+        public CosmosDBCost(ItemResponse<T> response)
         {
+            if (response == null) throw new ArgumentNullException("response");
+            NumberOfItems = 1;
             RequestUnitsConsumed = response.RequestCharge;
-            Duration = stopWatch.Elapsed;
+            Duration = response.Diagnostics.GetClientElapsedTime();
         }
 
-        public static AzureCost operator +(AzureCost a, AzureCost b)
+        public CosmosDBCost(FeedResponse<T> response)
         {
-            return new AzureCost
+            if (response == null) throw new ArgumentNullException("response");
+            NumberOfItems = response.Count;
+            RequestUnitsConsumed = response.RequestCharge;
+            Duration = response.Diagnostics.GetClientElapsedTime();
+        }
+
+        public static CosmosDBCost<T> operator +(CosmosDBCost<T> a, CosmosDBCost<T> b)
+        {
+            return new CosmosDBCost<T>
             {
-                NumberOfDocuments = a.NumberOfDocuments + b.NumberOfDocuments,
+                NumberOfItems = a.NumberOfItems + b.NumberOfItems,
                 RequestUnitsConsumed = a.RequestUnitsConsumed + b.RequestUnitsConsumed,
                 Duration = a.Duration + b.Duration
             };
@@ -53,11 +59,11 @@ namespace SAEON.Azure.CosmosDB
         {
             if (Duration.TotalSeconds > 0)
             {
-                return $"Docs: {NumberOfDocuments:N0} Docs/s: {NumberOfDocuments / Duration.TotalSeconds:N3} Request Units: {RequestUnitsConsumed:N3} RUs/s: {RequestUnitsConsumed / Duration.TotalSeconds:N3} in {Duration}";
+                return $"Items: {NumberOfItems:N0} Items/s: {NumberOfItems / Duration.TotalSeconds:N3} Request Units: {RequestUnitsConsumed:N3} RUs/s: {RequestUnitsConsumed / Duration.TotalSeconds:N3} in {Duration.TimeStr()}";
             }
             else
             {
-                return $"Docs: {NumberOfDocuments:N0} Request Units: {RequestUnitsConsumed:N3} in {Duration}";
+                return $"Items: {NumberOfItems:N0} Request Units: {RequestUnitsConsumed:N3} in {Duration.TimeStr()}";
             }
         }
     }
@@ -82,23 +88,25 @@ namespace SAEON.Azure.CosmosDB
         }
     }
 
-    public class AzureCosmosDB<T> where T : AzureDocument
+    public class AzureCosmosDB<T> where T : CosmosDBItem
     {
-        private DocumentClient client = null;
+        private CosmosClient client = null;
         private Database database = null;
-        private DocumentCollection collection = null;
+        private Container container = null;
 
         public static int DefaultThroughput { get; set; } = 1000;
         public static int DefaultBatchSize { get; set; } = 100000;
+        public static int DefaultRetries { get; set; } = 500;
+        public static int DefaultRetryWaitSecs { get; set; } = 60;
 
         private string DatabaseId { get; set; }
-        private string CollectionId { get; set; }
+        private string ContainerId { get; set; }
         private string PartitionKey { get; set; }
         private int Throughput { get; set; } = DefaultThroughput;
 
-        public static bool AutoEnsureCollection { get; set; } = false;
+        public static bool AutoEnsureContainer { get; set; } = true;
 
-        public AzureCosmosDB(string databaseId, string collectionId, string partitionKey)
+        public AzureCosmosDB(string databaseId, string containerId, string partitionKey, bool allowBulkExecution = false)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
@@ -115,14 +123,19 @@ namespace SAEON.Azure.CosmosDB
                     {
                         throw new ArgumentNullException("AppSettings.AzureCosmosDBAuthKey cannot be null");
                     }
-
-                    client = new DocumentClient(new Uri(cosmosDBUrl), authKey);
+                    var clientOptions = new CosmosClientOptions
+                    {
+                        AllowBulkExecution = allowBulkExecution,
+                        MaxRetryAttemptsOnRateLimitedRequests = int.Parse(ConfigurationManager.AppSettings["AzureCosmosDBRetries"] ?? DefaultRetries.ToString()),
+                        MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(int.Parse(ConfigurationManager.AppSettings["AzureCosmosDBRetryWaitSecs"] ?? DefaultRetryWaitSecs.ToString()))
+                    };
+                    client = new CosmosClient(cosmosDBUrl, authKey, clientOptions);
                     DatabaseId = databaseId;
-                    CollectionId = collectionId;
+                    ContainerId = containerId;
                     PartitionKey = partitionKey;
                     Throughput = int.Parse(ConfigurationManager.AppSettings["AzureCosmosDBThroughput"] ?? DefaultThroughput.ToString());
-                    Logging.Information("CosmosDbUrl: {CosmosDbUrl} Database: {DatabaseId} Collection: {CollectionId} PartitionKey: {PartitionKey} Throughput: {Throughput}",
-                        cosmosDBUrl, DatabaseId, CollectionId, PartitionKey, Throughput);
+                    Logging.Information("CosmosDbUrl: {CosmosDbUrl} Database: {DatabaseId} Container: {ContainerId} PartitionKey: {PartitionKey} Throughput: {Throughput} BulkExecution: {BulkExection}",
+                        cosmosDBUrl, DatabaseId, ContainerId, PartitionKey, Throughput, allowBulkExecution);
                 }
                 catch (Exception ex)
                 {
@@ -136,7 +149,7 @@ namespace SAEON.Azure.CosmosDB
         {
             using (Logging.MethodCall<T>(GetType()))
             {
-                collection = null;
+                container = null;
                 database = null;
                 client = null;
             }
@@ -154,7 +167,7 @@ namespace SAEON.Azure.CosmosDB
             {
                 try
                 {
-                    database = await client.CreateDatabaseIfNotExistsAsync(new Database { Id = DatabaseId });
+                    database = await client.CreateDatabaseIfNotExistsAsync(DatabaseId);
                 }
                 catch (Exception ex)
                 {
@@ -165,107 +178,83 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task LoadDatabaseAsync()
-        {
-            if (database != null)
-            {
-                return;
-            }
+        //public async Task LoadDatabaseAsync()
+        //{
+        //    if (database != null)
+        //    {
+        //        return;
+        //    }
 
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId } }))
-            {
-                try
-                {
-                    Logging.Verbose("DatabaseUri: {DatabaseUri}", UriFactory.CreateDatabaseUri(DatabaseId));
-                    database = await client.ReadDatabaseAsync(UriFactory.CreateDatabaseUri(DatabaseId));
-                }
-                catch (Exception ex)
-                {
-                    collection = null;
-                    database = null;
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
+        //    using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId } }))
+        //    {
+        //        try
+        //        {
+        //            Logging.Verbose("DatabaseUri: {DatabaseUri}", UriFactory.CreateDatabaseUri(DatabaseId));
+        //            database = await client.ReadDatabaseAsync(UriFactory.CreateDatabaseUri(DatabaseId));
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            container = null;
+        //            database = null;
+        //            Logging.Exception(ex);
+        //            throw;
+        //        }
+        //    }
+        //}
         #endregion
 
-        #region Collection
-        public async Task EnsureCollectionAsync()
+        #region Container
+        public async Task EnsureContainerAsync()
         {
-            if (collection != null)
+            if (container != null)
             {
                 return;
             }
 
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId }, { "CollectionId", CollectionId }, { "PartitionKey", PartitionKey } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId }, { "ContainerId", ContainerId }, { "PartitionKey", PartitionKey } }))
             {
                 try
                 {
                     await EnsureDatabaseAsync();
-                    var collection = new DocumentCollection { Id = CollectionId };
-                    collection.PartitionKey.Paths.Add(PartitionKey);
-                    collection.IndexingPolicy.IndexingMode = IndexingMode.Lazy;
-                    // Defaults
-                    collection.IndexingPolicy.IncludedPaths.Add(
-                        new IncludedPath
-                        {
-                            Path = "/*",
-                            Indexes = new Collection<Index> {
-                                new HashIndex(DataType.String) { Precision = 3 },
-                                new RangeIndex(DataType.Number) { Precision = -1 }
-                            }
-                        });
-                    foreach (var prop in typeof(T).GetProperties().Where(i => i.PropertyType == typeof(EpochDate)))
-                    {
-                        var propName = prop.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? prop.Name;
-                        collection.IndexingPolicy.IncludedPaths.Add(new IncludedPath
-                        {
-                            Path = $"/{propName}/epoch/?",
-                            Indexes = new Collection<Index> { { new RangeIndex(DataType.Number, -1) } }
-                        });
-                    };
-                    foreach (var subProp in typeof(T).GetProperties().Where(i => i.PropertyType == typeof(AzureSubDocument)))
-                    {
-                        var subPropName = subProp.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? subProp.Name;
-                        foreach (var prop in subProp.GetType().GetProperties().Where(i => i.PropertyType == typeof(EpochDate)))
-                        {
-                            var propName = prop.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? prop.Name;
-                            collection.IndexingPolicy.IncludedPaths.Add(new IncludedPath
-                            {
-                                Path = $"/{subPropName}/{propName}/epoch/?",
-                                Indexes = new Collection<Index> { { new RangeIndex(DataType.Number, -1) } }
-                            });
-                        }
-                    };
-                    this.collection = await client.CreateDocumentCollectionIfNotExistsAsync(database.SelfLink, collection);
+                    var containerProperties = new ContainerProperties(ContainerId, PartitionKey);
+                    containerProperties.IndexingPolicy.IndexingMode = IndexingMode.Consistent;
+                    //// Defaults
+                    //Container.IndexingPolicy.IncludedPaths.Add(
+                    //    new IncludedPath
+                    //    {
+                    //        Path = "/*",
+                    //        Indexes = new Container<Index> {
+                    //            new HashIndex(DataType.String) { Precision = 3 },
+                    //            new RangeIndex(DataType.Number) { Precision = -1 }
+                    //        }
+                    //    });
+                    //foreach (var prop in typeof(T).GetProperties().Where(i => i.PropertyType == typeof(EpochDate)))
+                    //{
+                    //    var propName = prop.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? prop.Name;
+                    //    Container.IndexingPolicy.IncludedPaths.Add(new IncludedPath
+                    //    {
+                    //        Path = $"/{propName}/epoch/?",
+                    //        Indexes = new Container<Index> { { new RangeIndex(DataType.Number, -1) } }
+                    //    });
+                    //};
+                    //foreach (var subProp in typeof(T).GetProperties().Where(i => i.PropertyType == typeof(AzureSubDocument)))
+                    //{
+                    //    var subPropName = subProp.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? subProp.Name;
+                    //    foreach (var prop in subProp.GetType().GetProperties().Where(i => i.PropertyType == typeof(EpochDate)))
+                    //    {
+                    //        var propName = prop.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? prop.Name;
+                    //        Container.IndexingPolicy.IncludedPaths.Add(new IncludedPath
+                    //        {
+                    //            Path = $"/{subPropName}/{propName}/epoch/?",
+                    //            Indexes = new Container<Index> { { new RangeIndex(DataType.Number, -1) } }
+                    //        });
+                    //    }
+                    //};
+                    container = await database.CreateContainerIfNotExistsAsync(containerProperties, Throughput);
                 }
                 catch (Exception ex)
                 {
-                    collection = null;
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task LoadCollectionAsync()
-        {
-            if (collection != null)
-            {
-                return;
-            }
-
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId }, { "CollectionId", CollectionId }, { "PartitionKey", PartitionKey } }))
-            {
-                try
-                {
-                    await EnsureDatabaseAsync();
-                    collection = await client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId));
-                }
-                catch (Exception ex)
-                {
-                    collection = null;
+                    container = null;
                     Logging.Exception(ex);
                     throw;
                 }
@@ -274,34 +263,67 @@ namespace SAEON.Azure.CosmosDB
         #endregion
 
         #region Items
-        public async Task<T> GetItemAsync(string id)
+        private void CheckItem(T item)
         {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "Id", id } }))
+            if (item == null) throw new ArgumentNullException("item");
+        }
+
+        private PartitionKey GetPartitionKey(Object partitionKey)
+        {
+            PartitionKey result;
+            switch (partitionKey)
+            {
+                case bool b:
+                    result = new PartitionKey(b);
+                    break;
+                case double d:
+                    result = new PartitionKey(d);
+                    break;
+                case string s:
+                    result = new PartitionKey(s);
+                    break;
+                default:
+                    //throw new ArgumentOutOfRangeException("PartionKey type can only be string, double or bool");
+                    result = new PartitionKey(partitionKey.ToString());
+                    break;
+            }
+            return result;
+        }
+
+        private PartitionKey GetPartitionKey(T item, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            return GetPartitionKey(partitionKeyExpression.Compile()(item));
+        }
+
+        private string GetPartitionKeyValue(T item, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            if (item == null)
+            {
+                return null;
+            }
+            else
+            {
+                return partitionKeyExpression.Compile()(item).ToString();
+            }
+        }
+
+        public async Task<T> GetItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
-                    try
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
                     {
-                        if (AutoEnsureCollection)
-                        {
-                            await EnsureCollectionAsync();
-                        }
-
-                        Document document = await client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
-                        return (T)(dynamic)document;
+                        await EnsureContainerAsync();
                     }
-                    catch (DocumentClientException e)
-                    {
-                        if (e.StatusCode == HttpStatusCode.NotFound)
-                        {
-                            Logging.Verbose("Item iwth ID {ID} not found", id);
-                            return default;
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
+                    return await container.ReadItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression));
+                }
+                catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    Logging.Verbose("Item with ID {ID} not found", item.Id);
+                    return default;
                 }
                 catch (Exception ex)
                 {
@@ -311,34 +333,24 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<T> GetItemAsync(object partitionKey, string id)
+        public async Task<(T item, CosmosDBCost<T> cost)> GetItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey }, { "Id", id } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
-                    try
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
                     {
-                        if (AutoEnsureCollection)
-                        {
-                            await EnsureCollectionAsync();
-                        }
-
-                        Document document = await client.ReadDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id), new RequestOptions { PartitionKey = new PartitionKey(partitionKey) });
-                        return (T)(dynamic)document;
+                        await EnsureContainerAsync();
                     }
-                    catch (DocumentClientException e)
-                    {
-                        if (e.StatusCode == HttpStatusCode.NotFound)
-                        {
-                            Logging.Verbose("Item iwth ID {ID}, PartitionKey {PartitionKey} not found", id, partitionKey);
-                            return default;
-                        }
-                        else
-                        {
-                            throw;
-                        }
-                    }
+                    var response = await container.ReadItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression));
+                    return (response, new CosmosDBCost<T>(response));
+                }
+                catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    Logging.Verbose("Item with ID {ID} not found", item.Id);
+                    return default;
                 }
                 catch (Exception ex)
                 {
@@ -346,16 +358,6 @@ namespace SAEON.Azure.CosmosDB
                     throw;
                 }
             }
-        }
-
-        public async Task<T> GetItemAsync(Expression<Func<T, object>> partitionKeyExpression, string id, T item)
-        {
-            return await GetItemAsync(partitionKeyExpression.Compile()(item), id);
-        }
-
-        public async Task<T> GetItemAsync(Expression<Func<T, object>> partitionKeyExpression, Expression<Func<T, string>> idExpression, T item)
-        {
-            return await GetItemAsync(partitionKeyExpression.Compile()(item), idExpression.Compile()(item));
         }
 
         public async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
@@ -364,18 +366,20 @@ namespace SAEON.Azure.CosmosDB
             {
                 try
                 {
-                    if (AutoEnsureCollection)
+                    if (AutoEnsureContainer)
                     {
-                        await EnsureCollectionAsync();
+                        await EnsureContainerAsync();
                     }
-
-                    var query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions { MaxItemCount = -1 }).Where(predicate).AsDocumentQuery();
-                    var results = new List<T>();
-                    while (query.HasMoreResults)
+                    var items = new List<T>();
+                    var iterator = container.GetItemLinqQueryable<T>().Where(predicate).ToFeedIterator();
+                    while (iterator.HasMoreResults)
                     {
-                        results.AddRange(await query.ExecuteNextAsync<T>());
+                        foreach (var item in await iterator.ReadNextAsync())
+                        {
+                            items.Add(item);
+                        }
                     }
-                    return results;
+                    return items;
                 }
                 catch (Exception ex)
                 {
@@ -385,116 +389,116 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
+        public async Task<(IEnumerable<T> items, CosmosDBCost<T> cost)> GetItemsWithCostAsync(Expression<Func<T, bool>> predicate)
+        {
+            using (Logging.MethodCall<T>(GetType()))
+            {
+                try
+                {
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    var items = new List<T>();
+                    var iterator = container.GetItemLinqQueryable<T>().Where(predicate).ToFeedIterator();
+                    var cost = new CosmosDBCost<T>();
+                    while (iterator.HasMoreResults)
+                    {
+                        var response = await iterator.ReadNextAsync();
+                        cost += new CosmosDBCost<T>(response);
+                        foreach (var item in response)
+                        {
+                            items.Add(item);
+                        }
+                    }
+                    return (items, cost);
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
         #region Create
-        public async Task<(T item, AzureCost cost)> CreateItemAsync(T item)
+        public async Task<T> CreateItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            {
+                try
+                {
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    return await container.CreateItemAsync(item, GetPartitionKey(item, partitionKeyExpression));
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<(T item, CosmosDBCost<T> cost)> CreateItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            {
+                try
+                {
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    var response = await container.CreateItemAsync<T>(item, GetPartitionKey(item, partitionKeyExpression));
+                    return (response, new CosmosDBCost<T>(response));
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<CosmosDBCost<T>> CreateItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
                 try
                 {
-                    if (AutoEnsureCollection)
+                    if (AutoEnsureContainer)
                     {
-                        await EnsureCollectionAsync();
+                        await EnsureContainerAsync();
                     }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var response = await client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item);
-                    stopWatch.Stop();
-                    return ((T)(dynamic)response.Resource, new AzureCost(response, stopWatch) { NumberOfDocuments = 1 });
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<AzureCost> CreateItemsAsync(List<T> items)
-        {
-            using (Logging.MethodCall<T>(GetType()))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
+                    var cost = new CosmosDBCost<T>();
+                    if (!client.ClientOptions.AllowBulkExecution)
                     {
-                        await EnsureCollectionAsync();
+                        foreach (var item in items)
+                        {
+                            cost += (await CreateItemWithCostAsync(item, partitionKeyExpression)).cost;
+                        }
                     }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    foreach (var item in items)
+                    else
                     {
-                        var response = await CreateItemAsync(item);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
+                        var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                        foreach (var item in items)
+                        {
+                            tasks.Add(CreateItemWithCostAsync(item, partitionKeyExpression));
+                        }
+                        await Task.WhenAll(tasks);
+                        if (tasks.Any(i => i.IsFaulted))
+                        {
+                            throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                        }
+                        foreach (var task in tasks.Where(i => !i.IsFaulted))
+                        {
+                            cost += task.Result.cost;
+                        }
                     }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<(T item, AzureCost cost)> CreateItemAsync(T item, object partitionKey)
-        {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var response = await client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item, new RequestOptions { PartitionKey = new PartitionKey(partitionKey) });
-                    stopWatch.Stop();
-                    return ((T)(dynamic)response.Resource, new AzureCost(response, stopWatch) { NumberOfDocuments = 1 });
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<(T item, AzureCost cost)> CreateItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
-        {
-            return await CreateItemAsync(item, partitionKeyExpression.Compile()(item));
-        }
-
-        public async Task<AzureCost> CreateItemsAsync(List<T> items, object partitionKey)
-        {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    foreach (var item in items)
-                    {
-                        var response = await CreateItemAsync(item, partitionKey);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
-                    }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
                     return cost;
                 }
                 catch (Exception ex)
@@ -506,116 +510,85 @@ namespace SAEON.Azure.CosmosDB
         }
         #endregion
 
-        #region Update
-        public async Task<(T item, AzureCost cost)> UpdateItemAsync(T item)
+        #region Replace
+        public async Task<T> ReplaceItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            {
+                try
+                {
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    return await container.ReplaceItemAsync(item, item.Id, GetPartitionKey(item, partitionKeyExpression));
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<(T item, CosmosDBCost<T> cost)> ReplaceItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            {
+                try
+                {
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    var response = await container.ReplaceItemAsync<T>(item, item.Id, GetPartitionKey(item, partitionKeyExpression));
+                    return (response, new CosmosDBCost<T>(response));
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<CosmosDBCost<T>> ReplaceItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
                 try
                 {
-                    if (AutoEnsureCollection)
+                    if (AutoEnsureContainer)
                     {
-                        await EnsureCollectionAsync();
+                        await EnsureContainerAsync();
                     }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var response = await client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, item.Id), item);
-                    stopWatch.Stop();
-                    return ((T)(dynamic)response.Resource, new AzureCost(response, stopWatch));
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<AzureCost> UpdateItemsAsync(List<T> items)
-        {
-            using (Logging.MethodCall<T>(GetType()))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
+                    var cost = new CosmosDBCost<T>();
+                    if (!client.ClientOptions.AllowBulkExecution)
                     {
-                        await EnsureCollectionAsync();
+                        foreach (var item in items)
+                        {
+                            cost += (await ReplaceItemWithCostAsync(item, partitionKeyExpression)).cost;
+                        }
                     }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    foreach (var item in items)
+                    else
                     {
-                        var response = await UpdateItemAsync(item);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
+                        var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                        foreach (var item in items)
+                        {
+                            tasks.Add(ReplaceItemWithCostAsync(item, partitionKeyExpression));
+                        }
+                        await Task.WhenAll(tasks);
+                        if (tasks.Any(i => i.IsFaulted))
+                        {
+                            throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                        }
+                        foreach (var task in tasks.Where(i => !i.IsFaulted))
+                        {
+                            cost += task.Result.cost;
+                        }
                     }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<(T item, AzureCost cost)> UpdateItemAsync(T item, object partitionKey)
-        {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var response = await client.ReplaceDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, item.Id), item, new RequestOptions { PartitionKey = new PartitionKey(partitionKey) });
-                    stopWatch.Stop();
-                    return ((T)(dynamic)response.Resource, new AzureCost(response, stopWatch));
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<(T item, AzureCost cost)> UpdateItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
-        {
-            return await UpdateItemAsync(item, partitionKeyExpression.Compile()(item));
-        }
-
-        public async Task<AzureCost> UpdateItemsAsync(List<T> items, object partitionKey)
-        {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    foreach (var item in items)
-                    {
-                        var response = await UpdateItemAsync(item, partitionKey);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
-                    }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
                     return cost;
                 }
                 catch (Exception ex)
@@ -628,22 +601,18 @@ namespace SAEON.Azure.CosmosDB
         #endregion
 
         #region Upsert
-        public async Task<(T item, AzureCost cost)> UpsertItemAsync(T item)
+        public async Task<T> UpsertItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
-            using (Logging.MethodCall<T>(GetType()))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
-                    if (AutoEnsureCollection)
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
                     {
-                        await EnsureCollectionAsync();
+                        await EnsureContainerAsync();
                     }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var response = await client.UpsertDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item);
-                    stopWatch.Stop();
-                    return ((T)(dynamic)response.Resource, new AzureCost(response, stopWatch));
+                    return await container.UpsertItemAsync(item, GetPartitionKey(item, partitionKeyExpression));
                 }
                 catch (Exception ex)
                 {
@@ -653,29 +622,19 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<AzureCost> UpsertItemsAsync(List<T> items)
+        public async Task<(T item, CosmosDBCost<T> cost)> UpsertItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
-            using (Logging.MethodCall<T>(GetType()))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
-                    if (AutoEnsureCollection)
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
                     {
-                        await EnsureCollectionAsync();
+                        await EnsureContainerAsync();
                     }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    foreach (var item in items)
-                    {
-                        var response = await UpsertItemAsync(item);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
-                    }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
+                    var response = await container.UpsertItemAsync<T>(item, GetPartitionKey(item, partitionKeyExpression));
+                    return (response, new CosmosDBCost<T>(response));
                 }
                 catch (Exception ex)
                 {
@@ -685,139 +644,51 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<AzureCost> BulkUpsertItemsAsync(List<T> items)
+        public async Task<CosmosDBCost<T>> UpsertItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
                 try
                 {
-                    if (AutoEnsureCollection)
+                    if (AutoEnsureContainer)
                     {
-                        await EnsureCollectionAsync();
+                        await EnsureContainerAsync();
                     }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    //foreach (var item in items)
-                    //{
-                    //    var response = await UpsertItemAsync(item);
-                    //    cost.NumberOfDocuments++;
-                    //    cost += response.cost;
-                    //}
-                    var oldMaxRetryWaitTimeInSeconds = client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds;
-                    var oldMaxRetryAttemptsOnThrottledRequests = client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests;
+                    var oldAutoEnsureContainer = AutoEnsureContainer;
                     try
                     {
-                        await LoadCollectionAsync();
-                        Logging.Verbose("Client: {Client} Database: {Database} Collection: {Collection}", client != null, database != null, collection != null);
-
-                        // Set retry options high for initialization (default values).
-                        client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
-                        client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 9;
-
-                        BulkExecutor bulkExecutor = new BulkExecutor(client, collection);
-                        await bulkExecutor.InitializeAsync();
-
-                        // Set retries to 0 to pass control to bulk executor.
-                        client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 0;
-                        client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 0;
-
-                        BulkImportResponse bulkImportResponse = null;
-                        var tokenSource = new CancellationTokenSource();
-                        var token = tokenSource.Token;
-
-                        do
+                        AutoEnsureContainer = false;
+                        var cost = new CosmosDBCost<T>();
+                        if (!client.ClientOptions.AllowBulkExecution)
                         {
-                            try
+                            foreach (var item in items)
                             {
-                                bulkImportResponse = await bulkExecutor.BulkImportAsync(
-                                    documents: items,
-                                    enableUpsert: true,
-                                    disableAutomaticIdGeneration: true,
-                                    maxConcurrencyPerPartitionKeyRange: null,
-                                    maxInMemorySortingBatchSize: null,
-                                    cancellationToken: token);
+                                cost += (await UpsertItemWithCostAsync(item, partitionKeyExpression)).cost;
                             }
-                            catch (Exception ex)
+                        }
+                        else
+                        {
+                            var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                            foreach (var item in items)
                             {
-                                Logging.Exception(ex);
-                                break;
+                                tasks.Add(UpsertItemWithCostAsync(item, partitionKeyExpression));
                             }
-                        } while (bulkImportResponse.NumberOfDocumentsImported < items.Count);
-                        cost.NumberOfDocuments += (int)bulkImportResponse.NumberOfDocumentsImported;
-                        cost.RequestUnitsConsumed += bulkImportResponse.TotalRequestUnitsConsumed;
+                            await Task.WhenAll(tasks);
+                            if (tasks.Any(i => i.IsFaulted))
+                            {
+                                throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                            }
+                            foreach (var task in tasks.Where(i => !i.IsFaulted))
+                            {
+                                cost += task.Result.cost;
+                            }
+                        }
+                        return cost;
                     }
                     finally
                     {
-                        client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = oldMaxRetryWaitTimeInSeconds;
-                        client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = oldMaxRetryAttemptsOnThrottledRequests;
+                        AutoEnsureContainer = oldAutoEnsureContainer;
                     }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<(T item, AzureCost cost)> UpsertItemAsync(T item, object partitionKey)
-        {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var response = await client.UpsertDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), item, new RequestOptions { PartitionKey = new PartitionKey(partitionKey) });
-                    stopWatch.Stop();
-                    return ((T)(dynamic)response.Resource, new AzureCost(response, stopWatch));
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<(T item, AzureCost cost)> UpsertItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
-        {
-            return await UpsertItemAsync(item, partitionKeyExpression.Compile()(item));
-        }
-
-        public async Task<AzureCost> UpsertItemsAsync(List<T> items, object partitionKey)
-        {
-            using (Logging.MethodCall<T>(GetType()))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    foreach (var item in items)
-                    {
-                        var response = await UpsertItemAsync(item, partitionKey);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
-                    }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
                 }
                 catch (Exception ex)
                 {
@@ -829,22 +700,18 @@ namespace SAEON.Azure.CosmosDB
         #endregion
 
         #region Delete
-        public async Task<(T item, AzureCost cost)> DeleteItemAsync(string id)
+        public async Task<T> DeleteItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "Id", id } }))
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
-                    if (AutoEnsureCollection)
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
                     {
-                        await EnsureCollectionAsync();
+                        await EnsureContainerAsync();
                     }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var response = await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id));
-                    stopWatch.Stop();
-                    return ((T)(dynamic)response.Resource, new AzureCost(response, stopWatch));
+                    return await container.DeleteItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression));
                 }
                 catch (Exception ex)
                 {
@@ -854,235 +721,94 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
-        public async Task<(T item, AzureCost cost)> DeleteItemAsync(T item)
+        private async Task<(T item, CosmosDBCost<T> cost)> DeleteItemWithCostAsync(string id, Object partitionKey)
         {
-            return await DeleteItemAsync(item.Id);
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", id }, { "partitionKey", partitionKey } }))
+            {
+                try
+                {
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    var response = await container.DeleteItemAsync<T>(id, GetPartitionKey(partitionKey));
+                    return (response, new CosmosDBCost<T>(response));
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
         }
 
-        public async Task<AzureCost> DeleteItemsAsync(List<T> items)
+        public async Task<(T item, CosmosDBCost<T> cost)> DeleteItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            {
+                try
+                {
+                    CheckItem(item);
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    var response = await container.DeleteItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression));
+                    return (response, new CosmosDBCost<T>(response));
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<CosmosDBCost<T>> DeleteItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
             using (Logging.MethodCall<T>(GetType()))
             {
                 try
                 {
-                    if (AutoEnsureCollection)
+                    if (AutoEnsureContainer)
                     {
-                        await EnsureCollectionAsync();
+                        await EnsureContainerAsync();
                     }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    foreach (var item in items)
-                    {
-                        var response = await DeleteItemAsync(item);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
-                    }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<AzureCost> DeleteItemsAsync(Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
-        {
-            using (Logging.MethodCall<T>(GetType()))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    IQueryable<string> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId),
-                        new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = enableCrossPartition }).Where(predicate).Select(idExpression);
-                    var cost = new AzureCost();
-                    foreach (var id in query)
-                    {
-                        var response = await DeleteItemAsync(id);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
-                    }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-
-        public async Task<(T item, AzureCost cost)> DeleteItemAsync(object partitionKey, string id)
-        {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey }, { "Id", id } }))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var response = await client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId, id), new RequestOptions { PartitionKey = new PartitionKey(partitionKey) });
-                    stopWatch.Stop();
-                    return ((T)(dynamic)response.Resource, new AzureCost(response, stopWatch));
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<(T item, AzureCost cost)> DeleteItemAsync(T item, object partitionKey)
-        {
-            return await DeleteItemAsync(partitionKey, item.Id);
-        }
-
-        public async Task<(T item, AzureCost cost)> DeleteItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
-        {
-            return await DeleteItemAsync(item, partitionKeyExpression.Compile()(item));
-        }
-
-        public async Task<AzureCost> DeleteItemsAsync(List<T> items, object partitionKey)
-        {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    foreach (var item in items)
-                    {
-                        var response = await DeleteItemAsync(item, partitionKey);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
-                    }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<AzureCost> DeleteItemsAsync(object partitionKey, Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate, bool enableCrossPartition = false)
-        {
-            using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "PartitionKey", partitionKey } }))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    IQueryable<string> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId),
-                        new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = enableCrossPartition }).Where(predicate).Select(idExpression);
-                    var cost = new AzureCost();
-                    foreach (var id in query)
-                    {
-                        var response = await DeleteItemAsync(partitionKey, id);
-                        cost.NumberOfDocuments++;
-                        cost += response.cost;
-                    }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
-                }
-                catch (Exception ex)
-                {
-                    Logging.Exception(ex);
-                    throw;
-                }
-            }
-        }
-
-        public async Task<AzureCost> BulkDeleteItemsAsync(object partitionKey, Expression<Func<T, string>> idExpression, Expression<Func<T, bool>> predicate)
-        {
-            using (Logging.MethodCall<T>(GetType()))
-            {
-                try
-                {
-                    if (AutoEnsureCollection)
-                    {
-                        await EnsureCollectionAsync();
-                    }
-
-                    var stopWatch = new Stopwatch();
-                    stopWatch.Start();
-                    var cost = new AzureCost();
-                    var oldMaxRetryWaitTimeInSeconds = client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds;
-                    var oldMaxRetryAttemptsOnThrottledRequests = client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests;
+                    var oldAutoEnsureContainer = AutoEnsureContainer;
                     try
                     {
-                        await LoadCollectionAsync();
-                        IQueryable<string> query = client.CreateDocumentQuery<T>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId),
-                            new FeedOptions { MaxItemCount = -1, EnableCrossPartitionQuery = true }).Where(predicate).Select(idExpression);
-                        var items = query.AsEnumerable().Select(i => new Tuple<string, string>(partitionKey.ToString(), i)).ToList();
-                        Logging.Verbose("Items: {Count} {@Items}", items.Count, items);
-
-                        // Set retry options high for initialization (default values).
-                        client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 30;
-                        client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 9;
-
-                        BulkExecutor bulkExecutor = new BulkExecutor(client, collection);
-                        await bulkExecutor.InitializeAsync();
-
-                        // Set retries to 0 to pass control to bulk executor.
-                        client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = 0;
-                        client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = 0;
-
-                        BulkDeleteResponse bulkDeleteResponse = null;
-                        try
+                        AutoEnsureContainer = false;
+                        var cost = new CosmosDBCost<T>();
+                        if (!client.ClientOptions.AllowBulkExecution)
                         {
-                            bulkDeleteResponse = await bulkExecutor.BulkDeleteAsync(items);
+                            foreach (var item in items)
+                            {
+                                cost += (await DeleteItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            }
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            Logging.Exception(ex);
-                            throw;
+                            var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                            foreach (var item in items)
+                            {
+                                tasks.Add(DeleteItemWithCostAsync(item, partitionKeyExpression));
+                            }
+                            await Task.WhenAll(tasks);
+                            if (tasks.Any(i => i.IsFaulted))
+                            {
+                                throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                            }
+                            foreach (var task in tasks.Where(i => !i.IsFaulted))
+                            {
+                                cost += task.Result.cost;
+                            }
                         }
-                        cost.NumberOfDocuments += (int)bulkDeleteResponse.NumberOfDocumentsDeleted;
-                        cost.RequestUnitsConsumed += bulkDeleteResponse.TotalRequestUnitsConsumed;
+                        return cost;
                     }
                     finally
                     {
-                        client.ConnectionPolicy.RetryOptions.MaxRetryWaitTimeInSeconds = oldMaxRetryWaitTimeInSeconds;
-                        client.ConnectionPolicy.RetryOptions.MaxRetryAttemptsOnThrottledRequests = oldMaxRetryAttemptsOnThrottledRequests;
+                        AutoEnsureContainer = oldAutoEnsureContainer;
                     }
-                    stopWatch.Stop();
-                    cost.Duration = stopWatch.Elapsed;
-                    return cost;
                 }
                 catch (Exception ex)
                 {
@@ -1092,6 +818,124 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
+        public async Task<(CosmosDBCost<T> totalCost, CosmosDBCost<T> readCost, CosmosDBCost<T> deleteCost)> DeleteItemsAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> partitionKeyExpression)
+        {
+            using (Logging.MethodCall<T>(GetType()))
+            {
+                try
+                {
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    var oldAutoEnsureContainer = AutoEnsureContainer;
+                    try
+                    {
+                        AutoEnsureContainer = false;
+                        var (items, readCost) = await GetItemsWithCostAsync(predicate);
+                        var deleteCost = new CosmosDBCost<T>();
+                        if (!client.ClientOptions.AllowBulkExecution)
+                        {
+                            foreach (var item in items)
+                            {
+                                deleteCost += (await DeleteItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            }
+                        }
+                        else
+                        {
+                            var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                            foreach (var item in items)
+                            {
+                                tasks.Add(DeleteItemWithCostAsync(item, partitionKeyExpression));
+                            }
+                            await Task.WhenAll(tasks);
+                            if (tasks.Any(i => i.IsFaulted))
+                            {
+                                throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                            }
+                            foreach (var task in tasks.Where(i => !i.IsFaulted))
+                            {
+                                deleteCost += task.Result.cost;
+                            }
+                        }
+                        return (readCost + deleteCost, readCost, deleteCost);
+                    }
+                    finally
+                    {
+                        AutoEnsureContainer = oldAutoEnsureContainer;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
+
+        public async Task<(CosmosDBCost<T> totalCost, CosmosDBCost<T> readCost, CosmosDBCost<T> deleteCost)> DeleteItemsAsync(Expression<Func<T, bool>> predicate, object partitionKey)
+        {
+            using (Logging.MethodCall<T>(GetType()))
+            {
+                try
+                {
+                    if (AutoEnsureContainer)
+                    {
+                        await EnsureContainerAsync();
+                    }
+                    var oldAutoEnsureContainer = AutoEnsureContainer;
+                    try
+                    {
+                        AutoEnsureContainer = false;
+                        var readCost = new CosmosDBCost<T>();
+                        var items = new List<string>();
+                        var iterator = container.GetItemLinqQueryable<T>().Where(predicate).Select(i => i.Id).ToFeedIterator();
+                        while (iterator.HasMoreResults)
+                        {
+                            foreach (var item in await iterator.ReadNextAsync())
+                            {
+                                items.Add(item);
+                            }
+                        }
+                        var deleteCost = new CosmosDBCost<T>();
+                        if (!client.ClientOptions.AllowBulkExecution)
+                        {
+                            foreach (var item in items)
+                            {
+                                deleteCost += (await DeleteItemWithCostAsync(item, partitionKey)).cost;
+                            }
+                        }
+                        else
+                        {
+                            var tasks = new List<Task<(T item, CosmosDBCost<T> cost)>>();
+                            foreach (var item in items)
+                            {
+                                tasks.Add(DeleteItemWithCostAsync(item, partitionKey));
+                            }
+                            await Task.WhenAll(tasks);
+                            if (tasks.Any(i => i.IsFaulted))
+                            {
+                                throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
+                            }
+                            foreach (var task in tasks.Where(i => !i.IsFaulted))
+                            {
+                                deleteCost += task.Result.cost;
+                            }
+                        }
+                        return (readCost + deleteCost, readCost, deleteCost);
+                    }
+                    finally
+                    {
+                        AutoEnsureContainer = oldAutoEnsureContainer;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logging.Exception(ex);
+                    throw;
+                }
+            }
+        }
         #endregion
 
         #endregion

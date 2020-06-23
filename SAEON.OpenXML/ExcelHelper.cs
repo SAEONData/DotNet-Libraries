@@ -187,13 +187,11 @@ namespace SAEON.OpenXML
 
         public static string GetColumnName(int column)
         {
-            uint value = 0;
-            uint remainder = 0;
             string result = string.Empty;
-            value = (uint)column;
+            var value = (uint)column;
             while (value > 0)
             {
-                remainder = (value - 1) % 26;
+                var remainder = (value - 1) % 26;
                 result = (char)(65 + remainder) + result;
                 value = (uint)(Math.Floor((double)((value - remainder) / 26)));
             }
@@ -277,29 +275,29 @@ namespace SAEON.OpenXML
             }
         }
 
-        // Given a column name, a Row, and a SheetDatam inserts a cell into the worksheet.
-        // If the cell already exists, returns it.
-        private static Cell InsertCellInWorksheet(SheetData sheetData, string columnName, int rowIndex)
-        {
-            var row = InsertRowInWorksheet(sheetData, rowIndex);
-            return InsertCellInWorksheet(sheetData, columnName, row);
-        }
+        //// Given a column name, a Row, and a SheetDatam inserts a cell into the worksheet.
+        //// If the cell already exists, returns it.
+        //private static Cell InsertCellInWorksheet(SheetData sheetData, string columnName, int rowIndex)
+        //{
+        //    var row = InsertRowInWorksheet(sheetData, rowIndex);
+        //    return InsertCellInWorksheet(sheetData, columnName, row);
+        //}
 
-        // Given a column name, a Row, and a WorksheetPart, inserts a cell into the worksheet.
-        // If the cell already exists, returns it.
-        private static Cell InsertCellInWorksheet(WorksheetPart worksheetPart, string columnName, Row row)
-        {
-            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
-            return InsertCellInWorksheet(sheetData, columnName, row);
-        }
+        //// Given a column name, a Row, and a WorksheetPart, inserts a cell into the worksheet.
+        //// If the cell already exists, returns it.
+        //private static Cell InsertCellInWorksheet(WorksheetPart worksheetPart, string columnName, Row row)
+        //{
+        //    SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+        //    return InsertCellInWorksheet(sheetData, columnName, row);
+        //}
 
-        // Given a column name, a row index, and a WorksheetPart, inserts a cell into the worksheet.
-        // If the cell already exists, returns it.
-        private static Cell InsertCellInWorksheet(WorksheetPart worksheetPart, string columnName, int rowIndex)
-        {
-            SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
-            return InsertCellInWorksheet(sheetData, columnName, rowIndex);
-        }
+        //// Given a column name, a row index, and a WorksheetPart, inserts a cell into the worksheet.
+        //// If the cell already exists, returns it.
+        //private static Cell InsertCellInWorksheet(WorksheetPart worksheetPart, string columnName, int rowIndex)
+        //{
+        //    SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
+        //    return InsertCellInWorksheet(sheetData, columnName, rowIndex);
+        //}
 
         // Given text and a SharedStringTablePart, creates a SharedStringItem with the specified text
         // and inserts it into the SharedStringTablePart. If the item already exists, returns its index.
@@ -389,9 +387,9 @@ namespace SAEON.OpenXML
                 cell.CellValue = new CellValue(value.ToString());
                 cell.DataType = new EnumValue<CellValues>(CellValues.Number);
             }
-            else if (value is bool)
+            else if (value is bool boolean)
             {
-                cell.CellValue = new CellValue((bool)value ? "1" : "0");
+                cell.CellValue = new CellValue(boolean ? "1" : "0");
                 cell.DataType = new EnumValue<CellValues>(CellValues.Boolean);
             }
             else if (value is DateTime)
@@ -757,9 +755,9 @@ namespace SAEON.OpenXML
             var splitSheet = range.Split('!');
             var sheet = splitSheet[0];
             var splitRange = splitSheet[1].Split(':');
-            var topLeft = SplitCellReference(splitRange[0]);
+            var (col, row) = SplitCellReference(splitRange[0]);
             var bottomRight = SplitCellReference(splitRange[1]);
-            return (sheet, topLeft.col, topLeft.row, bottomRight.col, bottomRight.row);
+            return (sheet, col, row, bottomRight.col, bottomRight.row);
         }
 
         public static (string col, int row) SplitCellReference(string cellReference)
