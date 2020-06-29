@@ -31,7 +31,7 @@ namespace SAEON.Azure.CosmosDB
 
         public CosmosDBCost(ItemResponse<T> response)
         {
-            if (response == null) throw new ArgumentNullException("response");
+            if (response == null) throw new ArgumentNullException(nameof(response));
             NumberOfItems = 1;
             RequestUnitsConsumed = response.RequestCharge;
             Duration = response.Diagnostics.GetClientElapsedTime();
@@ -39,20 +39,27 @@ namespace SAEON.Azure.CosmosDB
 
         public CosmosDBCost(FeedResponse<T> response)
         {
-            if (response == null) throw new ArgumentNullException("response");
+            if (response == null) throw new ArgumentNullException(nameof(response));
             NumberOfItems = response.Count;
             RequestUnitsConsumed = response.RequestCharge;
             Duration = response.Diagnostics.GetClientElapsedTime();
         }
 
-        public static CosmosDBCost<T> operator +(CosmosDBCost<T> a, CosmosDBCost<T> b)
+        public static CosmosDBCost<T> operator +(CosmosDBCost<T> left, CosmosDBCost<T> right)
         {
+            if (left == null) throw new ArgumentNullException(nameof(left));
+            if (right == null) throw new ArgumentNullException(nameof(right));
             return new CosmosDBCost<T>
             {
-                NumberOfItems = a.NumberOfItems + b.NumberOfItems,
-                RequestUnitsConsumed = a.RequestUnitsConsumed + b.RequestUnitsConsumed,
-                Duration = a.Duration + b.Duration
+                NumberOfItems = left.NumberOfItems + right.NumberOfItems,
+                RequestUnitsConsumed = left.RequestUnitsConsumed + right.RequestUnitsConsumed,
+                Duration = left.Duration + right.Duration
             };
+        }
+
+        public static CosmosDBCost<T> Add(CosmosDBCost<T> left, CosmosDBCost<T> right)
+        {
+            return left + right;
         }
 
         public override string ToString()
@@ -66,6 +73,7 @@ namespace SAEON.Azure.CosmosDB
                 return $"Items: {NumberOfItems:N0} Request Units: {RequestUnitsConsumed:N3} in {Duration.TimeStr()}";
             }
         }
+
     }
 
     public class EpochDate
@@ -265,7 +273,7 @@ namespace SAEON.Azure.CosmosDB
         #region Items
         private void CheckItem(T item)
         {
-            if (item == null) throw new ArgumentNullException("item");
+            if (item == null) throw new ArgumentNullException(nameof(item));
         }
 
         private PartitionKey GetPartitionKey(Object partitionKey)
@@ -309,6 +317,8 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<T> GetItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -335,6 +345,8 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, CosmosDBCost<T> cost)> GetItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -936,6 +948,7 @@ namespace SAEON.Azure.CosmosDB
                 }
             }
         }
+
         #endregion
 
         #endregion
