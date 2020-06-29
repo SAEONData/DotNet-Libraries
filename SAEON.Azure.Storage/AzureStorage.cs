@@ -1,9 +1,11 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Microsoft.Azure.Cosmos.Table;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -182,24 +184,6 @@ namespace SAEON.Azure.Storage
             return queueServiceClient.GetQueueClient(name.ToLower());
         }
 
-        //public async Task<List<string>> ListQueuesAsync()
-        //{
-        //    var result = new List<string>();
-        //    QueueContinuationToken continuationToken = null;
-        //    var allTables = new List<CloudTable>();
-        //    do
-        //    {
-        //        var segment = await queueClient.ListQueuesSegmentedAsync(continuationToken);
-        //        foreach (var queue in segment.Results)
-        //        {
-        //            result.Add(queue.Name);
-        //        }
-        //        continuationToken = segment.ContinuationToken;
-        //    }
-        //    while (continuationToken != null);
-        //    return result;
-        //}
-
         public List<string> ListQueues()
         {
             var result = new List<string>();
@@ -208,6 +192,35 @@ namespace SAEON.Azure.Storage
                 result.Add(queue.Name);
             }
             return result;
+        }
+
+        public async Task<List<string>> ListQueuesAsync()
+        {
+            var result = new List<string>();
+            var allQueues = queueServiceClient.GetQueuesAsync();
+            IAsyncEnumerator<QueueItem> enumerator = allQueues.GetAsyncEnumerator();
+            try
+            {
+                while (await enumerator.MoveNextAsync())
+                {
+                    result.Add(enumerator.Current.Name);
+                }
+            }
+            finally
+            {
+                await enumerator.DisposeAsync();
+            }
+            return result;
+        }
+
+        public bool QueueExists(string name)
+        {
+            return ListQueues().Any(i => i == name.ToLower());
+        }
+
+        public async Task<bool> QueueExistsAsync(string name)
+        {
+            return (await ListQueuesAsync()).Any(i => i == name.ToLower());
         }
         #endregion
 
