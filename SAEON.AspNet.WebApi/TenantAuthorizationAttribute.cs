@@ -3,11 +3,10 @@ using SAEON.Logs;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -15,6 +14,7 @@ using System.Web.Http.Filters;
 namespace SAEON.AspNet.WebApi
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
     public sealed class TenantAuthorizationAttribute : AuthorizationFilterAttribute
     {
         public List<string> Tenants { get; private set; } = new List<string>();
@@ -42,55 +42,41 @@ namespace SAEON.AspNet.WebApi
             }
         }
 
-        private void DoTenantAuthorization(HttpActionContext actionContext)
-        {
-            //if (!actionContext.Request.Headers.Contains(AspNetConstants.TenantHeader))
-            //{
-            //    Logging.Error("Tenant Authorization Failed (No tenant header)");
-            //    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenant header)");
-            //    return;
-            //}
-            var tenant = actionContext.Request.Headers.Contains(AspNetConstants.TenantHeader) ? actionContext.Request.Headers.GetValues(AspNetConstants.TenantHeader).FirstOrDefault() : null;
-            Logging.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant} Tenant: {Tenant}", Tenants.ToArray(), DefaultTenant, tenant);
-            if (string.IsNullOrWhiteSpace(tenant))
-            {
-                tenant = DefaultTenant;
-            }
-            if (string.IsNullOrWhiteSpace(tenant))
-            {
-                Logging.Error("Tenant Authorization Failed (No tenant)");
-                actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenant)");
-                return;
-            }
-            if (!Tenants.Any())
-            {
-                Logging.Error("Tenant Authorization Failed (No tenants)");
-                actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenants)");
-                return;
-            }
-            if (!Tenants.Contains(tenant))
-            {
-                Logging.Error("Tenant Authorization Failed (Unknown tenant)");
-                actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (Unknown tenant)");
-                return;
-            }
-        }
-
-        public override async Task OnAuthorizationAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
-        {
-            using (Logging.MethodCall(GetType()))
-            {
-                await base.OnAuthorizationAsync(actionContext, cancellationToken);
-                DoTenantAuthorization(actionContext);
-            }
-        }
-
         public override void OnAuthorization(HttpActionContext actionContext)
         {
             using (Logging.MethodCall(GetType()))
             {
-                base.OnAuthorization(actionContext);
-                DoTenantAuthorization(actionContext);
+                if (actionContext == null) throw new ArgumentNullException(nameof(actionContext));
+                //if (!actionContext.Request.Headers.Contains(AspNetConstants.TenantHeader))
+                //{
+                //    Logging.Error("Tenant Authorization Failed (No tenant header)");
+                //    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenant header)");
+                //    return;
+                //}
+                var tenant = actionContext.Request.Headers.Contains(AspNetConstants.TenantHeader) ? actionContext.Request.Headers.GetValues(AspNetConstants.TenantHeader).FirstOrDefault() : null;
+                Logging.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant} Tenant: {Tenant}", Tenants.ToArray(), DefaultTenant, tenant);
+                if (string.IsNullOrWhiteSpace(tenant))
+                {
+                    tenant = DefaultTenant;
+                }
+                if (string.IsNullOrWhiteSpace(tenant))
+                {
+                    Logging.Error("Tenant Authorization Failed (No tenant)");
+                    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenant)");
+                    return;
+                }
+                if (!Tenants.Any())
+                {
+                    Logging.Error("Tenant Authorization Failed (No tenants)");
+                    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenants)");
+                    return;
+                }
+                if (!Tenants.Contains(tenant))
+                {
+                    Logging.Error("Tenant Authorization Failed (Unknown tenant)");
+                    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (Unknown tenant)");
+                    return;
+                }
             }
         }
 

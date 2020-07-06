@@ -10,6 +10,14 @@ namespace SAEON.Core
             return source.Quoted('"');
         }
 
+        public static bool IsTrue(this string value)
+        {
+            if (bool.TryParse(value, out bool result))
+                return result;
+            else
+                return false;
+        }
+
         public static string Quoted(this string source, char quote)
         {
             return
