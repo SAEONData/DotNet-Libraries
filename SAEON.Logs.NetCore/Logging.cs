@@ -5,23 +5,21 @@ using Serilog.Context;
 using Serilog.Events;
 using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace SAEON.Logs
 {
     public static class Logging
     {
-        public static string Level
+        public static LogEventLevel Level
         {
             get
             {
-                foreach (var level in Enum.GetValues(typeof(LogEventLevel)).Cast<LogEventLevel>())
+                foreach (LogEventLevel logLevel in Enum.GetValues(typeof(LogEventLevel)))
                 {
-                    if (Log.IsEnabled(level)) return level.ToString();
+                    if (Log.IsEnabled(logLevel)) return logLevel;
                 }
-                // Shouldn’t get here!
-                return "Unknown";
+                return LogEventLevel.Information;
             }
         }
 
