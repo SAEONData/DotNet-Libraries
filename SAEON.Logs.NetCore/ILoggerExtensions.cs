@@ -10,6 +10,7 @@ namespace SAEON.Logs
     {
         public static string Level(this ILogger logger)
         {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
             foreach (var level in Enum.GetValues(typeof(LogLevel)).Cast<LogLevel>())
             {
                 if (logger.IsEnabled(level)) return level.ToString();
@@ -20,6 +21,7 @@ namespace SAEON.Logs
 
         public static string Level<T>(this ILogger<T> logger)
         {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
             foreach (var level in Enum.GetValues(typeof(LogLevel)).Cast<LogLevel>())
             {
                 if (logger.IsEnabled(level)) return level.ToString();

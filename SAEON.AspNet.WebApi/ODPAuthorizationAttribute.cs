@@ -21,7 +21,7 @@ namespace SAEON.AspNet.WebApi
     [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
     public sealed class ODPAuthorizeAttribute : AuthorizationFilterAttribute
     {
-        private bool requireLogin = false;
+        private readonly bool requireLogin = false;
 
         public ODPAuthorizeAttribute() : base() { }
 
@@ -38,8 +38,8 @@ namespace SAEON.AspNet.WebApi
                 try
                 {
                     if (actionContext == null) throw new ArgumentNullException(nameof(actionContext));
-                    var introspectionUrl = ConfigurationManager.AppSettings[AspNetConstants.ODPAuthInspectionUrl];
-                    if (string.IsNullOrWhiteSpace(introspectionUrl)) throw new ArgumentNullException($"AppSettings[{AspNetConstants.ODPAuthInspectionUrl}]");
+                    var introspectionUrl = ConfigurationManager.AppSettings["ODPAuthInspectionUrl"];
+                    if (string.IsNullOrWhiteSpace(introspectionUrl)) throw new ArgumentNullException($"AppSettings[ODPAuthInspectionUrl]");
                     // Get token
                     var token = actionContext?.Request?.Headers?.Authorization?.Parameter;
                     if (string.IsNullOrWhiteSpace(token))
@@ -52,7 +52,7 @@ namespace SAEON.AspNet.WebApi
                     using (var handler = new HttpClientHandler())
                     {
                         // Remove once Mark has sorted out the certificate
-                        if (ConfigurationManager.AppSettings[AspNetConstants.ODBAuthIgnoreInvalidCertificates].IsTrue())
+                        if (ConfigurationManager.AppSettings["ODPAuthIgnoreInvalidCertificates"].IsTrue())
                         {
                             handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
                         }
