@@ -83,29 +83,26 @@ namespace SAEON.Azure.Storage
         #region Blobs
         public async Task DeleteBlobAsync(BlobContainerClient blobContainerClient, string name)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             await blobContainerClient.DeleteBlobIfExistsAsync(name);
         }
 
         public static async Task DownloadBlobAsync(BlobContainerClient blobContainerClient, string name, Stream stream)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             var blobClient = blobContainerClient.GetBlobClient(name);
             await blobClient.DownloadToAsync(stream);
         }
 
-        //public static async Task<List<string>> FolderList(CloudBlobContainer container, string folder)
-        //{
-        //    return await container.FolderList(folder);
-        //}
-
-        //public static async Task<List<string>> FolderList(BlobContainerClient blobContainerClient, string folder)
-
-        //{
-        //    blobContainerClient.GetBlobsByHierarchyAsync()
-        //    return await container.FolderList(folder);
-        //}
+        public static async Task<List<string>> ListFolders(BlobContainerClient blobContainerClient, string folder)
+        {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
+            return await blobContainerClient.ListFolder(folder);
+        }
 
         public static async Task UploadBlobAsync(BlobContainerClient blobContainerClient, string name, Stream stream)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             await blobContainerClient.UploadBlobAsync(name, stream);
         }
 
@@ -127,6 +124,7 @@ namespace SAEON.Azure.Storage
 
         public static async Task UploadBlobIfNotExistsAsync(BlobContainerClient blobContainerClient, string name, Stream stream)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             var blobClient = blobContainerClient.GetBlobClient(name);
             if (!await blobClient.ExistsAsync())
             {
@@ -299,6 +297,7 @@ namespace SAEON.Azure.Storage
         #region Blobs
         public static async Task DeleteBlobAsync(this BlobContainerClient blobContainerClient, string name)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             if (!AzureStorage.UseExists)
             {
                 await blobContainerClient.DeleteBlobIfExistsAsync(name);
@@ -315,10 +314,26 @@ namespace SAEON.Azure.Storage
 
         public static async Task<bool> DownloadBlobAsync(this BlobContainerClient blobContainerClient, string name, Stream stream)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             var blobClient = blobContainerClient.GetBlobClient(name);
             if (!await blobClient.ExistsAsync()) return false;
             await blobClient.DownloadToAsync(stream);
             return true;
+        }
+
+        public static async Task<List<string>> ListFolder(this BlobContainerClient blobContainerClient, string folder)
+        {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
+            var blobs = blobContainerClient.GetBlobsByHierarchyAsync(prefix: folder);
+            var result = new List<string>();
+            await foreach (var blob in blobs)
+            {
+                if (blob.IsBlob)
+                {
+                    result.Add(blob.Blob.Name);
+                }
+            }
+            return result;
         }
 
         //public static async Task<List<string>> FolderList(this CloudBlobContainer container, string folder)
@@ -353,12 +368,14 @@ namespace SAEON.Azure.Storage
 
         public static async Task UploadBlobAsync(this BlobContainerClient blobContainerClient, string name, Stream stream)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             await blobContainerClient.DeleteBlobIfExistsAsync(name);
             await blobContainerClient.UploadBlobAsync(name, stream);
         }
 
         public static async Task UploadBlobAsync(this BlobContainerClient blobContainerClient, string name, byte[] byteArray)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             using (var stream = new MemoryStream(byteArray))
             {
                 await blobContainerClient.UploadBlobAsync(name, stream);
@@ -367,6 +384,7 @@ namespace SAEON.Azure.Storage
 
         public static async Task UploadBlobAsync(this BlobContainerClient blobContainerClient, string name, string content)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             using (var stream = new MemoryStream(Encoding.ASCII.GetBytes(content)))
             {
                 await blobContainerClient.UploadBlobAsync(name, stream);
@@ -375,6 +393,7 @@ namespace SAEON.Azure.Storage
 
         public static async Task UploadBlobIfNotExistsAsync(this BlobContainerClient blobContainerClient, string name, Stream stream)
         {
+            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             var blobClient = blobContainerClient.GetBlobClient(name);
             if (!await blobClient.ExistsAsync())
             {
@@ -423,11 +442,7 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> DeleteEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null)
-            {
-                throw new NullReferenceException("DeleteEntity: Null entity");
-            }
-
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             T oldEntity = await GetEntityAsync<T>(table, entity);
             if (oldEntity == null)
             {
@@ -439,6 +454,7 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> GetEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             entity.SetKeys();
             return (T)(await table.ExecuteAsync(TableOperation.Retrieve<T>(entity.PartitionKey, entity.RowKey))).Result;
         }
@@ -495,31 +511,20 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> InsertOrMergeEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null)
-            {
-                throw new NullReferenceException("InsertOrMergeEntity: Null entity");
-            }
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             entity.SetKeys();
             return (T)(await table.ExecuteAsync(TableOperation.InsertOrMerge(entity))).Result;
         }
 
         public static async Task<T> InsertOrReplaceEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null)
-            {
-                throw new NullReferenceException("InsertOrReplaceEntity: Null entity");
-            }
-            entity.SetKeys();
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             return (T)(await table.ExecuteAsync(TableOperation.InsertOrReplace(entity))).Result;
         }
 
         public static async Task<T> MergeEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null)
-            {
-                throw new NullReferenceException("MergeEntity: Null entity");
-            }
-
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             T oldEntity = await GetEntityAsync<T>(table, entity);
             if (oldEntity == null)
             {
@@ -533,11 +538,7 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> ReplaceEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null)
-            {
-                throw new NullReferenceException("ReplaceEntity: Null entity");
-            }
-
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             T oldEntity = await GetEntityAsync<T>(table, entity);
             if (oldEntity == null)
             {
