@@ -9,7 +9,7 @@
     <Description>OpenXML utilities for SAEON .Net</Description>
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.62</Version>
+    <Version>1.0.63</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -21,7 +21,7 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.2" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.3" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -32,12 +32,8 @@
     <PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.18" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.2'">
-    <PackageReference Include="SAEON.Logs.NetCore" Version="1.0.30" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="SAEON.Logs.NetCore" Version="1.0.30" />
+    <PackageReference Include="SAEON.Logs.NetCore" Version="1.0.31" />
   </ItemGroup>
 
 </Project>
