@@ -15,6 +15,7 @@ namespace SAEON.ImageProcessing
     {
         public static ImageFactory Overlay(this ImageFactory factory, string fileName, Point position, Size size)
         {
+            if (factory == null) throw new ArgumentNullException(nameof(factory));
             if (factory.ShouldProcess)
             {
                 OverlayLayer overlayLayer = new OverlayLayer(fileName, position, size);
@@ -25,6 +26,7 @@ namespace SAEON.ImageProcessing
 
         public static ImageFactory Overlay(this ImageFactory factory, string fileName, Point position)
         {
+            if (factory == null) throw new ArgumentNullException(nameof(factory));
             if (factory.ShouldProcess)
             {
                 OverlayLayer overlayLayer = new OverlayLayer(fileName, position, new Size(0, 0));
@@ -35,6 +37,7 @@ namespace SAEON.ImageProcessing
 
         public static ImageFactory Overlay(this ImageFactory factory, OverlayLayer overlayLayer)
         {
+            if (factory == null) throw new ArgumentNullException(nameof(factory));
             if (factory.ShouldProcess)
             {
                 Overlay overlay = new Overlay { DynamicParameter = overlayLayer };
@@ -46,6 +49,7 @@ namespace SAEON.ImageProcessing
         public static ImageFactory GetExifString(this ImageFactory imageFactory, ExifPropertyTag propertyTag, out string value)
         {
             value = null;
+            if (imageFactory == null) throw new ArgumentNullException(nameof(imageFactory));
             if (imageFactory.ExifPropertyItems.TryGetValue((int)propertyTag, out PropertyItem propertyItem) &&
                 (propertyItem != null) &&
                 (propertyItem.Type == (int)ExifPropertyTagType.ASCII))
@@ -56,6 +60,7 @@ namespace SAEON.ImageProcessing
         public static ImageFactory GetExifLatLong(this ImageFactory imageFactory, ExifPropertyTag propertyTagRef, ExifPropertyTag propertyTag, out decimal? value)
         {
             value = null;
+            if (imageFactory == null) throw new ArgumentNullException(nameof(imageFactory));
             imageFactory.GetExifString(propertyTagRef, out string latLongRef);
             if (imageFactory.ExifPropertyItems.TryGetValue((int)propertyTag, out PropertyItem propertyItem) &&
                 (propertyItem != null) &&
@@ -92,7 +97,7 @@ namespace SAEON.ImageProcessing
         private static PropertyItem CreatePropertyItem()
         {
             var ci = typeof(PropertyItem);
-            var o = ci.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public, null, new Type[] { }, null);
+            var o = ci.GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public, null, Array.Empty<Type>(), null);
 
             return (PropertyItem)o.Invoke(null);
         }
@@ -100,6 +105,7 @@ namespace SAEON.ImageProcessing
         public static ImageFactory SetExifString(this ImageFactory imageFactory, ExifPropertyTag tag, string value)
         {
             value += "\0";
+            if (imageFactory == null) throw new ArgumentNullException(nameof(imageFactory));
             if (imageFactory.ExifPropertyItems.TryGetValue((int)tag, out PropertyItem propertyItem) && (propertyItem != null))
             {
                 if (propertyItem.Type != (int)ExifPropertyTagType.ASCII) propertyItem.Type = (int)ExifPropertyTagType.ASCII;
@@ -122,6 +128,8 @@ namespace SAEON.ImageProcessing
 
         public static ImageFactory AddTags(this ImageFactory imageFactory, string fileName, List<string> newTags)
         {
+            if (imageFactory == null) throw new ArgumentNullException(nameof(imageFactory));
+            if (newTags == null) throw new ArgumentNullException(nameof(newTags));
             imageFactory.GetTags(fileName, out List<string> tags);
             if (tags == null)
                 imageFactory.SetTags(fileName, newTags);
@@ -136,6 +144,7 @@ namespace SAEON.ImageProcessing
 
         public static ImageFactory SetTags(this ImageFactory imageFactory, string fileName, List<string> tags)
         {
+            if (tags == null) throw new ArgumentNullException(nameof(tags));
             ShellFile.FromFilePath(fileName).Properties.System.Keywords.Value = tags.ToArray();
             return imageFactory;
         }
