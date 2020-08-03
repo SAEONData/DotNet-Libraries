@@ -39,21 +39,13 @@ namespace SAEON.Logs
                     }
                     else
                     {
-                        switch (kvPair.Value)
+                        result += kvPair.Value switch
                         {
-                            case string str:
-                                result += $"'{kvPair.Value}'";
-                                break;
-                            case List<string> list:
-                                result += $"[{string.Join(",", list)}]";
-                                break;
-                            case string[] strings:
-                                result += $"[{string.Join(",", strings)}]";
-                                break;
-                            default:
-                                result += $"{kvPair.Value}";
-                                break;
-                        }
+                            string str => $"'{kvPair.Value}'",
+                            List<string> list => $"[{string.Join(",", list)}]",
+                            string[] strings => $"[{string.Join(",", strings)}]",
+                            _ => $"{kvPair.Value}",
+                        };
                     }
                 }
             }
@@ -62,16 +54,22 @@ namespace SAEON.Logs
 
         public static string MethodSignature(Type type, string methodName, MethodCallParameters parameters = null)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
             return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})".Replace("..", ".");
         }
 
         public static string MethodSignature(Type type, Type entityType, string methodName, MethodCallParameters parameters = null)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (entityType == null) throw new ArgumentNullException(nameof(entityType));
             return $"{GetTypeName(type)}<{GetTypeName(entityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".");
         }
 
         public static string MethodSignature(Type type, Type entityType, Type relatedEntityType, string methodName, MethodCallParameters parameters = null)
         {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (entityType == null) throw new ArgumentNullException(nameof(entityType));
+            if (relatedEntityType == null) throw new ArgumentNullException(nameof(relatedEntityType));
             return $"{GetTypeName(type)}<{GetTypeName(entityType)},{GetTypeName(relatedEntityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".");
         }
 

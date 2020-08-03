@@ -8,26 +8,26 @@ namespace SAEON.Logs
 {
     public static class ILoggerExtensions
     {
-        public static string Level(this ILogger logger)
+        public static LogLevel Level(this ILogger logger)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             foreach (var level in Enum.GetValues(typeof(LogLevel)).Cast<LogLevel>())
             {
-                if (logger.IsEnabled(level)) return level.ToString();
+                if (logger.IsEnabled(level)) return level;
             }
             // Shouldn’t get here!
-            return "Unknown";
+            return LogLevel.Information;
         }
 
-        public static string Level<T>(this ILogger<T> logger)
+        public static LogLevel Level<T>(this ILogger<T> logger)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             foreach (var level in Enum.GetValues(typeof(LogLevel)).Cast<LogLevel>())
             {
-                if (logger.IsEnabled(level)) return level.ToString();
+                if (logger.IsEnabled(level)) return level;
             }
             // Shouldn’t get here!
-            return "Unknown";
+            return LogLevel.Information;
         }
 
         //public static void LogError(this ILogger logger, string message = "", params object[] args)

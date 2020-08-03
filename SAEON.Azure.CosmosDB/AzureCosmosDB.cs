@@ -123,13 +123,17 @@ namespace SAEON.Azure.CosmosDB
                     var cosmosDBUrl = ConfigurationManager.AppSettings["AzureCosmosDBUrl"];
                     if (string.IsNullOrWhiteSpace(cosmosDBUrl))
                     {
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
                         throw new ArgumentNullException("AppSettings.AzureCosmosDBUrl cannot be null");
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
                     }
 
                     var authKey = ConfigurationManager.AppSettings["AzureCosmosDBAuthKey"];
                     if (string.IsNullOrWhiteSpace(authKey))
                     {
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
                         throw new ArgumentNullException("AppSettings.AzureCosmosDBAuthKey cannot be null");
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
                     }
                     var clientOptions = new CosmosClientOptions
                     {
@@ -435,6 +439,7 @@ namespace SAEON.Azure.CosmosDB
         #region Create
         public async Task<T> CreateItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -456,6 +461,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, CosmosDBCost<T> cost)> CreateItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -478,6 +484,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<CosmosDBCost<T>> CreateItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (items == null) throw new ArgumentNullException(nameof(items));
             using (Logging.MethodCall<T>(GetType()))
             {
                 try
@@ -525,6 +532,8 @@ namespace SAEON.Azure.CosmosDB
         #region Replace
         public async Task<T> ReplaceItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -546,6 +555,8 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, CosmosDBCost<T> cost)> ReplaceItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -568,6 +579,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<CosmosDBCost<T>> ReplaceItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (items == null) throw new ArgumentNullException(nameof(items));
             using (Logging.MethodCall<T>(GetType()))
             {
                 try
@@ -615,6 +627,8 @@ namespace SAEON.Azure.CosmosDB
         #region Upsert
         public async Task<T> UpsertItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -636,6 +650,8 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, CosmosDBCost<T> cost)> UpsertItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -658,6 +674,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<CosmosDBCost<T>> UpsertItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (items == null) throw new ArgumentNullException(nameof(items));
             using (Logging.MethodCall<T>(GetType()))
             {
                 try
@@ -714,6 +731,8 @@ namespace SAEON.Azure.CosmosDB
         #region Delete
         public async Task<T> DeleteItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -756,6 +775,8 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(T item, CosmosDBCost<T> cost)> DeleteItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (Logging.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -778,6 +799,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<CosmosDBCost<T>> DeleteItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
+            if (items == null) throw new ArgumentNullException(nameof(items));
             using (Logging.MethodCall<T>(GetType()))
             {
                 try

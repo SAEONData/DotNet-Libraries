@@ -5,7 +5,6 @@ using SAEON.Logs;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -18,7 +17,6 @@ using System.Web.Http.Filters;
 namespace SAEON.AspNet.WebApi
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
     public sealed class ODPAuthorizeAttribute : AuthorizationFilterAttribute
     {
         private readonly bool requireLogin = false;
@@ -30,7 +28,6 @@ namespace SAEON.AspNet.WebApi
             this.requireLogin = requireLogin;
         }
 
-        [SuppressMessage("Reliability", "CA2007:Consider calling ConfigureAwait on the awaited task", Justification = "<Pending>")]
         public override async Task OnAuthorizationAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
         {
             using (Logging.MethodCall(GetType()))

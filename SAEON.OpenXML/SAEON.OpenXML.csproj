@@ -9,7 +9,7 @@
     <Description>OpenXML utilities for SAEON .Net</Description>
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.63</Version>
+    <Version>1.0.64</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -29,11 +29,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
-    <PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.18" />
+    <PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.19" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="SAEON.Logs.NetCore" Version="1.0.31" />
+    <PackageReference Include="SAEON.Logs.NetCore" Version="1.0.32" />
   </ItemGroup>
 
 </Project>

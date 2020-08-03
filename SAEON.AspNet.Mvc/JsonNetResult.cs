@@ -23,10 +23,7 @@ namespace SAEON.AspNet.Mvc
 
         public override void ExecuteResult(ControllerContext context)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
+            if (context == null) throw new ArgumentNullException(nameof(context));
 
             HttpResponseBase response = context.HttpContext.Response;
 
@@ -39,12 +36,12 @@ namespace SAEON.AspNet.Mvc
 
             if (Data != null)
             {
-                JsonTextWriter writer = new JsonTextWriter(response.Output) { Formatting = Formatting };
-
-                JsonSerializer serializer = JsonSerializer.Create(SerializerSettings);
-                serializer.Serialize(writer, Data);
-
-                writer.Flush();
+                using (JsonTextWriter writer = new JsonTextWriter(response.Output) { Formatting = Formatting })
+                {
+                    JsonSerializer serializer = JsonSerializer.Create(SerializerSettings);
+                    serializer.Serialize(writer, Data);
+                    writer.Flush();
+                }
             }
         }
     }

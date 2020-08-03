@@ -1,4 +1,5 @@
 ﻿using SAEON.AspNet.Common;
+using System;
 using System.IO.Compression;
 using System.Web;
 using System.Web.Mvc;
@@ -9,6 +10,7 @@ namespace SAEON.AspNet.Mvc
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
+            if (filterContext == null) throw new ArgumentNullException(nameof(filterContext));
             HttpRequestBase request = filterContext.HttpContext.Request;
 
             string acceptEncoding = request.Headers[AspNetConstants.AcceptEncoding];

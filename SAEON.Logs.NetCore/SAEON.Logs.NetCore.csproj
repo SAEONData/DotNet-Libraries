@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;netstandard2.1;</TargetFrameworks>
+    <LangVersion>8.0</LangVersion>
     <RootNamespace>SAEON.Logs</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Tim Parker-Nance</Authors>
@@ -11,7 +12,7 @@
     <Description>Logging for SAEON in .NetCore</Description>
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.31</Version>
+    <Version>1.0.32</Version>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
   </PropertyGroup>
 

@@ -19,6 +19,7 @@ namespace SAEON.Logs
                 {
                     if (Log.IsEnabled(logLevel)) return logLevel;
                 }
+                // Shouldn’t get here!
                 return LogEventLevel.Information;
             }
         }
@@ -47,10 +48,9 @@ namespace SAEON.Logs
             return CreateConfiguration(null, config);
         }
 
-        public static void Create(this LoggerConfiguration config)
-        {
-            Log.Logger = config.CreateLogger();
-        }
+#pragma warning disable CA1062 // Validate arguments of public methods
+        public static void Create(this LoggerConfiguration config) => Log.Logger = config.CreateLogger();
+#pragma warning restore CA1062 // Validate arguments of public methods
 
         public static void ShutDown()
         {

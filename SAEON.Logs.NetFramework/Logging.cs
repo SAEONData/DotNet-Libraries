@@ -21,17 +21,9 @@ namespace SAEON.Logs
                     if (Log.IsEnabled(logLevel)) return logLevel;
                 }
                 return LogEventLevel.Information;
+                // Shouldn’t get here!
             }
         }
-
-        //public static string LogLevel =>
-        //    Log.IsEnabled(LogEventLevel.Verbose) ? "Verbose" :
-        //    Log.IsEnabled(LogEventLevel.Debug) ? "Debug" :
-        //    Log.IsEnabled(LogEventLevel.Information) ? "Info" :
-        //    Log.IsEnabled(LogEventLevel.Warning) ? "Warning" :
-        //    Log.IsEnabled(LogEventLevel.Error) ? "Error" :
-        //    Log.IsEnabled(LogEventLevel.Fatal) ? "Fatal" :
-        //    "Unknown";
 
         public static LoggerConfiguration CreateConfiguration(string fileName = "")
         {
@@ -46,7 +38,9 @@ namespace SAEON.Logs
 
         public static void Create(this LoggerConfiguration config)
         {
+#pragma warning disable CA1062 // Validate arguments of public methods
             Log.Logger = config.CreateLogger();
+#pragma warning restore CA1062 // Validate arguments of public methods
         }
 
         public static void ShutDown()
