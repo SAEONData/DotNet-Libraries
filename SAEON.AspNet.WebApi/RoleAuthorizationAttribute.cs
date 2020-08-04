@@ -24,20 +24,20 @@ namespace SAEON.AspNet.WebApi
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
-            using (Logging.MethodCall(GetType(), new MethodCallParameters { { "Role", role } }))
+            using (Logger.MethodCall(GetType(), new MethodCallParameters { { "Role", role } }))
             {
                 if (actionContext == null) throw new ArgumentNullException(nameof(actionContext));
                 var principal = actionContext.RequestContext.Principal as ClaimsPrincipal;
                 if (!principal.Identity.IsAuthenticated)
                 {
-                    Logging.Error("Not Authenticated");
+                    Logger.Error("Not Authenticated");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "Not Authenticated");
                     return;
                 }
-                Logging.Verbose("Role: {role} Claims: {claims}", role, principal.Claims.Select(i => i.Type + "=" + i.Value));
+                Logger.Verbose("Role: {role} Claims: {claims}", role, principal.Claims.Select(i => i.Type + "=" + i.Value));
                 if (!(principal.HasClaim(x => x.Type.Equals(AspNetConstants.ClaimRole, StringComparison.CurrentCultureIgnoreCase) && x.Value.Equals(role, StringComparison.CurrentCultureIgnoreCase))))
                 {
-                    Logging.Error("Role Authorization Failed");
+                    Logger.Error("Role Authorization Failed");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Role Authorization Failed");
                     return;
                 }

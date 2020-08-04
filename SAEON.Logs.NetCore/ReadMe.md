@@ -14,8 +14,10 @@ namespace SAEON.Observations.WebAPI
     {
         public static void Main(string[] args)
         {
+            Logging.CreateConfiguration().Create();
             try
             {
+                Logging.Information("Starting application");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
@@ -31,7 +33,7 @@ namespace SAEON.Observations.WebAPI
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .UseSAEONLogs((hostingContext, loggerConfiguration) => loggerConfiguration.InitializeSAEONLogs(hostingContext.Configuration))
+                .UseSAEONLogs()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();

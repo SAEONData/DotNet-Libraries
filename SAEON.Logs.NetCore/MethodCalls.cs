@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace SAEON.Logs
 {
-#pragma warning disable CA2237 // Mark ISerializable types with serializable
-    public class MethodCallParameters : Dictionary<string, object> { }
-#pragma warning restore CA2237 // Mark ISerializable types with serializable
+    [Serializable]
+    public class MethodCallParameters : Dictionary<string, object>
+    {
+        public MethodCallParameters() : base() { }
+        protected MethodCallParameters(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext) { }
+    }
 
     public static class MethodCalls
     {

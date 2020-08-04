@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace SAEON.Logs
 {
-    public static class Logging
+    public static class Logger
     {
         public static LogEventLevel Level
         {
@@ -27,10 +27,12 @@ namespace SAEON.Logs
         public static LoggerConfiguration CreateConfiguration(string fileName = "", IConfiguration config = null)
         {
             var result = new LoggerConfiguration()
+                                .MinimumLevel.Information()
                                 .Enrich.FromLogContext()
+                                .WriteTo.Console()
                                 .WriteTo.Seq("http://localhost:5341/");
-            if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + ".txt");
-            if (!string.IsNullOrWhiteSpace(fileName)) result.WriteTo.File(fileName, rollOnFileSizeLimit: true, shared: true, flushToDiskInterval: TimeSpan.FromSeconds(1), rollingInterval: RollingInterval.Day, retainedFileCountLimit: null);
+            if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + ".log");
+            if (!string.IsNullOrWhiteSpace(fileName)) result.WriteTo.File(fileName, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null, rollOnFileSizeLimit: true);
             if (config != null)
             {
                 result.ReadFrom.Configuration(config);
@@ -48,9 +50,7 @@ namespace SAEON.Logs
             return CreateConfiguration(null, config);
         }
 
-#pragma warning disable CA1062 // Validate arguments of public methods
         public static void Create(this LoggerConfiguration config) => Log.Logger = config.CreateLogger();
-#pragma warning restore CA1062 // Validate arguments of public methods
 
         public static void ShutDown()
         {

@@ -20,58 +20,58 @@ namespace SAEON.AspNet.WebApi
 
         public TenantAuthorizationAttribute() : base()
         {
-            //using (Logging.MethodCall(GetType()))
+            //using (Logger.MethodCall(GetType()))
             {
                 var tenants = (ConfigurationManager.AppSettings[AspNetConstants.TenantTenants] ?? string.Empty).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 Tenants.AddRange(tenants);
                 DefaultTenant = (ConfigurationManager.AppSettings[AspNetConstants.TenantDefault] ?? string.Empty);
-                //Logging.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant}", Tenants.ToArray(), DefaultTenant);
+                //Logger.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant}", Tenants.ToArray(), DefaultTenant);
             }
         }
 
         public TenantAuthorizationAttribute(List<string> tenants, string defaultTenant) : this()
         {
-            //using (Logging.MethodCall(GetType(), new ParameterList { { "Tenants", string.Join(", ",tenants) }, { "Default", defaultTenant } }))
+            //using (Logger.MethodCall(GetType(), new ParameterList { { "Tenants", string.Join(", ",tenants) }, { "Default", defaultTenant } }))
             {
                 Tenants.Clear();
                 Tenants.AddRange(tenants);
                 DefaultTenant = defaultTenant;
-                //Logging.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant}", Tenants.ToArray(), DefaultTenant);
+                //Logger.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant}", Tenants.ToArray(), DefaultTenant);
             }
         }
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
-            using (Logging.MethodCall(GetType()))
+            using (Logger.MethodCall(GetType()))
             {
                 if (actionContext == null) throw new ArgumentNullException(nameof(actionContext));
                 //if (!actionContext.Request.Headers.Contains(AspNetConstants.TenantHeader))
                 //{
-                //    Logging.Error("Tenant Authorization Failed (No tenant header)");
+                //    Logger.Error("Tenant Authorization Failed (No tenant header)");
                 //    actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenant header)");
                 //    return;
                 //}
                 var tenant = actionContext.Request.Headers.Contains(AspNetConstants.TenantHeader) ? actionContext.Request.Headers.GetValues(AspNetConstants.TenantHeader).FirstOrDefault() : null;
-                Logging.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant} Tenant: {Tenant}", Tenants.ToArray(), DefaultTenant, tenant);
+                Logger.Verbose("Tenants: {Tenants} DefaultTenant: {DefaultTenant} Tenant: {Tenant}", Tenants.ToArray(), DefaultTenant, tenant);
                 if (string.IsNullOrWhiteSpace(tenant))
                 {
                     tenant = DefaultTenant;
                 }
                 if (string.IsNullOrWhiteSpace(tenant))
                 {
-                    Logging.Error("Tenant Authorization Failed (No tenant)");
+                    Logger.Error("Tenant Authorization Failed (No tenant)");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenant)");
                     return;
                 }
                 if (!Tenants.Any())
                 {
-                    Logging.Error("Tenant Authorization Failed (No tenants)");
+                    Logger.Error("Tenant Authorization Failed (No tenants)");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (No tenants)");
                     return;
                 }
                 if (!Tenants.Contains(tenant))
                 {
-                    Logging.Error("Tenant Authorization Failed (Unknown tenant)");
+                    Logger.Error("Tenant Authorization Failed (Unknown tenant)");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Tenant Authorization Failed (Unknown tenant)");
                     return;
                 }
@@ -80,7 +80,7 @@ namespace SAEON.AspNet.WebApi
 
         public static string GetTenantFromHeaders(HttpRequestMessage request)
         {
-            //using (Logging.MethodCall(GetType()))
+            //using (Logger.MethodCall(GetType()))
             {
                 if (request == null)
                 {

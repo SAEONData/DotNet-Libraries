@@ -297,7 +297,6 @@ namespace SAEON.Azure.Storage
         #region Blobs
         public static async Task DeleteBlobAsync(this BlobContainerClient blobContainerClient, string name)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             if (!AzureStorage.UseExists)
             {
                 await blobContainerClient.DeleteBlobIfExistsAsync(name);
@@ -314,7 +313,6 @@ namespace SAEON.Azure.Storage
 
         public static async Task<bool> DownloadBlobAsync(this BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             var blobClient = blobContainerClient.GetBlobClient(name);
             if (!await blobClient.ExistsAsync()) return false;
             await blobClient.DownloadToAsync(stream);
@@ -323,7 +321,6 @@ namespace SAEON.Azure.Storage
 
         public static async Task<List<string>> ListFolder(this BlobContainerClient blobContainerClient, string folder)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             var blobs = blobContainerClient.GetBlobsByHierarchyAsync(prefix: folder);
             var result = new List<string>();
             await foreach (var blob in blobs)
@@ -336,46 +333,14 @@ namespace SAEON.Azure.Storage
             return result;
         }
 
-        //public static async Task<List<string>> FolderList(this CloudBlobContainer container, string folder)
-        //{
-        //    string GetFileNameFromBlobURI(Uri theUri, string containerName)
-        //    {
-        //        string theFile = theUri.ToString();
-        //        int dirIndex = theFile.IndexOf(containerName);
-        //        string oneFile = theFile.Substring(dirIndex + containerName.Length + 1,
-        //            theFile.Length - (dirIndex + containerName.Length + 1));
-        //        return oneFile;
-        //    }
-
-        //    var result = new List<string>();
-        //    BlobContinuationToken token = null;
-        //    do
-        //    {
-        //        var dir = container.GetDirectoryReference(folder);
-        //        var segment = await dir.ListBlobsSegmentedAsync(false, BlobListingDetails.None, null, token, null, null);
-        //        foreach (var blob in segment.Results)
-        //        {
-        //            if (blob is CloudBlockBlob)
-        //            {
-        //                result.Add(GetFileNameFromBlobURI(blob.Uri, container.Name));
-        //            }
-        //        }
-        //        token = segment.ContinuationToken;
-        //    }
-        //    while (token != null);
-        //    return result;
-        //}
-
         public static async Task UploadBlobAsync(this BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             await blobContainerClient.DeleteBlobIfExistsAsync(name);
             await blobContainerClient.UploadBlobAsync(name, stream);
         }
 
         public static async Task UploadBlobAsync(this BlobContainerClient blobContainerClient, string name, byte[] byteArray)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             using (var stream = new MemoryStream(byteArray))
             {
                 await blobContainerClient.UploadBlobAsync(name, stream);
@@ -384,7 +349,6 @@ namespace SAEON.Azure.Storage
 
         public static async Task UploadBlobAsync(this BlobContainerClient blobContainerClient, string name, string content)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             using (var stream = new MemoryStream(Encoding.ASCII.GetBytes(content)))
             {
                 await blobContainerClient.UploadBlobAsync(name, stream);
@@ -393,7 +357,6 @@ namespace SAEON.Azure.Storage
 
         public static async Task UploadBlobIfNotExistsAsync(this BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
             var blobClient = blobContainerClient.GetBlobClient(name);
             if (!await blobClient.ExistsAsync())
             {

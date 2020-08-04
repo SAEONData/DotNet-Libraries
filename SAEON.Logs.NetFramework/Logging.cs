@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace SAEON.Logs
 {
-    public static class Logging
+    public static class Logger
     {
         public static bool UseFullName { get; set; } = true;
 
@@ -38,9 +38,7 @@ namespace SAEON.Logs
 
         public static void Create(this LoggerConfiguration config)
         {
-#pragma warning disable CA1062 // Validate arguments of public methods
             Log.Logger = config.CreateLogger();
-#pragma warning restore CA1062 // Validate arguments of public methods
         }
 
         public static void ShutDown()

@@ -11,14 +11,14 @@ namespace SAEON.AspNet.Mvc
     {
         public override void OnResultExecuted(ResultExecutedContext context)
         {
-            using (Logging.MethodCall(this.GetType()))
+            using (Logger.MethodCall(this.GetType()))
             {
                 if (context == null) throw new ArgumentNullException(nameof(context));
                 string policy = ConfigurationManager.AppSettings[AspNetConstants.ContentSecurityPolicy];
                 if (!string.IsNullOrWhiteSpace(policy) && (context.Result is ViewResult))
                 {
-                    Logging.Verbose("ContentSecurityPolicy: {policy}", policy);
-                    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+                    Logger.Verbose("ContentSecurityPolicy: {policy}", policy);
+                    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options 
                     if (!context.HttpContext.Response.Headers.AllKeys.Contains("X-Content-Type-Options"))
                     {
                         context.HttpContext.Response.Headers.Add("X-Content-Type-Options", "nosniff");
