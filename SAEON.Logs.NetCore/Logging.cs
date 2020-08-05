@@ -50,7 +50,7 @@ namespace SAEON.Logs
             return CreateConfiguration(null, config);
         }
 
-        public static void Create(this LoggerConfiguration config) => Log.Logger = config.CreateLogger();
+        public static void Initialize(this LoggerConfiguration config) => Log.Logger = config.CreateLogger();
 
         public static void ShutDown()
         {

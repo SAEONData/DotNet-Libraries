@@ -36,7 +36,7 @@ namespace SAEON.Logs
             return result;
         }
 
-        public static void Create(this LoggerConfiguration config)
+        public static void Initialize(this LoggerConfiguration config)
         {
             Log.Logger = config.CreateLogger();
         }
