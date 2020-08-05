@@ -19,8 +19,6 @@ namespace SAEON.Azure.CosmosDB
         public string Id { get; set; }
     }
 
-    //public class AzureSubDocument { }
-
     public class CosmosDBCost<T> where T : CosmosDBItem
     {
         public int NumberOfItems { get; set; }
@@ -116,7 +114,7 @@ namespace SAEON.Azure.CosmosDB
 
         public AzureCosmosDB(string databaseId, string containerId, string partitionKey, bool allowBulkExecution = false)
         {
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 try
                 {
@@ -146,12 +144,12 @@ namespace SAEON.Azure.CosmosDB
                     ContainerId = containerId;
                     PartitionKey = partitionKey;
                     Throughput = int.Parse(ConfigurationManager.AppSettings["AzureCosmosDBThroughput"] ?? DefaultThroughput.ToString());
-                    Logger.Information("CosmosDbUrl: {CosmosDbUrl} Database: {DatabaseId} Container: {ContainerId} PartitionKey: {PartitionKey} Throughput: {Throughput} BulkExecution: {BulkExection}",
+                    SAEONLogs.Information("CosmosDbUrl: {CosmosDbUrl} Database: {DatabaseId} Container: {ContainerId} PartitionKey: {PartitionKey} Throughput: {Throughput} BulkExecution: {BulkExection}",
                         cosmosDBUrl, DatabaseId, ContainerId, PartitionKey, Throughput, allowBulkExecution);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -159,7 +157,7 @@ namespace SAEON.Azure.CosmosDB
 
         ~AzureCosmosDB()
         {
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 container = null;
                 database = null;
@@ -175,7 +173,7 @@ namespace SAEON.Azure.CosmosDB
                 return;
             }
 
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId } }))
             {
                 try
                 {
@@ -184,7 +182,7 @@ namespace SAEON.Azure.CosmosDB
                 catch (Exception ex)
                 {
                     database = null;
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -197,18 +195,18 @@ namespace SAEON.Azure.CosmosDB
         //        return;
         //    }
 
-        //    using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId } }))
+        //    using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId } }))
         //    {
         //        try
         //        {
-        //            Logger.Verbose("DatabaseUri: {DatabaseUri}", UriFactory.CreateDatabaseUri(DatabaseId));
+        //            SAEONLogs.Verbose("DatabaseUri: {DatabaseUri}", UriFactory.CreateDatabaseUri(DatabaseId));
         //            database = await client.ReadDatabaseAsync(UriFactory.CreateDatabaseUri(DatabaseId));
         //        }
         //        catch (Exception ex)
         //        {
         //            container = null;
         //            database = null;
-        //            Logger.Exception(ex);
+        //            SAEONLogs.Exception(ex);
         //            throw;
         //        }
         //    }
@@ -223,7 +221,7 @@ namespace SAEON.Azure.CosmosDB
                 return;
             }
 
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId }, { "ContainerId", ContainerId }, { "PartitionKey", PartitionKey } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "DatabaseId", DatabaseId }, { "ContainerId", ContainerId }, { "PartitionKey", PartitionKey } }))
             {
                 try
                 {
@@ -267,7 +265,7 @@ namespace SAEON.Azure.CosmosDB
                 catch (Exception ex)
                 {
                     container = null;
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -323,7 +321,7 @@ namespace SAEON.Azure.CosmosDB
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -336,12 +334,12 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                 {
-                    Logger.Verbose("Item with ID {ID} not found", item.Id);
+                    SAEONLogs.Verbose("Item with ID {ID} not found", item.Id);
                     return default;
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -351,7 +349,7 @@ namespace SAEON.Azure.CosmosDB
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -365,12 +363,12 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                 {
-                    Logger.Verbose("Item with ID {ID} not found", item.Id);
+                    SAEONLogs.Verbose("Item with ID {ID} not found", item.Id);
                     return default;
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -378,7 +376,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<IEnumerable<T>> GetItemsAsync(Expression<Func<T, bool>> predicate)
         {
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 try
                 {
@@ -399,7 +397,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -407,7 +405,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(IEnumerable<T> items, CosmosDBCost<T> cost)> GetItemsWithCostAsync(Expression<Func<T, bool>> predicate)
         {
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 try
                 {
@@ -431,7 +429,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -440,7 +438,7 @@ namespace SAEON.Azure.CosmosDB
         public async Task<T> CreateItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -453,7 +451,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -462,7 +460,7 @@ namespace SAEON.Azure.CosmosDB
         public async Task<(T item, CosmosDBCost<T> cost)> CreateItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -476,7 +474,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -485,7 +483,7 @@ namespace SAEON.Azure.CosmosDB
         public async Task<CosmosDBCost<T>> CreateItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
             if (items == null) throw new ArgumentNullException(nameof(items));
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 try
                 {
@@ -522,7 +520,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -534,7 +532,7 @@ namespace SAEON.Azure.CosmosDB
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -547,7 +545,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -557,7 +555,7 @@ namespace SAEON.Azure.CosmosDB
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -571,7 +569,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -580,7 +578,7 @@ namespace SAEON.Azure.CosmosDB
         public async Task<CosmosDBCost<T>> ReplaceItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
             if (items == null) throw new ArgumentNullException(nameof(items));
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 try
                 {
@@ -617,7 +615,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -629,7 +627,7 @@ namespace SAEON.Azure.CosmosDB
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -642,7 +640,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -652,7 +650,7 @@ namespace SAEON.Azure.CosmosDB
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -666,7 +664,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -675,7 +673,7 @@ namespace SAEON.Azure.CosmosDB
         public async Task<CosmosDBCost<T>> UpsertItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
             if (items == null) throw new ArgumentNullException(nameof(items));
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 try
                 {
@@ -721,7 +719,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -733,7 +731,7 @@ namespace SAEON.Azure.CosmosDB
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -746,7 +744,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -754,7 +752,7 @@ namespace SAEON.Azure.CosmosDB
 
         private async Task<(T item, CosmosDBCost<T> cost)> DeleteItemWithCostAsync(string id, Object partitionKey)
         {
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", id }, { "partitionKey", partitionKey } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", id }, { "partitionKey", partitionKey } }))
             {
                 try
                 {
@@ -767,7 +765,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -777,7 +775,7 @@ namespace SAEON.Azure.CosmosDB
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
             if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
-            using (Logger.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
+            using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
                 {
@@ -791,7 +789,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -800,7 +798,7 @@ namespace SAEON.Azure.CosmosDB
         public async Task<CosmosDBCost<T>> DeleteItemsAsync(List<T> items, Expression<Func<T, object>> partitionKeyExpression)
         {
             if (items == null) throw new ArgumentNullException(nameof(items));
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 try
                 {
@@ -846,7 +844,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -854,7 +852,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(CosmosDBCost<T> totalCost, CosmosDBCost<T> readCost, CosmosDBCost<T> deleteCost)> DeleteItemsAsync(Expression<Func<T, bool>> predicate, Expression<Func<T, object>> partitionKeyExpression)
         {
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 try
                 {
@@ -901,7 +899,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -909,7 +907,7 @@ namespace SAEON.Azure.CosmosDB
 
         public async Task<(CosmosDBCost<T> totalCost, CosmosDBCost<T> readCost, CosmosDBCost<T> deleteCost)> DeleteItemsAsync(Expression<Func<T, bool>> predicate, object partitionKey)
         {
-            using (Logger.MethodCall<T>(GetType()))
+            using (SAEONLogs.MethodCall<T>(GetType()))
             {
                 try
                 {
@@ -965,7 +963,7 @@ namespace SAEON.Azure.CosmosDB
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }

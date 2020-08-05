@@ -25,20 +25,20 @@ namespace SAEON.AspNet.WebApi
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
-            using (Logger.MethodCall(GetType(), new MethodCallParameters { { "Claim", ClaimType }, { "Value", ClaimValue } }))
+            using (SAEONLogs.MethodCall(GetType(), new MethodCallParameters { { "Claim", ClaimType }, { "Value", ClaimValue } }))
             {
                 if (actionContext == null) throw new ArgumentNullException(nameof(actionContext));
                 var principal = actionContext.RequestContext.Principal as ClaimsPrincipal;
                 if (!principal.Identity.IsAuthenticated)
                 {
-                    Logger.Error("Not Authenticated");
+                    SAEONLogs.Error("Not Authenticated");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "Not Authenticated");
                     return;
                 }
-                Logger.Verbose("Claims: {claims}", principal.Claims.Select(i => i.Type + "=" + i.Value));
+                SAEONLogs.Verbose("Claims: {claims}", principal.Claims.Select(i => i.Type + "=" + i.Value));
                 if (!(principal.HasClaim(x => x.Type.Equals(ClaimType, StringComparison.CurrentCultureIgnoreCase) && x.Value.Equals(ClaimValue, StringComparison.CurrentCultureIgnoreCase))))
                 {
-                    Logger.Error("Claims Authorization Failed");
+                    SAEONLogs.Error("Claims Authorization Failed");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Claims Authorization Failed");
                     return;
                 }

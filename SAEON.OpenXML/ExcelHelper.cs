@@ -70,7 +70,7 @@ namespace SAEON.OpenXML
 
         public static WorksheetPart InsertSheet(SpreadsheetDocument document, string sheetName = "")
         {
-            using (Logger.MethodCall(typeof(WorksheetPart)))
+            using (SAEONLogs.MethodCall(typeof(WorksheetPart)))
             {
                 try
                 {
@@ -85,7 +85,7 @@ namespace SAEON.OpenXML
                         sheets = document.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
                     }
                     string relationshipId = document.WorkbookPart.GetIdOfPart(worksheetPart);
-                    Logger.Verbose("relationshipId: {relationshipId}", relationshipId);
+                    SAEONLogs.Verbose("relationshipId: {relationshipId}", relationshipId);
 
                     // Get a unique ID for the new worksheet.
                     uint sheetId = 1;
@@ -93,7 +93,7 @@ namespace SAEON.OpenXML
                     {
                         sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).Max() + 1;
                     }
-                    Logger.Verbose("sheetId: {sheetId}", sheetId);
+                    SAEONLogs.Verbose("sheetId: {sheetId}", sheetId);
 
                     // Give the new worksheet a name.
                     if (string.IsNullOrEmpty(sheetName))
@@ -101,7 +101,7 @@ namespace SAEON.OpenXML
                         sheetName = "Sheet" + sheetId;
                     }
 
-                    Logger.Verbose("sheetName: {sheetName}", sheetName);
+                    SAEONLogs.Verbose("sheetName: {sheetName}", sheetName);
 
                     // Append the new worksheet and associate it with the workbook.
                     Sheet sheet = new Sheet() { Id = relationshipId, SheetId = sheetId, Name = sheetName };
@@ -110,7 +110,7 @@ namespace SAEON.OpenXML
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -652,7 +652,7 @@ namespace SAEON.OpenXML
 
         private static SpreadsheetDocument CreateSpreadsheetDocument(SpreadsheetDocument document)
         {
-            using (Logger.MethodCall(typeof(SpreadsheetDocument)))
+            using (SAEONLogs.MethodCall(typeof(SpreadsheetDocument)))
             {
                 try
                 {
@@ -676,7 +676,7 @@ namespace SAEON.OpenXML
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }

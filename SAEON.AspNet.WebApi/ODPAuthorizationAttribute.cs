@@ -30,7 +30,7 @@ namespace SAEON.AspNet.WebApi
 
         public override async Task OnAuthorizationAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
         {
-            using (Logger.MethodCall(GetType()))
+            using (SAEONLogs.MethodCall(GetType()))
             {
                 try
                 {
@@ -41,10 +41,10 @@ namespace SAEON.AspNet.WebApi
                     var token = actionContext?.Request?.Headers?.Authorization?.Parameter;
                     if (string.IsNullOrWhiteSpace(token))
                     {
-                        Logger.Error("ODP Authorization Failed, no token");
+                        SAEONLogs.Error("ODP Authorization Failed, no token");
                         actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, new SecurityException("ODP Authorization Failed, no token"));
                     }
-                    Logger.Verbose("Token: {Token}", token);
+                    SAEONLogs.Verbose("Token: {Token}", token);
                     // Validate token
                     using (var handler = new HttpClientHandler())
                     {
@@ -63,17 +63,17 @@ namespace SAEON.AspNet.WebApi
                                 var response = await client.PostAsync(new Uri(introspectionUrl), formContent);
                                 if (!response.IsSuccessStatusCode)
                                 {
-                                    Logger.Error("HttpError: {StatusCode} {Reason}", response.StatusCode, response.ReasonPhrase);
-                                    Logger.Error("Response: {Response}", await response.Content.ReadAsStringAsync());
+                                    SAEONLogs.Error("HttpError: {StatusCode} {Reason}", response.StatusCode, response.ReasonPhrase);
+                                    SAEONLogs.Error("Response: {Response}", await response.Content.ReadAsStringAsync());
                                 }
                                 response.EnsureSuccessStatusCode();
                                 var json = await response.Content.ReadAsStringAsync();
-                                Logger.Information("Result: {Result}", json);
+                                SAEONLogs.Information("Result: {Result}", json);
                                 var jObject = JObject.Parse(json);
                                 var isActive = jObject.Value<bool>("active");
                                 if (!isActive)
                                 {
-                                    Logger.Error("Invalid token {Token}", token);
+                                    SAEONLogs.Error("Invalid token {Token}", token);
                                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, new SecurityException("Invalid token"));
                                     return;
                                 }
@@ -88,7 +88,7 @@ namespace SAEON.AspNet.WebApi
                 }
                 catch (Exception ex)
                 {
-                    Logger.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }

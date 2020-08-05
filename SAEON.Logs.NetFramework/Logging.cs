@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 
 namespace SAEON.Logs
 {
-    public static class Logger
+    public static class SAEONLogs
     {
         public static bool UseFullName { get; set; } = true;
 

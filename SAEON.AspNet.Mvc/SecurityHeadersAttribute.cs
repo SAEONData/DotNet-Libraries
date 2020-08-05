@@ -1,4 +1,5 @@
-﻿using SAEON.AspNet.Common;
+﻿/*
+using SAEON.AspNet.Common;
 using SAEON.Logs;
 using System;
 using System.Configuration;
@@ -11,13 +12,13 @@ namespace SAEON.AspNet.Mvc
     {
         public override void OnResultExecuted(ResultExecutedContext context)
         {
-            using (Logger.MethodCall(this.GetType()))
+            using (SAEONLogs.MethodCall(this.GetType()))
             {
                 if (context == null) throw new ArgumentNullException(nameof(context));
                 string policy = ConfigurationManager.AppSettings[AspNetConstants.ContentSecurityPolicy];
                 if (!string.IsNullOrWhiteSpace(policy) && (context.Result is ViewResult))
                 {
-                    Logger.Verbose("ContentSecurityPolicy: {policy}", policy);
+                    SAEONLogs.Verbose("ContentSecurityPolicy: {policy}", policy);
                     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options 
                     if (!context.HttpContext.Response.Headers.AllKeys.Contains("X-Content-Type-Options"))
                     {
@@ -60,3 +61,4 @@ namespace SAEON.AspNet.Mvc
     }
 
 }
+*/
