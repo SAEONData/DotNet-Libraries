@@ -7,8 +7,7 @@ namespace SAEON.Logs
     {
         public static IHostBuilder UseSAEONLogs(this IHostBuilder builder)
         {
-            builder.UseSerilog();
-            return builder;
+            return builder.UseSerilog();
         }
 
         //public static IHostBuilder UseSAEONLogs(this IHostBuilder builder, ILogger logger = null, bool dispose = false, LoggerProviderCollection providers = null)

@@ -33,6 +33,12 @@ namespace SAEON.Logs
                                 .WriteTo.Seq("http://localhost:5341/");
             if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + ".log");
             if (!string.IsNullOrWhiteSpace(fileName)) result.WriteTo.File(fileName, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null, rollOnFileSizeLimit: true);
+#if !NETSTANDARD2_1
+            if (config == null)
+            {
+                config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+            }
+#endif
             if (config != null)
             {
                 result.ReadFrom.Configuration(config);
