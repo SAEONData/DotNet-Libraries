@@ -36,7 +36,10 @@ namespace SAEON.Logs
 #if !NETSTANDARD2_1
             if (config == null)
             {
-                config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+                config = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", true)
+                    .AddJsonFile("local.settings.json", true)
+                    .Build();
             }
 #endif
             if (config != null)

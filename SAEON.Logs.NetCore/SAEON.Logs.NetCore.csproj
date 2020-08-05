@@ -12,7 +12,7 @@
     <Description>Logging for SAEON in .NetCore</Description>
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.37</Version>
+    <Version>1.0.39</Version>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
   </PropertyGroup>
 
