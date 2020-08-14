@@ -39,6 +39,7 @@ namespace SAEON.Logs
                 config = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json", true)
                     .AddJsonFile("local.settings.json", true)
+                    .AddJsonFile("secrets.json", true)
                     .Build();
             }
 #endif
