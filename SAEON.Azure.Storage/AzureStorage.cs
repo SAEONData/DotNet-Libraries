@@ -22,11 +22,11 @@ namespace SAEON.Azure.Storage
 
     public class AzureStorage
     {
-        private BlobServiceClient blobServiceClient = null;
-        private QueueServiceClient queueServiceClient = null;
-        private CloudStorageAccount cloudStorageAccount = null;
-        private CloudTableClient cloudTableClient = null;
-        public static bool UseExists { get; set; } = false;
+        private BlobServiceClient blobServiceClient;
+        private QueueServiceClient queueServiceClient;
+        private CloudStorageAccount cloudStorageAccount;
+        private CloudTableClient cloudTableClient;
+        public static bool UseExists { get; set; }
 
         public AzureStorage(string connectionString)
         {
@@ -76,6 +76,7 @@ namespace SAEON.Azure.Storage
 
         public BlobContainerClient GetBlobContainerClient(string name)
         {
+            if (name == null) throw new ArgumentNullException(nameof(name));
             return blobServiceClient.GetBlobContainerClient(name.ToLower());
         }
         #endregion Containers
@@ -179,6 +180,7 @@ namespace SAEON.Azure.Storage
 
         public QueueClient GetQueueClient(string name)
         {
+            if (name == null) throw new ArgumentNullException(nameof(name));
             return queueServiceClient.GetQueueClient(name.ToLower());
         }
 

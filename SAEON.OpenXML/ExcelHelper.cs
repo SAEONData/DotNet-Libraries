@@ -211,6 +211,7 @@ namespace SAEON.OpenXML
 
         public static int GetColumnIndex(string columnName)
         {
+            if (columnName == null) throw new ArgumentNullException(nameof(columnName));
             // Remove row numbers
             int r = columnName.IndexOfAny("0123456789".ToCharArray());
             if (r > 0)
@@ -759,6 +760,7 @@ namespace SAEON.OpenXML
 
         public static (string sheetName, string colLeft, int rowTop, string colRight, int rowBottom) SplitRange(string range)
         {
+            if (range == null) throw new ArgumentNullException(nameof(range));
             var splitSheet = range.Split('!');
             var sheet = splitSheet[0];
             var splitRange = splitSheet[1].Split(':');
@@ -769,6 +771,7 @@ namespace SAEON.OpenXML
 
         public static (string col, int row) SplitCellReference(string cellReference)
         {
+            if (cellReference == null) throw new ArgumentNullException(nameof(cellReference));
             var cellRef = cellReference.Replace("$", string.Empty);
             var p = cellRef.IndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
             var col = cellRef.Substring(0, p);

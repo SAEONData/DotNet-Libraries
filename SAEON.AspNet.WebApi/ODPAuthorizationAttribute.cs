@@ -19,7 +19,7 @@ namespace SAEON.AspNet.WebApi
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public sealed class ODPAuthorizeAttribute : AuthorizationFilterAttribute
     {
-        private readonly bool requireLogin = false;
+        private readonly bool requireLogin;
 
         public ODPAuthorizeAttribute() : base() { }
 
@@ -60,7 +60,7 @@ namespace SAEON.AspNet.WebApi
                             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(AspNetConstants.ApplicationJson));
                             using (var formContent = new FormUrlEncodedContent(new[] { new KeyValuePair<string, string>("token", token) }))
                             {
-                                var response = await client.PostAsync(new Uri(introspectionUrl), formContent);
+                                var response = await client.PostAsync(new Uri(introspectionUrl), formContent, cancellationToken);
                                 if (!response.IsSuccessStatusCode)
                                 {
                                     SAEONLogs.Error("HttpError: {StatusCode} {Reason}", response.StatusCode, response.ReasonPhrase);

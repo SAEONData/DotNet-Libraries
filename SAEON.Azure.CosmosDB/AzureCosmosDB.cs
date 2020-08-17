@@ -96,9 +96,9 @@ namespace SAEON.Azure.CosmosDB
 
     public class AzureCosmosDB<T> where T : CosmosDBItem
     {
-        private CosmosClient client = null;
-        private Database database = null;
-        private Container container = null;
+        private CosmosClient client;
+        private Database database;
+        private Container container;
 
         public static int DefaultThroughput { get; set; } = 1000;
         public static int DefaultBatchSize { get; set; } = 100000;
@@ -438,6 +438,7 @@ namespace SAEON.Azure.CosmosDB
         public async Task<T> CreateItemAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
@@ -460,6 +461,7 @@ namespace SAEON.Azure.CosmosDB
         public async Task<(T item, CosmosDBCost<T> cost)> CreateItemWithCostAsync(T item, Expression<Func<T, object>> partitionKeyExpression)
         {
             if (item == null) throw new ArgumentNullException(nameof(item));
+            if (partitionKeyExpression == null) throw new ArgumentNullException(nameof(partitionKeyExpression));
             using (SAEONLogs.MethodCall<T>(GetType(), new MethodCallParameters { { "id", item.Id }, { "partitionKey", GetPartitionKeyValue(item, partitionKeyExpression) } }))
             {
                 try
