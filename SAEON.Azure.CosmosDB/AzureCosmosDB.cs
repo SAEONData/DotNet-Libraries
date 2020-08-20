@@ -177,7 +177,7 @@ namespace SAEON.Azure.CosmosDB
             {
                 try
                 {
-                    database = await client.CreateDatabaseIfNotExistsAsync(DatabaseId);
+                    database = await client.CreateDatabaseIfNotExistsAsync(DatabaseId).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -225,7 +225,7 @@ namespace SAEON.Azure.CosmosDB
             {
                 try
                 {
-                    await EnsureDatabaseAsync();
+                    await EnsureDatabaseAsync().ConfigureAwait(false);
                     var containerProperties = new ContainerProperties(ContainerId, PartitionKey);
                     containerProperties.IndexingPolicy.IndexingMode = IndexingMode.Consistent;
                     //// Defaults
@@ -260,7 +260,7 @@ namespace SAEON.Azure.CosmosDB
                     //        });
                     //    }
                     //};
-                    container = await database.CreateContainerIfNotExistsAsync(containerProperties, Throughput);
+                    container = await database.CreateContainerIfNotExistsAsync(containerProperties, Throughput).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -328,9 +328,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    return await container.ReadItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression));
+                    return await container.ReadItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                 }
                 catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
                 {
@@ -356,9 +356,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    var response = await container.ReadItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression));
+                    var response = await container.ReadItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                     return (response, new CosmosDBCost<T>(response));
                 }
                 catch (CosmosException ex) when (ex.StatusCode == HttpStatusCode.NotFound)
@@ -382,13 +382,13 @@ namespace SAEON.Azure.CosmosDB
                 {
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
                     var items = new List<T>();
                     var iterator = container.GetItemLinqQueryable<T>().Where(predicate).ToFeedIterator();
                     while (iterator.HasMoreResults)
                     {
-                        foreach (var item in await iterator.ReadNextAsync())
+                        foreach (var item in await iterator.ReadNextAsync().ConfigureAwait(false))
                         {
                             items.Add(item);
                         }
@@ -411,14 +411,14 @@ namespace SAEON.Azure.CosmosDB
                 {
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
                     var items = new List<T>();
                     var iterator = container.GetItemLinqQueryable<T>().Where(predicate).ToFeedIterator();
                     var cost = new CosmosDBCost<T>();
                     while (iterator.HasMoreResults)
                     {
-                        var response = await iterator.ReadNextAsync();
+                        var response = await iterator.ReadNextAsync().ConfigureAwait(false);
                         cost += new CosmosDBCost<T>(response);
                         foreach (var item in response)
                         {
@@ -446,9 +446,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    return await container.CreateItemAsync(item, GetPartitionKey(item, partitionKeyExpression));
+                    return await container.CreateItemAsync(item, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -469,9 +469,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    var response = await container.CreateItemAsync<T>(item, GetPartitionKey(item, partitionKeyExpression));
+                    var response = await container.CreateItemAsync(item, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                     return (response, new CosmosDBCost<T>(response));
                 }
                 catch (Exception ex)
@@ -491,14 +491,14 @@ namespace SAEON.Azure.CosmosDB
                 {
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
                     var cost = new CosmosDBCost<T>();
                     if (!client.ClientOptions.AllowBulkExecution)
                     {
                         foreach (var item in items)
                         {
-                            cost += (await CreateItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            cost += (await CreateItemWithCostAsync(item, partitionKeyExpression).ConfigureAwait(false)).cost;
                         }
                     }
                     else
@@ -508,7 +508,7 @@ namespace SAEON.Azure.CosmosDB
                         {
                             tasks.Add(CreateItemWithCostAsync(item, partitionKeyExpression));
                         }
-                        await Task.WhenAll(tasks);
+                        await Task.WhenAll(tasks).ConfigureAwait(false);
                         if (tasks.Any(i => i.IsFaulted))
                         {
                             throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
@@ -541,9 +541,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    return await container.ReplaceItemAsync(item, item.Id, GetPartitionKey(item, partitionKeyExpression));
+                    return await container.ReplaceItemAsync(item, item.Id, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -564,9 +564,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    var response = await container.ReplaceItemAsync<T>(item, item.Id, GetPartitionKey(item, partitionKeyExpression));
+                    var response = await container.ReplaceItemAsync(item, item.Id, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                     return (response, new CosmosDBCost<T>(response));
                 }
                 catch (Exception ex)
@@ -586,14 +586,14 @@ namespace SAEON.Azure.CosmosDB
                 {
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
                     var cost = new CosmosDBCost<T>();
                     if (!client.ClientOptions.AllowBulkExecution)
                     {
                         foreach (var item in items)
                         {
-                            cost += (await ReplaceItemWithCostAsync(item, partitionKeyExpression)).cost;
+                            cost += (await ReplaceItemWithCostAsync(item, partitionKeyExpression).ConfigureAwait(false)).cost;
                         }
                     }
                     else
@@ -603,7 +603,7 @@ namespace SAEON.Azure.CosmosDB
                         {
                             tasks.Add(ReplaceItemWithCostAsync(item, partitionKeyExpression));
                         }
-                        await Task.WhenAll(tasks);
+                        await Task.WhenAll(tasks).ConfigureAwait(false);
                         if (tasks.Any(i => i.IsFaulted))
                         {
                             throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
@@ -636,9 +636,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    return await container.UpsertItemAsync(item, GetPartitionKey(item, partitionKeyExpression));
+                    return await container.UpsertItemAsync(item, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -659,9 +659,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    var response = await container.UpsertItemAsync<T>(item, GetPartitionKey(item, partitionKeyExpression));
+                    var response = await container.UpsertItemAsync(item, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                     return (response, new CosmosDBCost<T>(response));
                 }
                 catch (Exception ex)
@@ -681,7 +681,7 @@ namespace SAEON.Azure.CosmosDB
                 {
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
                     var oldAutoEnsureContainer = AutoEnsureContainer;
                     try
@@ -692,7 +692,7 @@ namespace SAEON.Azure.CosmosDB
                         {
                             foreach (var item in items)
                             {
-                                cost += (await UpsertItemWithCostAsync(item, partitionKeyExpression)).cost;
+                                cost += (await UpsertItemWithCostAsync(item, partitionKeyExpression).ConfigureAwait(false)).cost;
                             }
                         }
                         else
@@ -702,7 +702,7 @@ namespace SAEON.Azure.CosmosDB
                             {
                                 tasks.Add(UpsertItemWithCostAsync(item, partitionKeyExpression));
                             }
-                            await Task.WhenAll(tasks);
+                            await Task.WhenAll(tasks).ConfigureAwait(false);
                             if (tasks.Any(i => i.IsFaulted))
                             {
                                 throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
@@ -740,9 +740,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    return await container.DeleteItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression));
+                    return await container.DeleteItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -760,9 +760,9 @@ namespace SAEON.Azure.CosmosDB
                 {
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    var response = await container.DeleteItemAsync<T>(id, GetPartitionKey(partitionKey));
+                    var response = await container.DeleteItemAsync<T>(id, GetPartitionKey(partitionKey)).ConfigureAwait(false);
                     return (response, new CosmosDBCost<T>(response));
                 }
                 catch (Exception ex)
@@ -784,9 +784,9 @@ namespace SAEON.Azure.CosmosDB
                     CheckItem(item);
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
-                    var response = await container.DeleteItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression));
+                    var response = await container.DeleteItemAsync<T>(item.Id, GetPartitionKey(item, partitionKeyExpression)).ConfigureAwait(false);
                     return (response, new CosmosDBCost<T>(response));
                 }
                 catch (Exception ex)
@@ -806,7 +806,7 @@ namespace SAEON.Azure.CosmosDB
                 {
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
                     var oldAutoEnsureContainer = AutoEnsureContainer;
                     try
@@ -817,7 +817,7 @@ namespace SAEON.Azure.CosmosDB
                         {
                             foreach (var item in items)
                             {
-                                cost += (await DeleteItemWithCostAsync(item, partitionKeyExpression)).cost;
+                                cost += (await DeleteItemWithCostAsync(item, partitionKeyExpression).ConfigureAwait(false)).cost;
                             }
                         }
                         else
@@ -827,7 +827,7 @@ namespace SAEON.Azure.CosmosDB
                             {
                                 tasks.Add(DeleteItemWithCostAsync(item, partitionKeyExpression));
                             }
-                            await Task.WhenAll(tasks);
+                            await Task.WhenAll(tasks).ConfigureAwait(false);
                             if (tasks.Any(i => i.IsFaulted))
                             {
                                 throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
@@ -860,19 +860,19 @@ namespace SAEON.Azure.CosmosDB
                 {
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
                     var oldAutoEnsureContainer = AutoEnsureContainer;
                     try
                     {
                         AutoEnsureContainer = false;
-                        var (items, readCost) = await GetItemsWithCostAsync(predicate);
+                        var (items, readCost) = await GetItemsWithCostAsync(predicate).ConfigureAwait(false);
                         var deleteCost = new CosmosDBCost<T>();
                         if (!client.ClientOptions.AllowBulkExecution)
                         {
                             foreach (var item in items)
                             {
-                                deleteCost += (await DeleteItemWithCostAsync(item, partitionKeyExpression)).cost;
+                                deleteCost += (await DeleteItemWithCostAsync(item, partitionKeyExpression).ConfigureAwait(false)).cost;
                             }
                         }
                         else
@@ -882,7 +882,7 @@ namespace SAEON.Azure.CosmosDB
                             {
                                 tasks.Add(DeleteItemWithCostAsync(item, partitionKeyExpression));
                             }
-                            await Task.WhenAll(tasks);
+                            await Task.WhenAll(tasks).ConfigureAwait(false);
                             if (tasks.Any(i => i.IsFaulted))
                             {
                                 throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
@@ -915,7 +915,7 @@ namespace SAEON.Azure.CosmosDB
                 {
                     if (AutoEnsureContainer)
                     {
-                        await EnsureContainerAsync();
+                        await EnsureContainerAsync().ConfigureAwait(false);
                     }
                     var oldAutoEnsureContainer = AutoEnsureContainer;
                     try
@@ -926,7 +926,7 @@ namespace SAEON.Azure.CosmosDB
                         var iterator = container.GetItemLinqQueryable<T>().Where(predicate).Select(i => i.Id).ToFeedIterator();
                         while (iterator.HasMoreResults)
                         {
-                            foreach (var item in await iterator.ReadNextAsync())
+                            foreach (var item in await iterator.ReadNextAsync().ConfigureAwait(false))
                             {
                                 items.Add(item);
                             }
@@ -936,7 +936,7 @@ namespace SAEON.Azure.CosmosDB
                         {
                             foreach (var item in items)
                             {
-                                deleteCost += (await DeleteItemWithCostAsync(item, partitionKey)).cost;
+                                deleteCost += (await DeleteItemWithCostAsync(item, partitionKey).ConfigureAwait(false)).cost;
                             }
                         }
                         else
@@ -946,7 +946,7 @@ namespace SAEON.Azure.CosmosDB
                             {
                                 tasks.Add(DeleteItemWithCostAsync(item, partitionKey));
                             }
-                            await Task.WhenAll(tasks);
+                            await Task.WhenAll(tasks).ConfigureAwait(false);
                             if (tasks.Any(i => i.IsFaulted))
                             {
                                 throw new InvalidOperationException($"{tasks.Count(i => i.IsFaulted)} tasks faulted");
