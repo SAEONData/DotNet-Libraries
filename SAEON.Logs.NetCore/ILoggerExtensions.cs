@@ -7,6 +7,8 @@ namespace SAEON.Logs
 {
     public static class ILoggerExtensions
     {
+        public static bool UseSAEONLogs { get; set; }
+
         public static LogLevel Level(this ILogger logger)
         {
             foreach (var level in Enum.GetValues(typeof(LogLevel)).Cast<LogLevel>())
@@ -30,85 +32,127 @@ namespace SAEON.Logs
         public static void Debug(this ILogger logger, string message = "", params object[] values)
         {
             logger.LogDebug(message, values);
-            SAEONLogs.Debug(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Debug(message, values);
+            }
         }
 
         public static void Debug<T>(this ILogger<T> logger, string message = "", params object[] values)
         {
             logger.LogDebug(message, values);
-            SAEONLogs.Debug(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Debug(message, values);
+            }
         }
 
         public static void Error(this ILogger logger, string message = "", params object[] values)
         {
             logger.LogError(string.IsNullOrEmpty(message) ? "An error occurred" : message, values);
-            SAEONLogs.Error(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Error(message, values);
+            }
         }
 
         public static void Error<T>(this ILogger<T> logger, string message = "", params object[] values)
         {
             logger.LogError(string.IsNullOrEmpty(message) ? "An error occurred" : message, values);
-            SAEONLogs.Error(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Error(message, values);
+            }
         }
 
         public static void Exception(this ILogger logger, Exception ex, string message = "", params object[] values)
         {
             logger.LogError(ex, string.IsNullOrEmpty(message) ? "An exception occurred" : message, values);
-            SAEONLogs.Exception(ex, message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Exception(ex, message, values);
+            }
         }
 
         public static void Exception<T>(this ILogger<T> logger, Exception ex, string message = "", params object[] values)
         {
             logger.LogError(ex, string.IsNullOrEmpty(message) ? "An exception occurred" : message, values);
-            SAEONLogs.Exception(ex, message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Exception(ex, message, values);
+            }
         }
 
         public static void Fatal(this ILogger logger, string message = "", params object[] values)
         {
             logger.LogCritical(string.IsNullOrEmpty(message) ? "A fatal error occurred" : message, values);
-            SAEONLogs.Error(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Error(message, values);
+            }
         }
 
         public static void Fatal<T>(this ILogger<T> logger, string message = "", params object[] values)
         {
             logger.LogCritical(string.IsNullOrEmpty(message) ? "A fatal error occurred" : message, values);
-            SAEONLogs.Error(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Error(message, values);
+            }
         }
 
         public static void Information(this ILogger logger, string message, params object[] values)
         {
             logger.LogInformation(message, values);
-            SAEONLogs.Information(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Information(message, values);
+            }
         }
 
         public static void Information<T>(this ILogger<T> logger, string message, params object[] values)
         {
             logger.LogInformation(message, values);
-            SAEONLogs.Information(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Information(message, values);
+            }
         }
 
         public static void Verbose(this ILogger logger, string message, params object[] values)
         {
             logger.LogTrace(message, values);
-            SAEONLogs.Verbose(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Verbose(message, values);
+            }
         }
 
         public static void Verbose<T>(this ILogger<T> logger, string message, params object[] values)
         {
             logger.LogTrace(message, values);
-            SAEONLogs.Verbose(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Verbose(message, values);
+            }
         }
 
         public static void Warning(this ILogger logger, string message, params object[] values)
         {
             logger.LogWarning(message, values);
-            SAEONLogs.Warning(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Warning(message, values);
+            }
         }
 
         public static void Warning<T>(this ILogger<T> logger, string message, params object[] values)
         {
             logger.LogWarning(message, values);
-            SAEONLogs.Warning(message, values);
+            if (UseSAEONLogs)
+            {
+                SAEONLogs.Warning(message, values);
+            }
         }
 
         #region MethodCalls
