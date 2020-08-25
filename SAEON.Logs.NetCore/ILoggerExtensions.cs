@@ -7,7 +7,7 @@ namespace SAEON.Logs
 {
     public static class ILoggerExtensions
     {
-        public static bool UseSAEONLogs { get; set; }
+        public static bool UseSAEONLogs { get; set; } = true;
 
         public static LogLevel Level(this ILogger logger)
         {
