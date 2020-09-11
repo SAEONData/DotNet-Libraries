@@ -799,7 +799,7 @@ namespace SAEON.OpenXML
 
         public static object[,] LoadSpreadsheet(string fileName, string sheetName = "")
         {
-            using (SpreadsheetDocument document = SpreadsheetDocument.Open(fileName, false))
+            using (var document = SpreadsheetDocument.Open(fileName, false))
             {
                 Sheet sheet =
                     string.IsNullOrEmpty(sheetName) ?
