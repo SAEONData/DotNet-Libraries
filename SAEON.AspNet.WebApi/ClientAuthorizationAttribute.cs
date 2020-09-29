@@ -39,16 +39,16 @@ namespace SAEON.AspNet.WebApi
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
-            using (Logging.MethodCall(GetType(), new MethodCallParameters { { "Client", Clients } }))
+            using (SAEONLogs.MethodCall(GetType(), new MethodCallParameters { { "Client", Clients } }))
             {
-                base.OnAuthorization(actionContext);
+                if (actionContext == null) throw new ArgumentNullException(nameof(actionContext));
                 var principal = actionContext.RequestContext.Principal as ClaimsPrincipal;
                 var callerClientId = principal.Claims.FirstOrDefault(i => i.Type == AspNetConstants.ClaimClientId)?.Value;
-                Logging.Information("ClientId: {ClientId}", callerClientId);
+                SAEONLogs.Information("ClientId: {ClientId}", callerClientId);
                 bool found = false;
                 foreach (var clientId in Clients)
                 {
-                    Logging.Verbose("Client: {client} Claims: {claims}", clientId, principal.Claims.Select(i => i.Type + "=" + i.Value));
+                    SAEONLogs.Verbose("Client: {client} Claims: {claims}", clientId, principal.Claims.Select(i => i.Type + "=" + i.Value));
                     if (callerClientId == clientId)
                     {
                         found = true;
@@ -57,11 +57,12 @@ namespace SAEON.AspNet.WebApi
                 }
                 if (!found)
                 {
-                    Logging.Error("Client Authorization Failed");
+                    SAEONLogs.Error("Client Authorization Failed");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Client Authorization Failed");
                     return;
                 }
             }
         }
+
     }
 }

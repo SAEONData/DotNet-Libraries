@@ -8,18 +8,22 @@ using System.Runtime.CompilerServices;
 
 namespace SAEON.Logs
 {
-    public static class Logging
+    public static class SAEONLogs
     {
         public static bool UseFullName { get; set; } = true;
 
-        public static string LogLevel =>
-            Log.IsEnabled(LogEventLevel.Verbose) ? "Verbose" :
-            Log.IsEnabled(LogEventLevel.Debug) ? "Debug" :
-            Log.IsEnabled(LogEventLevel.Information) ? "Info" :
-            Log.IsEnabled(LogEventLevel.Warning) ? "Warning" :
-            Log.IsEnabled(LogEventLevel.Error) ? "Error" :
-            Log.IsEnabled(LogEventLevel.Fatal) ? "Fatal" :
-            "Unknown";
+        public static LogEventLevel Level
+        {
+            get
+            {
+                foreach (LogEventLevel logLevel in Enum.GetValues(typeof(LogEventLevel)))
+                {
+                    if (Log.IsEnabled(logLevel)) return logLevel;
+                }
+                return LogEventLevel.Information;
+                // Shouldn’t get here!
+            }
+        }
 
         public static LoggerConfiguration CreateConfiguration(string fileName = "")
         {
@@ -32,7 +36,7 @@ namespace SAEON.Logs
             return result;
         }
 
-        public static void Create(this LoggerConfiguration config)
+        public static void Initialize(this LoggerConfiguration config)
         {
             Log.Logger = config.CreateLogger();
         }

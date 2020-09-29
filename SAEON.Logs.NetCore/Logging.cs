@@ -5,33 +5,44 @@ using Serilog.Context;
 using Serilog.Events;
 using System;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace SAEON.Logs
 {
-    public static class Logging
+    public static class SAEONLogs
     {
-        public static string Level
+        public static LogEventLevel Level
         {
             get
             {
-                foreach (var level in Enum.GetValues(typeof(LogEventLevel)).Cast<LogEventLevel>())
+                foreach (LogEventLevel logLevel in Enum.GetValues(typeof(LogEventLevel)))
                 {
-                    if (Log.IsEnabled(level)) return level.ToString();
+                    if (Log.IsEnabled(logLevel)) return logLevel;
                 }
                 // Shouldn’t get here!
-                return "Unknown";
+                return LogEventLevel.Information;
             }
         }
 
         public static LoggerConfiguration CreateConfiguration(string fileName = "", IConfiguration config = null)
         {
             var result = new LoggerConfiguration()
+                                .MinimumLevel.Information()
                                 .Enrich.FromLogContext()
+                                .WriteTo.Console()
                                 .WriteTo.Seq("http://localhost:5341/");
-            if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + ".txt");
-            if (!string.IsNullOrWhiteSpace(fileName)) result.WriteTo.File(fileName, rollOnFileSizeLimit: true, shared: true, flushToDiskInterval: TimeSpan.FromSeconds(1), rollingInterval: RollingInterval.Day, retainedFileCountLimit: null);
+            if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + ".log");
+            if (!string.IsNullOrWhiteSpace(fileName)) result.WriteTo.File(fileName, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null, rollOnFileSizeLimit: true);
+#if !NETSTANDARD2_1
+            if (config == null)
+            {
+                config = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json", true)
+                    .AddJsonFile("local.settings.json", true)
+                    .AddJsonFile("secrets.json", true)
+                    .Build();
+            }
+#endif
             if (config != null)
             {
                 result.ReadFrom.Configuration(config);
@@ -49,10 +60,7 @@ namespace SAEON.Logs
             return CreateConfiguration(null, config);
         }
 
-        public static void Create(this LoggerConfiguration config)
-        {
-            Log.Logger = config.CreateLogger();
-        }
+        public static void Initialize(this LoggerConfiguration config) => Log.Logger = config.CreateLogger();
 
         public static void ShutDown()
         {

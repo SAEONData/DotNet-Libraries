@@ -20,11 +20,13 @@ namespace SAEON.OpenXML
         #region Sheets
         public static Sheet GetSheet(SpreadsheetDocument document, int sheetId)
         {
+            if (document == null) throw new ArgumentNullException(nameof(document));
             return document.WorkbookPart.Workbook.Descendants<Sheet>().Where(s => s.SheetId.Value == sheetId).FirstOrDefault();
         }
 
         public static Sheet GetSheet(SpreadsheetDocument document, string sheetName)
         {
+            if (document == null) throw new ArgumentNullException(nameof(document));
             return document.WorkbookPart.Workbook.Descendants<Sheet>().Where(s => s.Name.Value == sheetName).FirstOrDefault();
         }
 
@@ -42,11 +44,14 @@ namespace SAEON.OpenXML
 
         public static List<Sheet> GetAllSheets(SpreadsheetDocument document)
         {
+            if (document == null) throw new ArgumentNullException(nameof(document));
             return document.WorkbookPart.Workbook.Descendants<Sheet>().ToList();
         }
 
         public static void DeleteSheet(SpreadsheetDocument document, Sheet sheet)
         {
+            if (document == null) throw new ArgumentNullException(nameof(document));
+            if (sheet == null) throw new ArgumentNullException(nameof(sheet));
             WorkbookPart workbookPart = document.WorkbookPart;
             WorksheetPart worksheetPart = (WorksheetPart)(workbookPart.GetPartById(sheet.Id));
             sheet.Remove();
@@ -65,10 +70,11 @@ namespace SAEON.OpenXML
 
         public static WorksheetPart InsertSheet(SpreadsheetDocument document, string sheetName = "")
         {
-            using (Logging.MethodCall(typeof(WorksheetPart)))
+            using (SAEONLogs.MethodCall(typeof(WorksheetPart)))
             {
                 try
                 {
+                    if (document == null) throw new ArgumentNullException(nameof(document));
                     // Add a blank WorksheetPart.
                     WorksheetPart worksheetPart = document.WorkbookPart.AddNewPart<WorksheetPart>();
                     worksheetPart.Worksheet = new Worksheet(new SheetData());
@@ -79,15 +85,15 @@ namespace SAEON.OpenXML
                         sheets = document.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
                     }
                     string relationshipId = document.WorkbookPart.GetIdOfPart(worksheetPart);
-                    Logging.Verbose("relationshipId: {relationshipId}", relationshipId);
+                    SAEONLogs.Verbose("relationshipId: {relationshipId}", relationshipId);
 
                     // Get a unique ID for the new worksheet.
                     uint sheetId = 1;
-                    if (sheets.Elements<Sheet>().Count() > 0)
+                    if (sheets.Elements<Sheet>().Any())
                     {
                         sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).Max() + 1;
                     }
-                    Logging.Verbose("sheetId: {sheetId}", sheetId);
+                    SAEONLogs.Verbose("sheetId: {sheetId}", sheetId);
 
                     // Give the new worksheet a name.
                     if (string.IsNullOrEmpty(sheetName))
@@ -95,7 +101,7 @@ namespace SAEON.OpenXML
                         sheetName = "Sheet" + sheetId;
                     }
 
-                    Logging.Verbose("sheetName: {sheetName}", sheetName);
+                    SAEONLogs.Verbose("sheetName: {sheetName}", sheetName);
 
                     // Append the new worksheet and associate it with the workbook.
                     Sheet sheet = new Sheet() { Id = relationshipId, SheetId = sheetId, Name = sheetName };
@@ -104,7 +110,7 @@ namespace SAEON.OpenXML
                 }
                 catch (Exception ex)
                 {
-                    Logging.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -115,10 +121,7 @@ namespace SAEON.OpenXML
         #region Rows
         public static Row InsertRowInWorksheet(SheetData sheetData, int rowIndex)
         {
-            if (sheetData == null)
-            {
-                throw new ArgumentNullException(nameof(sheetData));
-            }
+            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
 
             Row row = sheetData.Elements<Row>().Where(r => r.RowIndex == rowIndex).FirstOrDefault();
             if (row == null)
@@ -131,6 +134,7 @@ namespace SAEON.OpenXML
 
         public static Row InsertRowInWorksheet(WorksheetPart worksheetPart, int rowIndex)
         {
+            if (worksheetPart == null) throw new ArgumentNullException(nameof(worksheetPart));
             SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
             return InsertRowInWorksheet(sheetData, rowIndex);
         }
@@ -140,6 +144,7 @@ namespace SAEON.OpenXML
         #region Columns
         public static Column AddColumn(WorksheetPart worksheetPart, int index, double width, bool save = false)
         {
+            if (worksheetPart == null) throw new ArgumentNullException(nameof(worksheetPart));
             Columns columns = worksheetPart.Worksheet.GetFirstChild<Columns>();
             if (columns == null)
             {
@@ -163,6 +168,7 @@ namespace SAEON.OpenXML
 
         public static Column GetColumn(WorksheetPart worksheetPart, int index, bool save = false)
         {
+            if (worksheetPart == null) throw new ArgumentNullException(nameof(worksheetPart));
             Columns columns = worksheetPart.Worksheet.GetFirstChild<Columns>();
             if (columns == null)
             {
@@ -205,6 +211,7 @@ namespace SAEON.OpenXML
 
         public static int GetColumnIndex(string columnName)
         {
+            if (columnName == null) throw new ArgumentNullException(nameof(columnName));
             // Remove row numbers
             int r = columnName.IndexOfAny("0123456789".ToCharArray());
             if (r > 0)
@@ -334,16 +341,9 @@ namespace SAEON.OpenXML
 
         public static void SetCellValue(SpreadsheetDocument document, SheetData sheetData, string columnName, Row row, object value)
         {
-            if (sheetData == null)
-            {
-                throw new ArgumentNullException(nameof(sheetData));
-            }
-
-            if (row == null)
-            {
-                throw new ArgumentNullException(nameof(row));
-            }
-
+            if (document == null) throw new ArgumentNullException(nameof(document));
+            if (sheetData == null) throw new ArgumentNullException(nameof(sheetData));
+            if (row == null) throw new ArgumentNullException(nameof(row));
             if (value == null)
             {
                 return;
@@ -416,12 +416,14 @@ namespace SAEON.OpenXML
 
         public static void SetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, string columnName, Row row, object value)
         {
+            if (worksheetPart == null) throw new ArgumentNullException(nameof(worksheetPart));
             SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
             SetCellValue(document, sheetData, columnName, row, value);
         }
 
         public static void SetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, string columnName, int rowIndex, object value)
         {
+            if (worksheetPart == null) throw new ArgumentNullException(nameof(worksheetPart));
             SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
             SetCellValue(document, sheetData, columnName, rowIndex, value);
         }
@@ -433,6 +435,7 @@ namespace SAEON.OpenXML
 
         public static void SetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, int colIndex, Row row, object value)
         {
+            if (worksheetPart == null) throw new ArgumentNullException(nameof(worksheetPart));
             SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
             SetCellValue(document, sheetData, colIndex, row, value);
         }
@@ -449,6 +452,8 @@ namespace SAEON.OpenXML
 
         public static object GetCellValue(SpreadsheetDocument document, WorksheetPart worksheetPart, string columnName, int rowIndex)
         {
+            if (document == null) throw new ArgumentNullException(nameof(document));
+            if (worksheetPart == null) throw new ArgumentNullException(nameof(worksheetPart));
             object result = null;
             Cell cell = worksheetPart.Worksheet.Descendants<Cell>().
               Where(c => c.CellReference == columnName + rowIndex).FirstOrDefault();
@@ -648,7 +653,7 @@ namespace SAEON.OpenXML
 
         private static SpreadsheetDocument CreateSpreadsheetDocument(SpreadsheetDocument document)
         {
-            using (Logging.MethodCall(typeof(SpreadsheetDocument)))
+            using (SAEONLogs.MethodCall(typeof(SpreadsheetDocument)))
             {
                 try
                 {
@@ -672,7 +677,7 @@ namespace SAEON.OpenXML
                 }
                 catch (Exception ex)
                 {
-                    Logging.Exception(ex);
+                    SAEONLogs.Exception(ex);
                     throw;
                 }
             }
@@ -698,7 +703,7 @@ namespace SAEON.OpenXML
             OpenXmlValidator validator = new OpenXmlValidator();
             var errors = validator.Validate(document);
             StringBuilder sb = new StringBuilder();
-            if (errors.Count() > 0)
+            if (errors.Any())
             {
                 sb.AppendLine("Spreadsheet is not valid!");
                 foreach (ValidationErrorInfo error in errors)
@@ -717,12 +722,14 @@ namespace SAEON.OpenXML
 
         public static void Save(SpreadsheetDocument document)
         {
+            if (document == null) throw new ArgumentNullException(nameof(document));
             //document.WorkbookPart.Workbook.Save();
             document.Save();
         }
 
         public static void Close(SpreadsheetDocument document)
         {
+            if (document == null) throw new ArgumentNullException(nameof(document));
             document.Close();
         }
 
@@ -734,6 +741,7 @@ namespace SAEON.OpenXML
 
         public static Dictionary<string, string> GetDefinedNames(SpreadsheetDocument document)
         {
+            if (document == null) throw new ArgumentNullException(nameof(document));
             var result = new Dictionary<String, String>();
             var wbPart = document.WorkbookPart;
             DefinedNames definedNames = wbPart.Workbook.DefinedNames;
@@ -752,6 +760,7 @@ namespace SAEON.OpenXML
 
         public static (string sheetName, string colLeft, int rowTop, string colRight, int rowBottom) SplitRange(string range)
         {
+            if (range == null) throw new ArgumentNullException(nameof(range));
             var splitSheet = range.Split('!');
             var sheet = splitSheet[0];
             var splitRange = splitSheet[1].Split(':');
@@ -762,6 +771,7 @@ namespace SAEON.OpenXML
 
         public static (string col, int row) SplitCellReference(string cellReference)
         {
+            if (cellReference == null) throw new ArgumentNullException(nameof(cellReference));
             var cellRef = cellReference.Replace("$", string.Empty);
             var p = cellRef.IndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
             var col = cellRef.Substring(0, p);
@@ -789,7 +799,7 @@ namespace SAEON.OpenXML
 
         public static object[,] LoadSpreadsheet(string fileName, string sheetName = "")
         {
-            using (SpreadsheetDocument document = SpreadsheetDocument.Open(fileName, false))
+            using (var document = SpreadsheetDocument.Open(fileName, false))
             {
                 Sheet sheet =
                     string.IsNullOrEmpty(sheetName) ?
@@ -815,6 +825,7 @@ namespace SAEON.OpenXML
 
         public static void WriteList<T>(SpreadsheetDocument document, WorksheetPart worksheetPart, List<T> data)
         {
+            if (data == null) throw new ArgumentNullException(nameof(data));
             PropertyInfo[] properties = typeof(T).GetProperties();
             int c = 1;
             foreach (PropertyInfo propertyInfo in properties)

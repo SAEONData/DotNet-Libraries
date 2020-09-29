@@ -1,16 +1,10 @@
-﻿#if !NET472
-using System;
-#endif
-
-namespace SAEON.AspNet.Common
+﻿namespace SAEON.AspNet.Common
 {
     public static class AspNetConstants
     {
         public static readonly string AcceptEncoding = "Accept-Encoding";
-#if !NET472
-        [Obsolete("ApplicationJson is obsolete. Use MediaTypeNames.Application.Json", true)]
-#endif
         public static readonly string ApplicationJson = "application/json";
+        public static readonly string AuthServerUrl = "AuthServerUrl";
         public static readonly string ClaimClientId = "client_id";
         public static readonly string ClaimRole = "role";
         public static readonly string ClaimSubject = "sub";

@@ -24,20 +24,20 @@ namespace SAEON.AspNet.WebApi
 
         public override void OnAuthorization(HttpActionContext actionContext)
         {
-            using (Logging.MethodCall(GetType(), new MethodCallParameters { { "Role", role } }))
+            using (SAEONLogs.MethodCall(GetType(), new MethodCallParameters { { "Role", role } }))
             {
-                base.OnAuthorization(actionContext);
+                if (actionContext == null) throw new ArgumentNullException(nameof(actionContext));
                 var principal = actionContext.RequestContext.Principal as ClaimsPrincipal;
                 if (!principal.Identity.IsAuthenticated)
                 {
-                    Logging.Error("Not Authenticated");
+                    SAEONLogs.Error("Not Authenticated");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Unauthorized, "Not Authenticated");
                     return;
                 }
-                Logging.Verbose("Role: {role} Claims: {claims}", role, principal.Claims.Select(i => i.Type + "=" + i.Value));
+                SAEONLogs.Verbose("Role: {role} Claims: {claims}", role, principal.Claims.Select(i => i.Type + "=" + i.Value));
                 if (!(principal.HasClaim(x => x.Type.Equals(AspNetConstants.ClaimRole, StringComparison.CurrentCultureIgnoreCase) && x.Value.Equals(role, StringComparison.CurrentCultureIgnoreCase))))
                 {
-                    Logging.Error("Role Authorization Failed");
+                    SAEONLogs.Error("Role Authorization Failed");
                     actionContext.Response = actionContext.Request.CreateErrorResponse(HttpStatusCode.Forbidden, "Role Authorization Failed");
                     return;
                 }

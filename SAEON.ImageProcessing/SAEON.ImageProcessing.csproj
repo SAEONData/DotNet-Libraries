@@ -9,7 +9,7 @@
         <Description>Image processing utilities for SAEON in .Net</Description>
         <Copyright>Copyright © 2017-2018 South African Environmental Observation Network (SAEON)</Copyright>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.10</Version>
+        <Version>1.0.12</Version>
     </PropertyGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
@@ -17,18 +17,19 @@
     </Target>
 
     <ItemGroup>
-      <PackageReference Include="ImageProcessor" Version="2.9.0" />
-      <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.6">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="2.0.1" />
-      <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-      <PackageReference Include="Microsoft.WindowsAPICodePack-Shell" Version="1.1.0" />
+      <Compile Remove="Properties\**" />
+      <EmbeddedResource Remove="Properties\**" />
+      <None Remove="Properties\**" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Properties\" />
+      <PackageReference Include="ImageProcessor" Version="2.9.1" />
+      <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+      <PackageReference Include="Microsoft.WindowsAPICodePack-Shell" Version="1.1.0" />
     </ItemGroup>
 
 </Project>

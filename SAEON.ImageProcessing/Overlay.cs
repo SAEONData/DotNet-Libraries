@@ -38,6 +38,7 @@ namespace SAEON.ImageProcessing
         /// </returns>
         public Image ProcessImage(ImageFactory factory)
         {
+            if (factory == null) throw new ArgumentNullException(nameof(factory));
             string fileName = DynamicParameter.FileName ?? string.Empty;
             int width = DynamicParameter.Size.Width ?? 0;
             int height = DynamicParameter.Size.Height ?? 0;
