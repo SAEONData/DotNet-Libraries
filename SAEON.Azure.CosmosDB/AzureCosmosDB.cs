@@ -94,11 +94,12 @@ namespace SAEON.Azure.CosmosDB
         }
     }
 
-    public class AzureCosmosDB<T> where T : CosmosDBItem
+    public class AzureCosmosDB<T> : IDisposable where T : CosmosDBItem
     {
         private CosmosClient client;
         private Database database;
         private Container container;
+        private bool disposedValue;
 
         public static int DefaultThroughput { get; set; } = 1000;
         public static int DefaultBatchSize { get; set; } = 100000;
@@ -155,14 +156,37 @@ namespace SAEON.Azure.CosmosDB
             }
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                    container = null;
+                    database = null;
+                    client?.Dispose();
+                    client = null;
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
         ~AzureCosmosDB()
         {
-            using (SAEONLogs.MethodCall<T>(GetType()))
-            {
-                container = null;
-                database = null;
-                client = null;
-            }
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         #region Database

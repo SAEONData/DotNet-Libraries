@@ -5,6 +5,17 @@ namespace SAEON.Core
 {
     public static class StringExtensions
     {
+        public static string AddTrailingForwardSlash(this string aString)
+        {
+            if (aString.EndsWith("/", StringComparison.InvariantCulture)) return aString;
+            return aString + "/";
+        }
+        public static string AddTrailingBackSlash(this string aString)
+        {
+            if (aString.EndsWith("\\", StringComparison.InvariantCulture)) return aString;
+            return aString + "\\";
+        }
+
         public static string DoubleQuoted(this string source)
         {
             return source.Quoted('"');
@@ -21,11 +32,14 @@ namespace SAEON.Core
         public static string Quoted(this string source, char quote)
         {
             return
+#pragma warning disable CA1305 // Specify IFormatProvider
                 quote + source.Replace(Convert.ToString(quote), Convert.ToString(quote) + Convert.ToString(quote)) + quote;
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
 
         public static string Replace(this string source, Dictionary<string, string> dictionary)
         {
+            if (dictionary == null) return source;
             string result = source;
             foreach (var kv in dictionary)
             {
@@ -42,12 +56,14 @@ namespace SAEON.Core
 
         public static string TrimStart(this string source, string prefix)
         {
-            return !source.StartsWith(prefix) ? source : source.Remove(0, prefix.Length);
+            if (prefix == null) return source;
+            return !source.StartsWith(prefix, StringComparison.InvariantCulture) ? source : source.Remove(0, prefix.Length);
         }
 
         public static string TrimEnd(this string source, string suffix)
         {
-            return !source.EndsWith(suffix) ? source : source.Remove(source.Length - suffix.Length);
+            if (suffix == null) return source;
+            return !source.EndsWith(suffix, StringComparison.InvariantCulture) ? source : source.Remove(source.Length - suffix.Length);
         }
     }
 }

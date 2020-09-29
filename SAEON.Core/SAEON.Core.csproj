@@ -9,12 +9,20 @@
     <Description>Core utilities for SAEON in .Net</Description>
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.25</Version>
+    <Version>1.0.26</Version>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="echo rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet" />
   </Target>
+
+  <ItemGroup>
+    <None Remove=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include=".editorconfig" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
