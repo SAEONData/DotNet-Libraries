@@ -32,7 +32,7 @@ namespace SAEON.Logs
                                 .WriteTo.Console()
                                 .WriteTo.Seq("http://localhost:5341/");
             if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + ".log");
-            if (!string.IsNullOrWhiteSpace(fileName)) result.WriteTo.File(fileName, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null, rollOnFileSizeLimit: true);
+            result.WriteTo.File(fileName, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null, rollOnFileSizeLimit: true);
 #if !NETSTANDARD2_1
             if (config == null)
             {

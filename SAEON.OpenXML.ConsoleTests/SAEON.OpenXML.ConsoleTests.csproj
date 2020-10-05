@@ -10,7 +10,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="SAEON.OpenXML" Version="1.0.71" />
+    <PackageReference Include="SAEON.OpenXML" Version="1.0.73" />
   </ItemGroup>
 
 </Project>
