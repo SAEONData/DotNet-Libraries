@@ -1,6 +1,7 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using SAEON.Core;
 using SAEON.Logs;
 using System;
 using System.Collections.Generic;
@@ -161,7 +162,7 @@ namespace SAEON.OpenXML
                             var timeMax = new TimeSpan((long)(elapsed.Ticks / rPerc));
                             if ((elapsed - lastLog).TotalSeconds >= 60)
                             {
-                                SAEONLogs.Information("Row {0} of {1}, {2:F2}% complete, in {3}, {4} of {5}, {6} left", r, rMax, rPerc * 100.0, elapsed - last, elapsed, timeMax, timeMax - elapsed);
+                                SAEONLogs.Information("Row {0} of {1}, {2:F2}% complete, in {3}, {4} of {5}, {6} left", r, rMax, rPerc * 100.0, (elapsed - last).TimeStr(), elapsed.TimeStr(), timeMax, (timeMax - elapsed).TimeStr());
                                 lastLog = elapsed;
                             }
                             last = elapsed;
@@ -177,6 +178,7 @@ namespace SAEON.OpenXML
                         writer.WriteEndElement(); //end of SheetData
                         writer.WriteEndElement(); //end of worksheet
                         writer.Close();
+                        SAEONLogs.Information("Processed {0} rows in {1}", rMax, sw.Elapsed.TimeStr());
                     }
                     if (sharedStrings.Any())
                     {
