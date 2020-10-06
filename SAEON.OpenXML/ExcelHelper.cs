@@ -392,10 +392,9 @@ namespace SAEON.OpenXML
                 cell.CellValue = new CellValue(boolean ? "1" : "0");
                 cell.DataType = new EnumValue<CellValues>(CellValues.Boolean);
             }
-            else if (value is DateTime)
+            else if (value is DateTime dateTimeValue)
             {
-                DateTime bv = (DateTime)value;
-                cell.CellValue = new CellValue(bv.ToOADate().ToString());
+                cell.CellValue = new CellValue(dateTimeValue.ToOADate().ToString());
                 cell.DataType = new EnumValue<CellValues>(CellValues.Number);
                 cell.StyleIndex = 1;
             }
@@ -524,7 +523,7 @@ namespace SAEON.OpenXML
 
         #region Document
 
-        private static Stylesheet CreateStylesheet()
+        internal static Stylesheet CreateStylesheet()
         {
             Stylesheet ss = new Stylesheet();
 
