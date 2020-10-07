@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SAEON.Core.Extensions
+namespace SAEON.Core
 {
     public static class ListOfTExtensions
     {

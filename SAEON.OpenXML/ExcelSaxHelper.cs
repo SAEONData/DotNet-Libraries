@@ -32,9 +32,7 @@ namespace SAEON.OpenXML
             }
             else if ((value is int) || value is long || (value is double) || (value is float) || (value is decimal))
             {
-                writer.WriteStartElement(new Cell(), attributes);
-                writer.WriteElement(new CellValue(value.ToString()));
-                writer.WriteEndElement();
+                WriteNumber(value);
             }
             else if (((value is int?) && ((int?)value).HasValue) ||
                      ((value is long?) && ((long?)value).HasValue) ||
@@ -42,44 +40,27 @@ namespace SAEON.OpenXML
                      ((value is float?) && ((float?)value).HasValue) ||
                      ((value is decimal?) && ((decimal?)value).HasValue))
             {
-                writer.WriteStartElement(new Cell(), attributes);
-                writer.WriteElement(new CellValue(value.ToString()));
-                writer.WriteEndElement();
+                WriteNumber(value);
             }
             else if (value is bool aBool)
             {
-                attributes.Add(new OpenXmlAttribute("t", null, "b"));
-                writer.WriteStartElement(new Cell(), attributes);
-                writer.WriteElement(new CellValue(aBool ? "1" : "0"));
-                writer.WriteEndElement();
+                WriteBoolean(aBool);
             }
             else if (value is DateTime aDateTime)
             {
-                attributes.Add(new OpenXmlAttribute("s", null, "1"));
-                writer.WriteStartElement(new Cell() { DataType = CellValues.Number }, attributes);
-                writer.WriteElement(new CellValue(aDateTime.ToOADate().ToString()));
-                writer.WriteEndElement();
+                WriteDateTime(aDateTime);
             }
             else if ((value is DateTime?) && ((DateTime?)value).HasValue)
             {
-                attributes.Add(new OpenXmlAttribute("s", null, "1"));
-                writer.WriteStartElement(new Cell() { DataType = CellValues.Number }, attributes);
-                writer.WriteElement(new CellValue($"{((DateTime?)value).Value.ToOADate()}"));
-                writer.WriteEndElement();
+                WriteDateTime(((DateTime?)value).Value);
             }
             else if (value is DateTimeOffset aDateTimeOffset)
             {
-                attributes.Add(new OpenXmlAttribute("s", null, "1"));
-                writer.WriteStartElement(new Cell() { DataType = CellValues.Number }, attributes);
-                writer.WriteElement(new CellValue(aDateTimeOffset.UtcDateTime.ToOADate().ToString()));
-                writer.WriteEndElement();
+                WriteDateTimeOffset(aDateTimeOffset);
             }
             else if ((value is DateTimeOffset?) && ((DateTimeOffset?)value).HasValue)
             {
-                attributes.Add(new OpenXmlAttribute("s", null, "1"));
-                writer.WriteStartElement(new Cell() { DataType = CellValues.Number }, attributes);
-                writer.WriteElement(new CellValue($"{((DateTimeOffset?)value).Value.UtcDateTime.ToOADate()}"));
-                writer.WriteEndElement();
+                WriteDateTimeOffset(((DateTimeOffset?)value).Value);
             }
             else if (value is Enum aEnum)
             {
@@ -110,6 +91,37 @@ namespace SAEON.OpenXML
                     writer.WriteElement(new CellValue($"{sharedStrings[aValue]}"));
                     writer.WriteEndElement();
                 }
+            }
+
+            void WriteNumber(object aValue)
+            {
+                writer.WriteStartElement(new Cell(), attributes);
+                writer.WriteElement(new CellValue(aValue.ToString()));
+                writer.WriteEndElement();
+            }
+
+            void WriteBoolean(bool aValue)
+            {
+                attributes.Add(new OpenXmlAttribute("t", null, "b"));
+                writer.WriteStartElement(new Cell(), attributes);
+                writer.WriteElement(new CellValue(aValue ? "1" : "0"));
+                writer.WriteEndElement();
+            }
+
+            void WriteDateTime(DateTime aValue)
+            {
+                attributes.Add(new OpenXmlAttribute("s", null, "1"));
+                writer.WriteStartElement(new Cell(), attributes);
+                writer.WriteElement(new CellValue(aValue.ToOADate().ToString()));
+                writer.WriteEndElement();
+            }
+
+            void WriteDateTimeOffset(DateTimeOffset aValue)
+            {
+                attributes.Add(new OpenXmlAttribute("s", null, "1"));
+                writer.WriteStartElement(new Cell(), attributes);
+                writer.WriteElement(new CellValue(aValue.UtcDateTime.ToOADate().ToString()));
+                writer.WriteEndElement();
             }
         }
 
@@ -148,7 +160,7 @@ namespace SAEON.OpenXML
                         var sw = new Stopwatch();
                         sw.Start();
                         var last = new TimeSpan();
-                        var lastLog = new TimeSpan(last.Ticks);
+                        var lastLog = last;
 
                         writer.WriteStartElement(new Worksheet());
                         writer.WriteStartElement(new SheetData());
@@ -247,7 +259,7 @@ namespace SAEON.OpenXML
                         var sw = new Stopwatch();
                         sw.Start();
                         var last = new TimeSpan();
-                        var lastLog = new TimeSpan(last.Ticks);
+                        var lastLog = last;
 
                         writer.WriteStartElement(new Worksheet());
                         writer.WriteStartElement(new SheetData());
