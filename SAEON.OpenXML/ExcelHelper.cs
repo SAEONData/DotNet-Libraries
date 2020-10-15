@@ -819,7 +819,15 @@ namespace SAEON.OpenXML
             {
                 for (int col = colLeftIndex; col < GetColumnIndex(colRight) + 1; col++)
                 {
-                    result[row - rowTop, col - colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
+                    try
+                    {
+                        result[row - rowTop, col - colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
+                    }
+                    catch (Exception ex)
+                    {
+                        SAEONLogs.Exception(ex, "{Range}[{row},{col}]", range, row, col);
+                        throw;
+                    }
                 }
             }
             return result;
@@ -844,7 +852,15 @@ namespace SAEON.OpenXML
                 {
                     for (int col = colLeftIndex; col < GetColumnIndex(colRight) + 1; col++)
                     {
-                        result[row - rowTop, col - colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
+                        try
+                        {
+                            result[row - rowTop, col - colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
+                        }
+                        catch (Exception ex)
+                        {
+                            SAEONLogs.Exception(ex, "{TableName}[{row},{col}]", tableName, row, col);
+                            throw;
+                        }
                     }
                 }
                 return result;
