@@ -800,7 +800,7 @@ namespace SAEON.OpenXML
             if (string.IsNullOrEmpty(name)) throw new ArgumentException($"'{nameof(name)}' cannot be null or empty", nameof(name));
 
             if (!GetNames(doc).TryGetValue(name, out string range))
-                return null;
+                throw new ArgumentOutOfRangeException(nameof(name), $"Unable to find Name {name}");
             else
             {
                 return GetRangeValues(doc, range);
@@ -838,7 +838,7 @@ namespace SAEON.OpenXML
             if (doc is null) throw new ArgumentNullException(nameof(doc));
             if (string.IsNullOrEmpty(tableName)) throw new ArgumentException($"'{nameof(tableName)}' cannot be null or empty", nameof(tableName));
             if (!GetTables(doc).TryGetValue(tableName, out string range))
-                return null;
+                throw new ArgumentOutOfRangeException(nameof(tableName), $"Unable to find Table {tableName}");
             else
             {
                 var (sheetName, colLeft, rowTop, colRight, rowBottom) = SplitRange(range);
