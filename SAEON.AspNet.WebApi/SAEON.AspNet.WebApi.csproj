@@ -26,7 +26,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="echo rd /s /q &quot;$(DevDir)Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;$(DevDir)Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)Development\NuGet&quot;&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)Development\NuGet&quot;" />
+		<Exec Command="echo rd /s /q &quot;$(DevDir)NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;$(DevDir)NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)NuGet&quot;&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)NuGet&quot;" />
 	</Target>
 
 </Project>
