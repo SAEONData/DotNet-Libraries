@@ -1,32 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net472</TargetFramework>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Authors>Tim Parker-Nance</Authors>
-        <Company>South African Environmental Observation Network (SAEON)</Company>
-        <Product>SAEON .Net Libraries</Product>
-        <Description>Asp.Net WebApi for SAEON in .Net</Description>
-        <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
-        <ApplicationIcon>SAEON.ico</ApplicationIcon>
-        <Version>1.0.99</Version>
-        <PackageTags />
-        <PackageReleaseNotes />
-    </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net472</TargetFramework>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Authors>Tim Parker-Nance</Authors>
+		<Company>South African Environmental Observation Network (SAEON)</Company>
+		<Product>SAEON .Net Libraries</Product>
+		<Description>Asp.Net WebApi for SAEON in .Net</Description>
+		<Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
+		<ApplicationIcon>SAEON.ico</ApplicationIcon>
+		<Version>1.0.103</Version>
+		<PackageTags />
+		<PackageReleaseNotes />
+	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
-        <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="SAEON.AspNet.Common" Version="1.0.34" />
-        <PackageReference Include="SAEON.Core" Version="1.0.26" />
-      <PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.23" />
-    </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
+		<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="SAEON.AspNet.Common" Version="1.0.34" />
+		<PackageReference Include="SAEON.Core" Version="1.0.28" />
+		<PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.27" />
+	</ItemGroup>
 
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="echo rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;D:\Development\NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; D:\Development\NuGet" />
-    </Target>
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+		<Exec Command="echo rd /s /q &quot;$(DevDir)NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;$(DevDir)NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)NuGet&quot;&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)NuGet&quot;" />
+	</Target>
 
 </Project>

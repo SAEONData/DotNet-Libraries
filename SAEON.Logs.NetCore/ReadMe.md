@@ -14,7 +14,7 @@ namespace SAEON.Observations.WebAPI
     {
         public static void Main(string[] args)
         {
-            Logging.CreateConfiguration().Create();
+            SAEONLogs.CreateConfiguration().Initialize();
             try
             {
                 Logging.Information("Starting application");

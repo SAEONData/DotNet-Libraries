@@ -392,10 +392,9 @@ namespace SAEON.OpenXML
                 cell.CellValue = new CellValue(boolean ? "1" : "0");
                 cell.DataType = new EnumValue<CellValues>(CellValues.Boolean);
             }
-            else if (value is DateTime)
+            else if (value is DateTime dateTimeValue)
             {
-                DateTime bv = (DateTime)value;
-                cell.CellValue = new CellValue(bv.ToOADate().ToString());
+                cell.CellValue = new CellValue(dateTimeValue.ToOADate().ToString());
                 cell.DataType = new EnumValue<CellValues>(CellValues.Number);
                 cell.StyleIndex = 1;
             }
@@ -524,7 +523,7 @@ namespace SAEON.OpenXML
 
         #region Document
 
-        private static Stylesheet CreateStylesheet()
+        internal static Stylesheet CreateStylesheet()
         {
             Stylesheet ss = new Stylesheet();
 
@@ -739,7 +738,7 @@ namespace SAEON.OpenXML
             Close(document);
         }
 
-        public static Dictionary<string, string> GetDefinedNames(SpreadsheetDocument document)
+        public static Dictionary<string, string> GetNames(SpreadsheetDocument document)
         {
             if (document == null) throw new ArgumentNullException(nameof(document));
             var result = new Dictionary<String, String>();
@@ -750,6 +749,22 @@ namespace SAEON.OpenXML
                 foreach (DefinedName dn in definedNames)
                 {
                     result.Add(dn.Name.Value, dn.Text);
+                }
+            }
+            return result;
+        }
+
+        public static Dictionary<string, string> GetTables(SpreadsheetDocument document)
+        {
+            if (document == null) throw new ArgumentNullException(nameof(document));
+            var result = new Dictionary<String, String>();
+            var wbPart = document.WorkbookPart;
+            foreach (Sheet sheet in wbPart.Workbook.GetFirstChild<Sheets>())
+            {
+                var wsPart = (WorksheetPart)document.WorkbookPart.GetPartById(sheet.Id);
+                foreach (var tdPart in wsPart.TableDefinitionParts)
+                {
+                    result.Add(tdPart.Table.DisplayName, $"{sheet.Name}!{tdPart.Table.Reference}");
                 }
             }
             return result;
@@ -779,6 +794,19 @@ namespace SAEON.OpenXML
             return (col, row);
         }
 
+        public static object[,] GetNameValues(SpreadsheetDocument doc, string name)
+        {
+            if (doc is null) throw new ArgumentNullException(nameof(doc));
+            if (string.IsNullOrEmpty(name)) throw new ArgumentException($"'{nameof(name)}' cannot be null or empty", nameof(name));
+
+            if (!GetNames(doc).TryGetValue(name, out string range))
+                throw new ArgumentOutOfRangeException(nameof(name), $"Unable to find Name {name}");
+            else
+            {
+                return GetRangeValues(doc, range);
+            }
+        }
+
         public static object[,] GetRangeValues(SpreadsheetDocument doc, string range)
         {
             var (sheetName, colLeft, rowTop, colRight, rowBottom) = SplitRange(range);
@@ -791,11 +819,54 @@ namespace SAEON.OpenXML
             {
                 for (int col = colLeftIndex; col < GetColumnIndex(colRight) + 1; col++)
                 {
-                    result[row - rowTop, col - colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
+                    try
+                    {
+                        result[row - rowTop, col - colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
+                    }
+                    catch (Exception ex)
+                    {
+                        SAEONLogs.Exception(ex, "{Range}[{row},{col}]", range, row, col);
+                        throw;
+                    }
                 }
             }
             return result;
         }
+
+        public static object[,] GetTableValues(SpreadsheetDocument doc, string tableName)
+        {
+            if (doc is null) throw new ArgumentNullException(nameof(doc));
+            if (string.IsNullOrEmpty(tableName)) throw new ArgumentException($"'{nameof(tableName)}' cannot be null or empty", nameof(tableName));
+            if (!GetTables(doc).TryGetValue(tableName, out string range))
+                throw new ArgumentOutOfRangeException(nameof(tableName), $"Unable to find Table {tableName}");
+            else
+            {
+                var (sheetName, colLeft, rowTop, colRight, rowBottom) = SplitRange(range);
+                var sheetPart = GetWorksheetPart(doc, sheetName);
+                rowTop++; // Ignore header
+                var nCols = GetColumnIndex(colRight) - GetColumnIndex(colLeft) + 1;
+                var nRows = rowBottom - rowTop + 1;
+                var result = new object[nRows, nCols];
+                int colLeftIndex = GetColumnIndex(colLeft);
+                for (int row = rowTop; row < rowBottom + 1; row++)
+                {
+                    for (int col = colLeftIndex; col < GetColumnIndex(colRight) + 1; col++)
+                    {
+                        try
+                        {
+                            result[row - rowTop, col - colLeftIndex] = GetCellValue(doc, sheetPart, col, row);
+                        }
+                        catch (Exception ex)
+                        {
+                            SAEONLogs.Exception(ex, "{TableName}[{row},{col}]", tableName, row, col);
+                            throw;
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+
 
         public static object[,] LoadSpreadsheet(string fileName, string sheetName = "")
         {
