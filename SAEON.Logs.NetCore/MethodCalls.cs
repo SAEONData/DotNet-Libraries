@@ -59,14 +59,22 @@ namespace SAEON.Logs
         public static string MethodSignature(Type type, string methodName, MethodCallParameters parameters = null)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
+#if NET472
+            return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})".Replace("..", ".");
+#else
             return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})".Replace("..", ".", StringComparison.CurrentCultureIgnoreCase);
+#endif
         }
 
         public static string MethodSignature(Type type, Type entityType, string methodName, MethodCallParameters parameters = null)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
             if (entityType == null) throw new ArgumentNullException(nameof(entityType));
+#if NET472
+            return $"{GetTypeName(type)}<{GetTypeName(entityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".");
+#else
             return $"{GetTypeName(type)}<{GetTypeName(entityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".", StringComparison.CurrentCultureIgnoreCase);
+#endif
         }
 
         public static string MethodSignature(Type type, Type entityType, Type relatedEntityType, string methodName, MethodCallParameters parameters = null)
@@ -74,7 +82,11 @@ namespace SAEON.Logs
             if (type == null) throw new ArgumentNullException(nameof(type));
             if (entityType == null) throw new ArgumentNullException(nameof(entityType));
             if (relatedEntityType == null) throw new ArgumentNullException(nameof(relatedEntityType));
+#if NET472
+            return $"{GetTypeName(type)}<{GetTypeName(entityType)},{GetTypeName(relatedEntityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".");
+#else
             return $"{GetTypeName(type)}<{GetTypeName(entityType)},{GetTypeName(relatedEntityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".", StringComparison.CurrentCultureIgnoreCase);
+#endif
         }
 
     }

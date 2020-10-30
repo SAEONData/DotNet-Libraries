@@ -32,9 +32,11 @@ namespace SAEON.Core
         public static string Quoted(this string source, char quote)
         {
             return
-#pragma warning disable CA1305 // Specify IFormatProvider
-                quote + source.Replace(Convert.ToString(quote), Convert.ToString(quote) + Convert.ToString(quote)) + quote;
-#pragma warning restore CA1305 // Specify IFormatProvider
+#if NET472
+                quote + source.Replace($"{quote}", $"{quote}{quote}") + quote;
+#else
+                quote + source.Replace($"{quote}", $"{quote}{quote}", StringComparison.CurrentCultureIgnoreCase) + quote;
+#endif
         }
 
         public static string Replace(this string source, Dictionary<string, string> dictionary)
@@ -43,7 +45,11 @@ namespace SAEON.Core
             string result = source;
             foreach (var kv in dictionary)
             {
+#if NET472
                 result = result.Replace(kv.Key, kv.Value);
+#else
+                result = result.Replace(kv.Key, kv.Value, StringComparison.CurrentCultureIgnoreCase);
+#endif
             }
 
             return result;

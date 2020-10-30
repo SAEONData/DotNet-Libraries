@@ -16,4 +16,11 @@
     <Exec Command="echo rd /s /q &quot;$(DevDir)NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;$(DevDir)NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)NuGet&quot;&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)NuGet&quot;" />
   </Target>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>

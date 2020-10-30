@@ -29,6 +29,7 @@ namespace SAEON.OpenXML.ConsoleTests
 
         static void Main(string[] args)
         {
+            Console.WriteLine(AppDomain.CurrentDomain.FriendlyName);
             using (SpreadsheetDocument doc = SpreadsheetDocument.Open(@"D:\Elwandle CMP UTR ObsDB setup.xlsx", false))
             {
                 ExcelHelper.Validate(doc);
