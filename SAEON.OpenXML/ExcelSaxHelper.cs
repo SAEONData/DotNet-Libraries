@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -340,11 +341,16 @@ namespace SAEON.OpenXML
             return CreateSpreadsheetDocument(SpreadsheetDocument.Create(fileName, SpreadsheetDocumentType.Workbook), list);
         }
 
-        public static SpreadsheetDocument CreateSpreadsheet<T>(string fileName, DataTable table) where T : class
+        public static SpreadsheetDocument CreateSpreadsheet(string fileName, DataTable table)
         {
             if (table == null) throw new ArgumentNullException(nameof(table));
             return CreateSpreadsheetDocument(SpreadsheetDocument.Create(fileName, SpreadsheetDocumentType.Workbook), table);
         }
 
+        public static SpreadsheetDocument CreateSpreadsheet(Stream stream, DataTable table)
+        {
+            if (table == null) throw new ArgumentNullException(nameof(table));
+            return CreateSpreadsheetDocument(SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook), table);
+        }
     }
 }
