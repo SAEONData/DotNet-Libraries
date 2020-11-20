@@ -9,7 +9,7 @@
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <Description>SAEON Azure CosmosDB library</Description>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.175</Version>
+    <Version>1.0.176</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.14.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.15.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
