@@ -31,7 +31,7 @@ namespace SAEON.Logs
                             .ReadFrom.AppSettings()
                             .Enrich.FromLogContext()
                             .WriteTo.Seq("http://localhost:5341/");
-            if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + ".txt");
+            if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + "-.log");
             result.WriteTo.File(fileName, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null, rollOnFileSizeLimit: true);
             return result;
         }

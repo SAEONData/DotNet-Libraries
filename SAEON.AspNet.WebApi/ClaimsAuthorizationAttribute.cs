@@ -10,6 +10,7 @@ using System.Web.Http.Filters;
 namespace SAEON.AspNet.WebApi
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    [Obsolete(nameof(ClaimsAuthorizationAttribute) + " is obsolete", true)]
     public sealed class ClaimsAuthorizationAttribute : AuthorizationFilterAttribute
     {
         public string ClaimType { get; set; }
