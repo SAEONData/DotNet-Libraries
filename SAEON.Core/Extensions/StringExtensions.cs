@@ -5,20 +5,20 @@ namespace SAEON.Core
 {
     public static class StringExtensions
     {
-        public static string AddTrailingForwardSlash(this string aString)
+        public static string AddTrailingForwardSlash(this string value)
         {
-            if (aString.EndsWith("/", StringComparison.InvariantCulture)) return aString;
-            return aString + "/";
+            if (value.EndsWith("/", StringComparison.InvariantCulture)) return value;
+            return value + "/";
         }
-        public static string AddTrailingBackSlash(this string aString)
+        public static string AddTrailingBackSlash(this string value)
         {
-            if (aString.EndsWith("\\", StringComparison.InvariantCulture)) return aString;
-            return aString + "\\";
+            if (value.EndsWith("\\", StringComparison.InvariantCulture)) return value;
+            return value + "\\";
         }
 
-        public static string DoubleQuoted(this string source)
+        public static string DoubleQuoted(this string value)
         {
-            return source.Quoted('"');
+            return value.Quoted('"');
         }
 
         public static bool IsTrue(this string value)
@@ -29,20 +29,20 @@ namespace SAEON.Core
                 return false;
         }
 
-        public static string Quoted(this string source, char quote)
+        public static string Quoted(this string value, char quote)
         {
             return
 #if NET472
-                quote + source.Replace($"{quote}", $"{quote}{quote}") + quote;
+                quote + value.Replace($"{quote}", $"{quote}{quote}") + quote;
 #else
-                quote + source.Replace($"{quote}", $"{quote}{quote}", StringComparison.CurrentCultureIgnoreCase) + quote;
+                quote + value.Replace($"{quote}", $"{quote}{quote}", StringComparison.CurrentCultureIgnoreCase) + quote;
 #endif
         }
 
-        public static string Replace(this string source, Dictionary<string, string> dictionary)
+        public static string Replace(this string value, Dictionary<string, string> dictionary)
         {
-            if (dictionary == null) return source;
-            string result = source;
+            if (dictionary == null) return value;
+            string result = value;
             foreach (var kv in dictionary)
             {
 #if NET472
@@ -55,21 +55,21 @@ namespace SAEON.Core
             return result;
         }
 
-        public static string SingleQuoted(this string source)
+        public static string SingleQuoted(this string value)
         {
-            return source.Quoted('\'');
+            return value.Quoted('\'');
         }
 
-        public static string TrimStart(this string source, string prefix)
+        public static string TrimStart(this string value, string prefix)
         {
-            if (prefix == null) return source;
-            return !source.StartsWith(prefix, StringComparison.InvariantCulture) ? source : source.Remove(0, prefix.Length);
+            if (prefix == null) return value;
+            return !value.StartsWith(prefix, StringComparison.InvariantCulture) ? value : value.Remove(0, prefix.Length);
         }
 
-        public static string TrimEnd(this string source, string suffix)
+        public static string TrimEnd(this string value, string suffix)
         {
-            if (suffix == null) return source;
-            return !source.EndsWith(suffix, StringComparison.InvariantCulture) ? source : source.Remove(source.Length - suffix.Length);
+            if (suffix == null) return value;
+            return !value.EndsWith(suffix, StringComparison.InvariantCulture) ? value : value.Remove(value.Length - suffix.Length);
         }
     }
 }
