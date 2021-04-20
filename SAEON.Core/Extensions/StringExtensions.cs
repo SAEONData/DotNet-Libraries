@@ -5,71 +5,77 @@ namespace SAEON.Core
 {
     public static class StringExtensions
     {
-        public static string AddTrailingForwardSlash(this string value)
+        public static string AddTrailing(this string source, string trailing)
         {
-            if (value.EndsWith("/", StringComparison.InvariantCulture)) return value;
-            return value + "/";
+            if (source.EndsWith(trailing))
+                return source;
+            else
+                return source + trailing;
         }
-        public static string AddTrailingBackSlash(this string value)
+        public static string AddTrailingForwardSlash(this string source)
         {
-            if (value.EndsWith("\\", StringComparison.InvariantCulture)) return value;
-            return value + "\\";
-        }
-
-        public static string DoubleQuoted(this string value)
-        {
-            return value.Quoted('"');
+            return source.AddTrailing("/");
         }
 
-        public static bool IsTrue(this string value)
+        public static string AddTrailingBackSlash(this string source)
         {
-            if (bool.TryParse(value, out bool result))
+            return source.AddTrailing("\\");
+        }
+
+        public static string DoubleQuoted(this string source)
+        {
+            return source.Quoted('"');
+        }
+
+        public static bool IsTrue(this string source)
+        {
+            if (bool.TryParse(source, out bool result))
                 return result;
             else
                 return false;
         }
 
-        public static string Quoted(this string value, char quote)
+        public static string Quoted(this string source, char quote)
         {
             return
 #if NET472
-                quote + value.Replace($"{quote}", $"{quote}{quote}") + quote;
+                quote + source.Replace($"{quote}", $"{quote}{quote}") + quote;
 #else
-                quote + value.Replace($"{quote}", $"{quote}{quote}", StringComparison.CurrentCultureIgnoreCase) + quote;
+                quote + source.Replace($"{quote}", $"{quote}{quote}", StringComparison.CurrentCultureIgnoreCase) + quote;
 #endif
         }
 
-        public static string Replace(this string value, Dictionary<string, string> dictionary)
+        public static string Replace(this string source, Dictionary<string, string> dictionary)
         {
-            if (dictionary == null) return value;
-            string result = value;
+            if (dictionary == null) return source;
+            string result = source;
             foreach (var kv in dictionary)
             {
 #if NET472
-                result = result.Replace(kv.Key, kv.Value);
+                result = result.Replace(kv.Key, kv.source);
 #else
-                result = result.Replace(kv.Key, kv.Value, StringComparison.CurrentCultureIgnoreCase);
+                result = result.Replace(kv.Key, kv.source, StringComparison.CurrentCultureIgnoreCase);
 #endif
             }
 
             return result;
         }
 
-        public static string SingleQuoted(this string value)
+        public static string SingleQuoted(this string source)
         {
-            return value.Quoted('\'');
+            return source.Quoted('\'');
         }
 
-        public static string TrimStart(this string value, string prefix)
+        public static string TrimStart(this string source, string prefix)
         {
-            if (prefix == null) return value;
-            return !value.StartsWith(prefix, StringComparison.InvariantCulture) ? value : value.Remove(0, prefix.Length);
+            if (prefix == null) return source;
+            return !source.StartsWith(prefix, StringComparison.InvariantCulture) ? source : source.Remove(0, prefix.Length);
         }
 
-        public static string TrimEnd(this string value, string suffix)
+        public static string TrimEnd(this string source, string suffix)
         {
-            if (suffix == null) return value;
-            return !value.EndsWith(suffix, StringComparison.InvariantCulture) ? value : value.Remove(value.Length - suffix.Length);
+            if (suffix == null) return source;
+            return !source.EndsWith(suffix, StringComparison.InvariantCulture) ? source : source.Remove(source.Length - suffix.Length);
         }
     }
 }
