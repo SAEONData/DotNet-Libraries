@@ -7,11 +7,9 @@ namespace SAEON.Core
     {
         public static string AddTrailing(this string source, string trailing)
         {
-            if (source.EndsWith(trailing))
-                return source;
-            else
-                return source + trailing;
+            return source.EndsWith(trailing) ? source : source + trailing;
         }
+
         public static string AddTrailingForwardSlash(this string source)
         {
             return source.AddTrailing("/");
@@ -43,6 +41,11 @@ namespace SAEON.Core
 #else
                 quote + source.Replace($"{quote}", $"{quote}{quote}", StringComparison.CurrentCultureIgnoreCase) + quote;
 #endif
+        }
+
+        public static string RemoveHttp(this string source)
+        {
+            return source.Replace("https://", string.Empty).Replace("http://", string.Empty);
         }
 
         public static string Replace(this string source, Dictionary<string, string> dictionary)
