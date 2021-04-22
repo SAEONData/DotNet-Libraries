@@ -55,9 +55,9 @@ namespace SAEON.Core
             foreach (var kv in dictionary)
             {
 #if NET472
-                result = result.Replace(kv.Key, kv.source);
+                result = result.Replace(kv.Key, kv.Value);
 #else
-                result = result.Replace(kv.Key, kv.source, StringComparison.CurrentCultureIgnoreCase);
+                result = result.Replace(kv.Key, kv.Value, StringComparison.CurrentCultureIgnoreCase);
 #endif
             }
 
@@ -69,16 +69,20 @@ namespace SAEON.Core
             return source.Quoted('\'');
         }
 
-        public static string TrimStart(this string source, string prefix)
+        public static string TrimEnd(this string source, string search, StringComparison comparisonType = StringComparison.CurrentCultureIgnoreCase)
         {
-            if (prefix == null) return source;
-            return !source.StartsWith(prefix, StringComparison.InvariantCulture) ? source : source.Remove(0, prefix.Length);
+            if (string.IsNullOrEmpty(search)) return source;
+            while (source.EndsWith(search, comparisonType))
+                source = source.Remove(source.Length - search.Length);
+            return source.TrimEnd();
         }
 
-        public static string TrimEnd(this string source, string suffix)
+        public static string TrimStart(this string source, string search, StringComparison comparisonType = StringComparison.CurrentCultureIgnoreCase)
         {
-            if (suffix == null) return source;
-            return !source.EndsWith(suffix, StringComparison.InvariantCulture) ? source : source.Remove(source.Length - suffix.Length);
+            if (string.IsNullOrEmpty(search)) return source;
+            while (source.StartsWith(search, comparisonType))
+                source = source.Remove(0, search.Length);
+            return source.TrimStart();
         }
     }
 }
