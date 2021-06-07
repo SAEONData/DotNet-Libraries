@@ -5,7 +5,8 @@ namespace SAEON.Core
 {
     public static class ApplicationHelper
     {
-        public static string ApplicationName { get; set; } = Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.FriendlyName);
+        //public static string ApplicationName { get; set; } = Path.GetFileNameWithoutExtension(AppDomain.CurrentDomain.FriendlyName);
+        public static string ApplicationName { get; set; } = AppDomain.CurrentDomain.FriendlyName;
         public static string ApplicationVendor { get; } = "SAEON";
 
         public static string DataFolder

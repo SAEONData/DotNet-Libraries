@@ -787,10 +787,18 @@ namespace SAEON.OpenXML
         public static (string col, int row) SplitCellReference(string cellReference)
         {
             if (cellReference == null) throw new ArgumentNullException(nameof(cellReference));
+#if NET472
             var cellRef = cellReference.Replace("$", string.Empty);
+#else
+            var cellRef = cellReference.Replace("$", string.Empty, StringComparison.CurrentCultureIgnoreCase);
+#endif
             var p = cellRef.IndexOfAny(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
             var col = cellRef.Substring(0, p);
+#if NET472
             var row = int.Parse(cellRef.Substring(p));
+#else
+            var row = int.Parse(cellRef[p..]);
+#endif
             return (col, row);
         }
 

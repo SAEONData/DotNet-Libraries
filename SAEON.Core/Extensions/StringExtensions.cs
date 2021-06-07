@@ -5,15 +5,19 @@ namespace SAEON.Core
 {
     public static class StringExtensions
     {
-        public static string AddTrailingForwardSlash(this string aString)
+        public static string AddTrailing(this string source, string trailing)
         {
-            if (aString.EndsWith("/", StringComparison.InvariantCulture)) return aString;
-            return aString + "/";
+            return source.EndsWith(trailing) ? source : source + trailing;
         }
-        public static string AddTrailingBackSlash(this string aString)
+
+        public static string AddTrailingForwardSlash(this string source)
         {
-            if (aString.EndsWith("\\", StringComparison.InvariantCulture)) return aString;
-            return aString + "\\";
+            return source.AddTrailing("/");
+        }
+
+        public static string AddTrailingBackSlash(this string source)
+        {
+            return source.AddTrailing("\\");
         }
 
         public static string DoubleQuoted(this string source)
@@ -21,9 +25,9 @@ namespace SAEON.Core
             return source.Quoted('"');
         }
 
-        public static bool IsTrue(this string value)
+        public static bool IsTrue(this string source)
         {
-            if (bool.TryParse(value, out bool result))
+            if (bool.TryParse(source, out bool result))
                 return result;
             else
                 return false;
@@ -32,9 +36,16 @@ namespace SAEON.Core
         public static string Quoted(this string source, char quote)
         {
             return
-#pragma warning disable CA1305 // Specify IFormatProvider
-                quote + source.Replace(Convert.ToString(quote), Convert.ToString(quote) + Convert.ToString(quote)) + quote;
-#pragma warning restore CA1305 // Specify IFormatProvider
+#if NET472
+                quote + source.Replace($"{quote}", $"{quote}{quote}") + quote;
+#else
+                quote + source.Replace($"{quote}", $"{quote}{quote}", StringComparison.CurrentCultureIgnoreCase) + quote;
+#endif
+        }
+
+        public static string RemoveHttp(this string source)
+        {
+            return source.Replace("https://", string.Empty).Replace("http://", string.Empty);
         }
 
         public static string Replace(this string source, Dictionary<string, string> dictionary)
@@ -43,7 +54,11 @@ namespace SAEON.Core
             string result = source;
             foreach (var kv in dictionary)
             {
+#if NET472
                 result = result.Replace(kv.Key, kv.Value);
+#else
+                result = result.Replace(kv.Key, kv.Value, StringComparison.CurrentCultureIgnoreCase);
+#endif
             }
 
             return result;
@@ -54,16 +69,20 @@ namespace SAEON.Core
             return source.Quoted('\'');
         }
 
-        public static string TrimStart(this string source, string prefix)
+        public static string TrimEnd(this string source, string search, StringComparison comparisonType = StringComparison.CurrentCultureIgnoreCase)
         {
-            if (prefix == null) return source;
-            return !source.StartsWith(prefix, StringComparison.InvariantCulture) ? source : source.Remove(0, prefix.Length);
+            if (string.IsNullOrEmpty(search)) return source;
+            while (source.EndsWith(search, comparisonType))
+                source = source.Remove(source.Length - search.Length);
+            return source.TrimEnd();
         }
 
-        public static string TrimEnd(this string source, string suffix)
+        public static string TrimStart(this string source, string search, StringComparison comparisonType = StringComparison.CurrentCultureIgnoreCase)
         {
-            if (suffix == null) return source;
-            return !source.EndsWith(suffix, StringComparison.InvariantCulture) ? source : source.Remove(source.Length - suffix.Length);
+            if (string.IsNullOrEmpty(search)) return source;
+            while (source.StartsWith(search, comparisonType))
+                source = source.Remove(0, search.Length);
+            return source.TrimStart();
         }
     }
 }

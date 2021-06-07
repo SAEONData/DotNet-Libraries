@@ -9,19 +9,12 @@
         <Description>Core WPF utilities for SAEON .Net</Description>
         <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Version>1.0.9</Version>
+        <Version>1.0.10</Version>
     </PropertyGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
       <Exec Command="echo rd /s /q &quot;$(DevDir)NuGet\$(ProjectName)&quot;&#xD;&#xA;rd /s /q &quot;$(DevDir)NuGet\$(ProjectName)&quot;&#xD;&#xA;echo nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)NuGet&quot;&#xD;&#xA;nuget init &quot;$(ProjectDir)bin\Release&quot; &quot;$(DevDir)NuGet&quot;" />
     </Target>
-
-    <ItemGroup>
-      <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-    </ItemGroup>
 
     <ItemGroup>
       <Reference Include="PresentationFramework" />

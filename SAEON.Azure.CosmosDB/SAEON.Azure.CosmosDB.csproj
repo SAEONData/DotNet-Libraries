@@ -9,8 +9,13 @@
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <Description>SAEON Azure CosmosDB library</Description>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
-    <Version>1.0.173</Version>
+    <Version>1.0.187</Version>
+    <UserSecretsId>8e94a280-66a3-4f10-b983-ef0149b1bdbe</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\timpn\.nuget\packages\microsoft.azure.cosmos\3.15.0\contentFiles\any\netstandard2.0\ThirdPartyNotice.txt" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove=".editorconfig" />
@@ -21,13 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.14.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.27" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.18.0" />
+    <PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.36" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
