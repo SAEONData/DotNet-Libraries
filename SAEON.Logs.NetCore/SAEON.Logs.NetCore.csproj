@@ -13,7 +13,6 @@
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <ApplicationIcon>SAEON.ico</ApplicationIcon>
     <Version>1.0.58</Version>
-    <ApplicationIcon>SAEON.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
