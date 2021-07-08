@@ -25,7 +25,7 @@ namespace SAEON.Logs
         private static string GetParameters(MethodCallParameters parameters)
         {
             string result = string.Empty;
-            if (parameters != null)
+            if (parameters is not null)
             {
                 bool isFirst = true;
                 foreach (var kvPair in parameters)
@@ -37,7 +37,7 @@ namespace SAEON.Logs
 
                     isFirst = false;
                     result += kvPair.Key + "=";
-                    if (kvPair.Value == null)
+                    if (kvPair.Value is null)
                     {
                         result += "Null";
                     }
@@ -58,7 +58,7 @@ namespace SAEON.Logs
 
         public static string MethodSignature(Type type, string methodName, MethodCallParameters parameters = null)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (type is null) throw new ArgumentNullException(nameof(type));
 #if NET472
             return $"{GetTypeName(type)}.{methodName}({GetParameters(parameters)})".Replace("..", ".");
 #else
@@ -68,8 +68,8 @@ namespace SAEON.Logs
 
         public static string MethodSignature(Type type, Type entityType, string methodName, MethodCallParameters parameters = null)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            if (entityType == null) throw new ArgumentNullException(nameof(entityType));
+            if (type is null) throw new ArgumentNullException(nameof(type));
+            if (entityType is null) throw new ArgumentNullException(nameof(entityType));
 #if NET472
             return $"{GetTypeName(type)}<{GetTypeName(entityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".");
 #else
@@ -79,9 +79,9 @@ namespace SAEON.Logs
 
         public static string MethodSignature(Type type, Type entityType, Type relatedEntityType, string methodName, MethodCallParameters parameters = null)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            if (entityType == null) throw new ArgumentNullException(nameof(entityType));
-            if (relatedEntityType == null) throw new ArgumentNullException(nameof(relatedEntityType));
+            if (type is null) throw new ArgumentNullException(nameof(type));
+            if (entityType is null) throw new ArgumentNullException(nameof(entityType));
+            if (relatedEntityType is null) throw new ArgumentNullException(nameof(relatedEntityType));
 #if NET472
             return $"{GetTypeName(type)}<{GetTypeName(entityType)},{GetTypeName(relatedEntityType)}>.{methodName}({GetParameters(parameters)})".Replace("..", ".");
 #else

@@ -50,7 +50,7 @@ namespace SAEON.Core
 
         public static string Replace(this string source, Dictionary<string, string> dictionary)
         {
-            if (dictionary == null) return source;
+            if (dictionary is null) return source;
             string result = source;
             foreach (var kv in dictionary)
             {

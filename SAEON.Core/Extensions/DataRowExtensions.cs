@@ -24,7 +24,7 @@ namespace SAEON.Core
 
         public static T SetValue<T>(this DataRow dataRow, string columnName, T value)
         {
-            if (value == null)
+            if (value is null)
                 dataRow[columnName] = DBNull.Value;
             else
                 dataRow[columnName] = value;

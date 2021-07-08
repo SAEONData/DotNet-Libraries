@@ -23,18 +23,18 @@ namespace SAEON.AspNet.Mvc
 
         public override void ExecuteResult(ControllerContext context)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (context is null) throw new ArgumentNullException(nameof(context));
 
             HttpResponseBase response = context.HttpContext.Response;
 
             response.ContentType = !string.IsNullOrEmpty(ContentType) ? ContentType : AspNetConstants.ApplicationJson;
 
-            if (ContentEncoding != null)
+            if (ContentEncoding is not null)
             {
                 response.ContentEncoding = ContentEncoding;
             }
 
-            if (Data != null)
+            if (Data is not null)
             {
                 using (JsonTextWriter writer = new JsonTextWriter(response.Output) { Formatting = Formatting })
                 {

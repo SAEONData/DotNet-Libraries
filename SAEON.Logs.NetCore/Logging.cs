@@ -34,7 +34,7 @@ namespace SAEON.Logs
             if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + "-.log");
             result.WriteTo.File(fileName, rollingInterval: RollingInterval.Day, retainedFileCountLimit: null, rollOnFileSizeLimit: true);
 #if !NETSTANDARD2_1
-            if (config == null)
+            if (config is null)
             {
                 config = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json", true)
@@ -43,7 +43,7 @@ namespace SAEON.Logs
                     .Build();
             }
 #endif
-            if (config != null)
+            if (config is not null)
             {
                 result.ReadFrom.Configuration(config);
             }

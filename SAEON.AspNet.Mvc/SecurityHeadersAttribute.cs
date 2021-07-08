@@ -14,7 +14,7 @@ namespace SAEON.AspNet.Mvc
         {
             using (SAEONLogs.MethodCall(this.GetType()))
             {
-                if (context == null) throw new ArgumentNullException(nameof(context));
+                if (context is null) throw new ArgumentNullException(nameof(context));
                 string policy = ConfigurationManager.AppSettings[AspNetConstants.ContentSecurityPolicy];
                 if (!string.IsNullOrWhiteSpace(policy) && (context.Result is ViewResult))
                 {

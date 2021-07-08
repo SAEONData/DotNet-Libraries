@@ -76,7 +76,7 @@ namespace SAEON.Azure.Storage
 
         public BlobContainerClient GetBlobContainerClient(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name is null) throw new ArgumentNullException(nameof(name));
             return blobServiceClient.GetBlobContainerClient(name.ToLower());
         }
         #endregion Containers
@@ -84,26 +84,26 @@ namespace SAEON.Azure.Storage
         #region Blobs
         public async Task DeleteBlobAsync(BlobContainerClient blobContainerClient, string name)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
+            if (blobContainerClient is null) throw new ArgumentNullException(nameof(blobContainerClient));
             await blobContainerClient.DeleteBlobIfExistsAsync(name).ConfigureAwait(false);
         }
 
         public static async Task DownloadBlobAsync(BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
+            if (blobContainerClient is null) throw new ArgumentNullException(nameof(blobContainerClient));
             var blobClient = blobContainerClient.GetBlobClient(name);
             await blobClient.DownloadToAsync(stream).ConfigureAwait(false);
         }
 
         public static async Task<List<string>> ListFolders(BlobContainerClient blobContainerClient, string folder)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
+            if (blobContainerClient is null) throw new ArgumentNullException(nameof(blobContainerClient));
             return await blobContainerClient.ListFolder(folder).ConfigureAwait(false);
         }
 
         public static async Task UploadBlobAsync(BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
+            if (blobContainerClient is null) throw new ArgumentNullException(nameof(blobContainerClient));
             await blobContainerClient.UploadBlobAsync(name, stream).ConfigureAwait(false);
         }
 
@@ -125,7 +125,7 @@ namespace SAEON.Azure.Storage
 
         public static async Task UploadBlobIfNotExistsAsync(BlobContainerClient blobContainerClient, string name, Stream stream)
         {
-            if (blobContainerClient == null) throw new ArgumentNullException(nameof(blobContainerClient));
+            if (blobContainerClient is null) throw new ArgumentNullException(nameof(blobContainerClient));
             var blobClient = blobContainerClient.GetBlobClient(name);
             if (!await blobClient.ExistsAsync().ConfigureAwait(false))
             {
@@ -180,7 +180,7 @@ namespace SAEON.Azure.Storage
 
         public QueueClient GetQueueClient(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name is null) throw new ArgumentNullException(nameof(name));
             return queueServiceClient.GetQueueClient(name.ToLower());
         }
 
@@ -272,7 +272,7 @@ namespace SAEON.Azure.Storage
                 }
                 continuationToken = segment.ContinuationToken;
             }
-            while (continuationToken != null);
+            while (continuationToken is not null);
             return result;
         }
 
@@ -406,9 +406,9 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> DeleteEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity is null) throw new ArgumentNullException(nameof(entity));
             T oldEntity = await GetEntityAsync(table, entity).ConfigureAwait(false);
-            if (oldEntity == null)
+            if (oldEntity is null)
             {
                 throw new KeyNotFoundException(string.Format("DeleteEntity: Unable to find p:[{0}] r:[{1}]", entity.PartitionKey, entity.RowKey));
             }
@@ -418,7 +418,7 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> GetEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity is null) throw new ArgumentNullException(nameof(entity));
             entity.SetKeys();
             return (T)(await table.ExecuteAsync(TableOperation.Retrieve<T>(entity.PartitionKey, entity.RowKey)).ConfigureAwait(false)).Result;
         }
@@ -430,12 +430,12 @@ namespace SAEON.Azure.Storage
 
         public static async Task<bool> EntityExistsAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            return await GetEntityAsync(table, entity).ConfigureAwait(false) != null;
+            return await GetEntityAsync(table, entity).ConfigureAwait(false) is not null;
         }
 
         public static async Task<bool> EntityExistsAsync<T>(this CloudTable table, string partitionKey, string rowKey) where T : AzureTableEntity
         {
-            return await GetEntityAsync<T>(table, partitionKey, rowKey).ConfigureAwait(false) != null;
+            return await GetEntityAsync<T>(table, partitionKey, rowKey).ConfigureAwait(false) is not null;
         }
 
         public static async Task<List<T>> GetEntitiesAsync<T>(this CloudTable table, TableQuery<T> query) where T : AzureTableEntity, new()
@@ -447,7 +447,7 @@ namespace SAEON.Azure.Storage
                 var segment = await table.ExecuteQuerySegmentedAsync(query, token).ConfigureAwait(false);
                 result.AddRange(segment.Results);
                 token = segment.ContinuationToken;
-            } while (token != null);
+            } while (token is not null);
             return result;
         }
 
@@ -465,7 +465,7 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> InsertEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null)
+            if (entity is null)
             {
                 throw new NullReferenceException("InsertEntity: Null entity");
             }
@@ -475,22 +475,22 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> InsertOrMergeEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity is null) throw new ArgumentNullException(nameof(entity));
             entity.SetKeys();
             return (T)(await table.ExecuteAsync(TableOperation.InsertOrMerge(entity)).ConfigureAwait(false)).Result;
         }
 
         public static async Task<T> InsertOrReplaceEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity is null) throw new ArgumentNullException(nameof(entity));
             return (T)(await table.ExecuteAsync(TableOperation.InsertOrReplace(entity)).ConfigureAwait(false)).Result;
         }
 
         public static async Task<T> MergeEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity is null) throw new ArgumentNullException(nameof(entity));
             T oldEntity = await GetEntityAsync(table, entity).ConfigureAwait(false);
-            if (oldEntity == null)
+            if (oldEntity is null)
             {
                 throw new KeyNotFoundException(string.Format("MergeEntity: Unable to find p:[{0}] r:[{1}]", entity.PartitionKey, entity.RowKey));
             }
@@ -502,9 +502,9 @@ namespace SAEON.Azure.Storage
 
         public static async Task<T> ReplaceEntityAsync<T>(this CloudTable table, T entity) where T : AzureTableEntity
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity is null) throw new ArgumentNullException(nameof(entity));
             T oldEntity = await GetEntityAsync(table, entity).ConfigureAwait(false);
-            if (oldEntity == null)
+            if (oldEntity is null)
             {
                 throw new KeyNotFoundException(string.Format("ReplaceEntity: Unable to find p:[{0}] r:[{1}]", entity.PartitionKey, entity.RowKey));
             }

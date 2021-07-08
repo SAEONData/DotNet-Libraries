@@ -24,8 +24,8 @@ namespace SAEON.Logs
 
         //public static LoggerConfiguration InitializeSAEONLogs(this LoggerConfiguration loggerConfiguration, IConfiguration config, string fileName = "")
         //{
-        //    if (loggerConfiguration == null) throw new ArgumentNullException(nameof(loggerConfiguration));
-        //    if (config != null) loggerConfiguration.ReadFrom.Configuration(config);
+        //    if (loggerConfiguration is null) throw new ArgumentNullException(nameof(loggerConfiguration));
+        //    if (config is not null) loggerConfiguration.ReadFrom.Configuration(config);
         //    loggerConfiguration.Enrich.FromLogContext();
         //    loggerConfiguration.WriteTo.Seq("http://localhost:5341/");
         //    if (string.IsNullOrWhiteSpace(fileName)) fileName = Path.Combine("Logs", ApplicationHelper.ApplicationName + ".txt");

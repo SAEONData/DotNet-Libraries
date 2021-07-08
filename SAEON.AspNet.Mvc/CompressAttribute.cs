@@ -10,7 +10,7 @@ namespace SAEON.AspNet.Mvc
     {
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            if (filterContext == null) throw new ArgumentNullException(nameof(filterContext));
+            if (filterContext is null) throw new ArgumentNullException(nameof(filterContext));
             HttpRequestBase request = filterContext.HttpContext.Request;
 
             string acceptEncoding = request.Headers[AspNetConstants.AcceptEncoding];

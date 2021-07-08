@@ -22,7 +22,7 @@ namespace SAEON.OpenXML
 
         private static void WriteCellValue(OpenXmlWriter writer, object value, int row, int col)
         {
-            if (value == null) return;
+            if (value is null) return;
             var attributes = new List<OpenXmlAttribute>
             {
                 new OpenXmlAttribute("r", null, $"{ExcelHelper.GetColumnName(col)}{row}")
@@ -337,19 +337,19 @@ namespace SAEON.OpenXML
 
         public static SpreadsheetDocument CreateSpreadsheet<T>(string fileName, List<T> list) where T : class
         {
-            if (list == null) throw new ArgumentNullException(nameof(list));
+            if (list is null) throw new ArgumentNullException(nameof(list));
             return CreateSpreadsheetDocument(SpreadsheetDocument.Create(fileName, SpreadsheetDocumentType.Workbook), list);
         }
 
         public static SpreadsheetDocument CreateSpreadsheet(string fileName, DataTable table)
         {
-            if (table == null) throw new ArgumentNullException(nameof(table));
+            if (table is null) throw new ArgumentNullException(nameof(table));
             return CreateSpreadsheetDocument(SpreadsheetDocument.Create(fileName, SpreadsheetDocumentType.Workbook), table);
         }
 
         public static SpreadsheetDocument CreateSpreadsheet(Stream stream, DataTable table)
         {
-            if (table == null) throw new ArgumentNullException(nameof(table));
+            if (table is null) throw new ArgumentNullException(nameof(table));
             return CreateSpreadsheetDocument(SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook), table);
         }
     }
