@@ -9,7 +9,8 @@
     <Description>Core utilities for SAEON in .Net</Description>
     <Copyright>Copyright © South African Environmental Observation Network (SAEON)</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.34</Version>
+    <Version>1.0.35</Version>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

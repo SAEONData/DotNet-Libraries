@@ -17,7 +17,7 @@ namespace SAEON.OpenXML
     {
         public static bool UseSharedStrings { get; set; } = true;
 
-        private static Dictionary<string, int> sharedStrings = new Dictionary<string, int>();
+        private static Dictionary<string, int> sharedStrings = new();
         private static int sharedStringsIndex;
 
         private static void WriteCellValue(OpenXmlWriter writer, object value, int row, int col)

@@ -83,7 +83,7 @@ namespace SAEON.Azure.CosmosDB
         {
             get
             {
-                return ((DateTime is null) || (DateTime == DateTime.MinValue)) ? int.MinValue : DateTime.ToEpoch();
+                return (DateTime == DateTime.MinValue) ? int.MinValue : DateTime.ToEpoch();
             }
         }
 
@@ -300,23 +300,13 @@ namespace SAEON.Azure.CosmosDB
 
         private PartitionKey GetPartitionKey(Object partitionKey)
         {
-            PartitionKey result;
-            switch (partitionKey)
+            var result = partitionKey switch
             {
-                case bool b:
-                    result = new PartitionKey(b);
-                    break;
-                case double d:
-                    result = new PartitionKey(d);
-                    break;
-                case string s:
-                    result = new PartitionKey(s);
-                    break;
-                default:
-                    //throw new ArgumentOutOfRangeException("PartionKey type can only be string, double or bool");
-                    result = new PartitionKey(partitionKey.ToString());
-                    break;
-            }
+                bool b => new PartitionKey(b),
+                double d => new PartitionKey(d),
+                string s => new PartitionKey(s),
+                _ => new PartitionKey(partitionKey.ToString()),//throw new ArgumentOutOfRangeException("PartionKey type can only be string, double or bool");
+            };
             return result;
         }
 
