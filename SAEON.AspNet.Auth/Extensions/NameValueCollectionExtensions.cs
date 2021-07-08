@@ -9,7 +9,7 @@ namespace SAEON.AspNet.Auth
     {
         public static bool ContainsKey(this NameValueCollection source, string key)
         {
-            if (source.Get(key) == null)
+            if (source.Get(key) is null)
             {
                 return source.AllKeys.Contains(key);
             }

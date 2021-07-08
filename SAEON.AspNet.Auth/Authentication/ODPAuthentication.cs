@@ -39,7 +39,7 @@ namespace SAEON.AspNet.Auth
     {
         public void PostConfigure(string name, ODPAuthenticationOptions options)
         {
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options is null) throw new ArgumentNullException(nameof(options));
             if (string.IsNullOrEmpty(options.IntrospectionUrl))
             {
                 throw new InvalidOperationException("IntrospectionUrl must be provided in options");
@@ -90,7 +90,7 @@ namespace SAEON.AspNet.Auth
                                 SAEONLogs.Error("ODPAuthorization, invalid token {Token}", token);
                                 return AuthenticateResult.Fail("Invalid token");
                             }
-                            if (jObj["ext"] == null)
+                            if (jObj["ext"] is null)
                             { // Access token
                                 var clientId = jObj.Value<string>("client_id");
                                 var claims = new List<Claim> {
@@ -144,22 +144,22 @@ namespace SAEON.AspNet.Auth
 
     public static class ODPAuthenticationExtensions
     {
-        public static AuthenticationBuilder AddODP(this AuthenticationBuilder builder)
+        public static AuthenticationBuilder AddODPAuthentication(this AuthenticationBuilder builder)
         {
-            return AddODP(builder, ODPAuthenticationDefaults.AuthenticationScheme, _ => { });
+            return AddODPAuthentication(builder, ODPAuthenticationDefaults.AuthenticationScheme, _ => { });
         }
 
-        public static AuthenticationBuilder AddODP(this AuthenticationBuilder builder, string authenticationScheme)
+        public static AuthenticationBuilder AddODPAuthentication(this AuthenticationBuilder builder, string authenticationScheme)
         {
-            return AddODP(builder, authenticationScheme, _ => { });
+            return AddODPAuthentication(builder, authenticationScheme, _ => { });
         }
 
-        public static AuthenticationBuilder AddODP(this AuthenticationBuilder builder, Action<ODPAuthenticationOptions> configureOptions)
+        public static AuthenticationBuilder AddODPAuthentication(this AuthenticationBuilder builder, Action<ODPAuthenticationOptions> configureOptions)
         {
-            return AddODP(builder, ODPAuthenticationDefaults.AuthenticationScheme, configureOptions);
+            return AddODPAuthentication(builder, ODPAuthenticationDefaults.AuthenticationScheme, configureOptions);
         }
 
-        public static AuthenticationBuilder AddODP(this AuthenticationBuilder builder, string authenticationScheme, Action<ODPAuthenticationOptions> configureOptions)
+        public static AuthenticationBuilder AddODPAuthentication(this AuthenticationBuilder builder, string authenticationScheme, Action<ODPAuthenticationOptions> configureOptions)
         {
             builder.Services.AddSingleton<IPostConfigureOptions<ODPAuthenticationOptions>, ODPAuthenticationPostConfigureOptions>();
             return builder.AddScheme<ODPAuthenticationOptions, ODPAuthenticationHandler>(authenticationScheme, configureOptions);

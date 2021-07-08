@@ -32,9 +32,9 @@ namespace SAEON.AspNet.Auth
         public static bool IsLocal(this HttpRequest req)
         {
             var connection = req.HttpContext.Connection;
-            if (connection.RemoteIpAddress != null)
+            if (connection.RemoteIpAddress is not null)
             {
-                if (connection.LocalIpAddress != null)
+                if (connection.LocalIpAddress is not null)
                 {
                     return connection.RemoteIpAddress.Equals(connection.LocalIpAddress);
                 }
@@ -45,7 +45,7 @@ namespace SAEON.AspNet.Auth
             }
 
             // for in memory TestServer or when dealing with default connection info
-            if (connection.RemoteIpAddress == null && connection.LocalIpAddress == null)
+            if (connection.RemoteIpAddress is null && connection.LocalIpAddress is null)
             {
                 return true;
             }
