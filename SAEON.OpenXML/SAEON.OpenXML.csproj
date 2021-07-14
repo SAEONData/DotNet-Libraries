@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
-    <PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.37" />
+    <PackageReference Include="SAEON.Logs.NetFramework" Version="1.0.38" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
